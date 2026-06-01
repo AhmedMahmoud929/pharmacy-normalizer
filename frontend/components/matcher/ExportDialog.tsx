@@ -117,63 +117,63 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         selectedColumns.forEach(fieldId => {
           switch (fieldId) {
             case "row_index":
-              record["Row #"] = res.row_index + 1;
+              record["row_number"] = res.row_index + 1;
               break;
             case "original_name":
-              record["Original Name"] = res.original_name;
+              record["original_name"] = res.original_name;
               break;
             case "normalized_name":
-              record["Normalized Name"] = res.normalized_name;
+              record["normalized_name"] = res.normalized_name;
               break;
             case "match_status":
-              record["Match Status"] = topMatch?.status || "no_match";
+              record["match_status"] = topMatch?.status || "no_match";
               break;
             case "match_score":
-              record["Match Score"] = topMatch ? (topMatch.score * 100).toFixed(1) + "%" : "0%";
+              record["match_score"] = topMatch ? (topMatch.score * 100).toFixed(1) + "%" : "0%";
               break;
             case "jaccard":
-              record["Jaccard Score"] = topMatch?.jaccard != null ? (topMatch.jaccard * 100).toFixed(1) + "%" : "";
+              record["jaccard_score"] = topMatch?.jaccard != null ? (topMatch.jaccard * 100).toFixed(1) + "%" : "";
               break;
             case "sequence":
-              record["Sequence Score"] = topMatch?.sequence != null ? (topMatch.sequence * 100).toFixed(1) + "%" : "";
+              record["sequence_score"] = topMatch?.sequence != null ? (topMatch.sequence * 100).toFixed(1) + "%" : "";
               break;
             case "matched_tokens":
-              record["Matched Tokens"] = Array.isArray(topMatch?.matched_tokens) ? topMatch.matched_tokens.join(", ") : "";
+              record["matched_tokens"] = Array.isArray(topMatch?.matched_tokens) ? topMatch.matched_tokens.join(", ") : "";
               break;
             case "id":
-              record["Product ID"] = v.id || p.id || topMatch?.id || "";
+              record["product_id"] = v.id || p.id || topMatch?.id || "";
               break;
             case "name_en":
-              record["English Name"] = topMatch?.name_en || v.name_en || p.name_en || "";
+              record["english_name"] = topMatch?.name_en || v.name_en || p.name_en || "";
               break;
             case "name_ar":
-              record["Arabic Name"] = v.name_ar || p.name_ar || "";
+              record["arabic_name"] = v.name_ar || p.name_ar || "";
               break;
             case "sku":
-              record["Reference SKU"] = topMatch?.sku || v.sku || "";
+              record["reference_sku"] = topMatch?.sku || v.sku || "";
               break;
             case "brand":
-              record["Brand / Manufacturer"] = p.brand?.name || p.brand || "";
+              record["brand"] = p.brand?.name || p.brand || "";
               break;
             case "category":
-              record["Classification Category"] = p.category?.name || p.category || "";
+              record["category"] = p.category?.name || p.category || "";
               break;
             case "price":
-              record["Catalog Price"] = v.price || p.price || 0;
+              record["price"] = v.price || p.price || 0;
               break;
             case "in_stock":
               const hasStock = v.stock > 0 || p.stock > 0 || (p.in_stock !== false);
-              record["In Stock Flag"] = hasStock ? "Yes" : "No";
+              record["in_stock"] = hasStock ? "Yes" : "No";
               break;
             case "stock":
-              record["Quantity Stock"] = v.stock || p.stock || 0;
+              record["stock"] = v.stock || p.stock || 0;
               break;
             case "share_link":
               const slug = p.slug || "";
-              record["Storefront Web Link"] = slug ? `https://chefaa.com/product/${slug}` : "";
+              record["share_link"] = slug ? `https://chefaa.com/product/${slug}` : "";
               break;
             case "image":
-              record["Asset Thumbnail URL"] = v.image || p.image || topMatch?.image || "";
+              record["image"] = v.image || p.image || topMatch?.image || "";
               break;
             default:
               break;
