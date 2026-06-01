@@ -14,6 +14,8 @@ import argparse
 import json
 import logging
 import os
+import re
+import signal
 import sys
 import time
 import hashlib
@@ -142,17 +144,49 @@ def sanitize_filename(url: str) -> str:
     # filename stays readable and won't trip up any OS or shell.
     name = name.encode("utf-8", errors="replace").decode("ascii", errors="replace")
     # Replace any character that isn't alphanumeric, dot, dash, or underscore
-    import re
     name = re.sub(r"[^A-Za-z0-9._-]", "_", name)
     # Collapse multiple underscores
     name = re.sub(r"_+", "_", name)
     return name
 
 
-def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> list[ImageTask]:
-    """Walk the JSON and collect all image download tasks."""
+def normalize_cdn_url(url: str) -> str:
+    """Strip Thumbor/imgproxy transform segments from CDN URLs.
+
+    Chefaa brand images are sometimes stored as:
+      https://cdn.chefaa.com/filters:format(webp)/public/uploads/brands/xyz.jpeg
+    The transform prefix causes 404s. Strip everything before '/public/' to get
+    the real path. URLs that are already clean pass through unchanged.
+    """
+    parsed = urlparse(url)
+    path = parsed.path
+    # Only act when there's a prefix before /public/ (i.e. a transform segment)
+    idx = path.find("/public/")
+    if idx > 0:                            # idx==0 means already starts with /public/
+        return parsed._replace(path=path[idx:]).geturl()
+    return url
+
+
+def fix_dotless_url(url: str) -> tuple[str, bool]:
+    """Check if the URL path ends with a dotless extension (e.g. 'png' instead of '.png').
+    If so, return (corrected_url, True). Otherwise return (url, False).
+    """
+    if not url:
+        return url, False
+    parsed = urlparse(url)
+    path = parsed.path
+    for ext in ["png", "jpg", "jpeg", "webp"]:
+        if path.endswith(ext) and not path.endswith(f".{ext}"):
+            new_path = path[:-len(ext)] + f".{ext}"
+            return parsed._replace(path=new_path).geturl(), True
+    return url, False
+
+
+def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> tuple[list[ImageTask], int]:
+    """Walk the JSON, correct dot-less URLs in-memory, and collect image download tasks."""
     tasks: list[ImageTask] = []
     seen_urls: set[str] = set()
+    corrected_count = 0
 
     products_dir = output_dir / "products"
     brands_dir   = output_dir / "brands"
@@ -163,11 +197,23 @@ def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> l
 
         # Product image
         product_url = item.get("image")
-        if product_url and product_url not in seen_urls:
-            seen_urls.add(product_url)
-            fname = sanitize_filename(product_url)
+        if product_url:
+            product_url = normalize_cdn_url(product_url)
+            corrected_url, changed = fix_dotless_url(product_url)
+            if changed:
+                item["image"] = corrected_url
+                corrected_count += 1
+                fname = sanitize_filename(corrected_url)
+            else:
+                fname = sanitize_filename(product_url)
+            target_url = product_url
+        else:
+            target_url = None
+
+        if target_url and target_url not in seen_urls:
+            seen_urls.add(target_url)
             tasks.append(ImageTask(
-                url=product_url,
+                url=target_url,
                 dest_path=products_dir / fname,
                 label=label,
                 category="product",
@@ -177,12 +223,24 @@ def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> l
         # Brand image
         brand = item.get("brands") or {}
         brand_url = brand.get("images") if brand else None
-        if brand_url and brand_url not in seen_urls:
-            seen_urls.add(brand_url)
+        if brand_url:
+            brand_url = normalize_cdn_url(brand_url)
+            corrected_brand_url, brand_changed = fix_dotless_url(brand_url)
+            if brand_changed:
+                brand["images"] = corrected_brand_url
+                corrected_count += 1
+                fname = sanitize_filename(corrected_brand_url)
+            else:
+                fname = sanitize_filename(brand_url)
+            target_brand_url = brand_url
+        else:
+            target_brand_url = None
+
+        if target_brand_url and target_brand_url not in seen_urls:
+            seen_urls.add(target_brand_url)
             brand_name = brand.get("title_en") or brand.get("title_ar") or "unknown_brand"
-            fname = sanitize_filename(brand_url)
             tasks.append(ImageTask(
-                url=brand_url,
+                url=target_brand_url,
                 dest_path=brands_dir / fname,
                 label=brand_name,
                 category="brand",
@@ -192,7 +250,7 @@ def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> l
     if count:
         tasks = tasks[:count]
 
-    return tasks
+    return tasks, corrected_count
 
 
 # ─── Downloader ───────────────────────────────────────────────────────────────
@@ -439,6 +497,16 @@ def _fmt_bytes(n: int) -> str:
 def main():
     args = parse_args()
 
+    # Suppress the ugly "Exception ignored on threading shutdown: KeyboardInterrupt"
+    # traceback that Python 3.13 prints when Ctrl+C fires while threads are running.
+    # We handle the abort ourselves via the _abort event; just silence the OS signal.
+    original_sigint = signal.getsignal(signal.SIGINT)
+    def _sigint_handler(sig, frame):
+        # Re-raise as KeyboardInterrupt so our try/except blocks catch it,
+        # but don't propagate to the threading machinery.
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGINT, _sigint_handler)
+
     # ── Load JSON ──
     json_path = Path(args.file)
     if not json_path.exists():
@@ -467,7 +535,7 @@ def main():
             sys.exit(1)
 
     output_dir = Path(args.output_dir)
-    tasks = extract_tasks(data, output_dir, args.count)
+    tasks, corrected_count = extract_tasks(data, output_dir, args.count)
 
     if not tasks:
         console.print("[yellow]⚠  No image URLs found in the JSON.[/]")
@@ -636,6 +704,14 @@ def main():
     if _abort.is_set():
         console.print("\n[bold yellow]⚠  Interrupted — partial download.[/]")
         logger.warning("Session interrupted by user after %d/%d images", stats.done, stats.total)
+
+    if not _abort.is_set() and corrected_count > 0:
+        with console.status(f"[bold cyan]Saving {corrected_count:,} corrected image URLs back to JSON..."):
+            try:
+                json_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
+                console.print(f"[green]✔ Successfully updated and saved database with {corrected_count:,} corrected dot-extensions:[/] {json_path}")
+            except Exception as e:
+                console.print(f"[red]❌ Failed to save updated database: {e}[/]")
 
     # ── Final Report ──
     console.print()
