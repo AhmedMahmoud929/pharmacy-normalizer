@@ -46,7 +46,7 @@ def fetch_meili_with_retry(url, headers, data_dict, max_retries=5, base_delay=1.
 def main():
     parser = argparse.ArgumentParser(description="Chefaa Fast Slugs & Full DB Extractor")
     parser.add_argument("--country", type=str, default="eg", choices=["eg", "sa", "ae"], help="Primary country [default: eg]")
-    parser.add_argument("--output-dir", type=str, default="data", help="Output directory [default: data]")
+    parser.add_argument("--output-dir", type=str, default="data/extracted", help="Output directory [default: data/extracted]")
     parser.add_argument("--format", type=str, default="both", choices=["json", "txt", "both"], help="Output format [default: both]")
     parser.add_argument("--preflight", action="store_true", help="Perform a preflight test query, show the raw Meilisearch response, and exit")
     parser.add_argument("--full-db", action="store_true", help="Fetch the complete product database records instead of just the slugs")

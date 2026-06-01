@@ -11,7 +11,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 def main():
     parser = argparse.ArgumentParser(description="Extract Brands and Categories from Chefaa Products Database")
-    parser.add_argument("file_path", type=str, nargs="?", default="data/chefaa_products_eg.json", help="Path to the JSON database [default: data/chefaa_products_eg.json]")
+    parser.add_argument("file_path", type=str, nargs="?", default="data/extracted/chefaa_products_eg.json", help="Path to the JSON database [default: data/extracted/chefaa_products_eg.json]")
     args = parser.parse_args()
 
     console = Console()
