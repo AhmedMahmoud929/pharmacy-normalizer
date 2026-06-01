@@ -39,6 +39,89 @@ app.add_middleware(
 # Global index instance
 index: Optional[ProductIndex] = None
 
+
+from urllib.parse import urlparse
+import hashlib
+
+def normalize_cdn_url(url: str) -> str:
+    if not url:
+        return ""
+    parsed = urlparse(url)
+    path = parsed.path
+    idx = path.find("/public/")
+    if idx > 0:
+        return parsed._replace(path=path[idx:]).geturl()
+    return url
+
+def fix_dotless_url(url: str) -> str:
+    if not url:
+        return ""
+    parsed = urlparse(url)
+    path = parsed.path
+    for ext in ["png", "jpg", "jpeg", "webp"]:
+        if path.endswith(ext) and not path.endswith(f".{ext}"):
+            new_path = path[:-len(ext)] + f".{ext}"
+            return parsed._replace(path=new_path).geturl()
+    return url
+
+def sanitize_filename(url: str) -> str:
+    parsed = urlparse(url)
+    name = os.path.basename(parsed.path).split("?")[0]
+    if not name:
+        return hashlib.md5(url.encode()).hexdigest() + ".jpg"
+    name = name.encode("utf-8", errors="replace").decode("ascii", errors="replace")
+    name = re.sub(r"[^A-Za-z0-9._-]", "_", name)
+    name = re.sub(r"_+", "_", name)
+    return name
+
+def enrich_product_image_status(product: dict) -> dict:
+    if not product or not isinstance(product, dict):
+        return product
+    
+    p = product.copy()
+    image_url = p.get("image")
+    if not image_url:
+        p["is_local_image"] = False
+        p["local_image_url"] = None
+        return p
+    
+    normalized = normalize_cdn_url(image_url)
+    corrected = fix_dotless_url(normalized)
+    filename = sanitize_filename(corrected)
+    
+    media_dir = os.path.join(project_root, "data", "media", "products")
+    file_path = os.path.join(media_dir, filename)
+    
+    if os.path.exists(file_path):
+        p["is_local_image"] = True
+        p["local_image_name"] = filename
+        p["local_image_url"] = f"/media/products/{filename}"
+    else:
+        brand_media_dir = os.path.join(project_root, "data", "media", "brands")
+        brand_file_path = os.path.join(brand_media_dir, filename)
+        if os.path.exists(brand_file_path):
+            p["is_local_image"] = True
+            p["local_image_name"] = filename
+            p["local_image_url"] = f"/media/brands/{filename}"
+        else:
+            p["is_local_image"] = False
+            p["local_image_url"] = None
+            
+    return p
+
+@app.get("/media/{category}/{filename}")
+async def get_media_file(category: str, filename: str):
+    if ".." in filename or filename.startswith("/") or filename.startswith("\\"):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if category not in ["products", "brands"]:
+        raise HTTPException(status_code=400, detail="Invalid category")
+    
+    media_dir = os.path.join(project_root, "data", "media", category)
+    file_path = os.path.join(media_dir, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="File not found")
+
 @app.on_event("startup")
 async def startup_event():
     global index
@@ -346,6 +429,29 @@ async def list_categories():
             
     return sorted(list(categories.values()), key=lambda x: x["count"], reverse=True)
 
+def enrich_brand_image(brand: dict) -> dict:
+    b = brand.copy()
+    image_url = b.get("image")
+    if not image_url:
+        b["is_local_image"] = False
+        b["local_image_url"] = None
+        return b
+    
+    normalized = normalize_cdn_url(image_url)
+    corrected = fix_dotless_url(normalized)
+    filename = sanitize_filename(corrected)
+    
+    brand_media_dir = os.path.join(project_root, "data", "media", "brands")
+    file_path = os.path.join(brand_media_dir, filename)
+    
+    if os.path.exists(file_path):
+        b["is_local_image"] = True
+        b["local_image_url"] = f"/media/brands/{filename}"
+    else:
+        b["is_local_image"] = False
+        b["local_image_url"] = None
+    return b
+
 @app.get("/db/brands")
 async def list_brands():
     if index is None:
@@ -360,11 +466,13 @@ async def list_brands():
                 brands[name] = {
                     "name": name,
                     "slug": brand.get("slug"),
+                    "image": brand.get("image"),
                     "count": 0
                 }
             brands[name]["count"] += 1
             
-    return sorted(list(brands.values()), key=lambda x: x["count"], reverse=True)
+    enriched_brands = [enrich_brand_image(b) for b in brands.values()]
+    return sorted(enriched_brands, key=lambda x: x["count"], reverse=True)
 
 class ManualMatchSave(BaseModel):
     original_name: str
@@ -402,21 +510,40 @@ async def save_manual_match(match: ManualMatchSave):
 async def list_db_products(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    image_status: Optional[str] = Query(None)
 ):
     if index is None:
         raise HTTPException(status_code=503, detail="Database not loaded")
     
-    # Simple search or list
     all_entries = index.entries
+    
     if search:
         search_norm = normalize(search)
-        results = index.search(search_norm, top_k=limit)
+        # Search all entries to perform accurate deduplication & filtering across all candidates
+        results = index.search(search_norm, top_k=len(all_entries))
+        
+        seen_ids = set()
+        matched_products = []
+        for r in results:
+            p = r["entry"]["product"]
+            if p["id"] not in seen_ids:
+                seen_ids.add(p["id"])
+                enriched = enrich_product_image_status(p)
+                
+                if image_status == "local" and not enriched.get("is_local_image"):
+                    continue
+                if image_status == "cdn" and enriched.get("is_local_image"):
+                    continue
+                    
+                matched_products.append(enriched)
+                
+        paged = matched_products[offset : offset + limit]
         return {
-            "total": len(results),
+            "total": len(matched_products),
             "limit": limit,
-            "offset": 0,
-            "products": [r["entry"]["product"] for r in results]
+            "offset": offset,
+            "products": paged
         }
     
     # Deduplicate products (index has variant entries)
@@ -426,7 +553,14 @@ async def list_db_products(
         p = entry["product"]
         if p["id"] not in seen_ids:
             seen_ids.add(p["id"])
-            unique_products.append(p)
+            enriched = enrich_product_image_status(p)
+            
+            if image_status == "local" and not enriched.get("is_local_image"):
+                continue
+            if image_status == "cdn" and enriched.get("is_local_image"):
+                continue
+                
+            unique_products.append(enriched)
             
     paged = unique_products[offset : offset + limit]
     return {
@@ -435,6 +569,7 @@ async def list_db_products(
         "offset": offset,
         "products": paged
     }
+
 
 @app.get("/db/export")
 async def export_database(

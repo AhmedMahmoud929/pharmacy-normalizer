@@ -3,6 +3,7 @@
 import React from "react";
 import { X, ExternalLink, Tag, Layers, CheckCircle2, AlertCircle, Barcode, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn, API_URL } from "@/lib/utils";
 
 interface ProductDetailModalProps {
   isOpen: boolean;
@@ -62,10 +63,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               {/* Product Image Frame */}
               <div className="relative aspect-square rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-black/50 overflow-hidden flex items-center justify-center p-6 group">
                 <img
-                  src={product.image}
+                  src={product.is_local_image ? `${API_URL}${product.local_image_url}` : product.image}
                   alt={product.name_en}
                   className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
                 />
+                
+                {/* Floating Image Source Indicator */}
+                <div className="absolute top-3 right-3">
+                  <span className={cn(
+                    "text-[9px] font-bold px-2 py-0.5 rounded-md border shadow-sm backdrop-blur-md uppercase tracking-wide",
+                    product.is_local_image
+                      ? "bg-emerald-50/90 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400"
+                      : "bg-amber-50/90 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400"
+                  )}>
+                    {product.is_local_image ? "Local API" : "Remote CDN"}
+                  </span>
+                </div>
               </div>
 
               {/* Title & Fast Specs */}

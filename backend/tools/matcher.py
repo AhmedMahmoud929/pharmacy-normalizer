@@ -52,8 +52,16 @@ error_console = Console(stderr=True)
 #  Constants & Config
 # ─────────────────────────────────────────────────────────────────────
 
-DEFAULT_DB_PATH = os.path.join(project_root, "data", "extracted", "chefaa_products_eg.json")
+DEFAULT_DB_PATH = os.path.join(project_root, "data", "normalized", "chefaa_products_eg_normalized.json")
 RAW_DB_PATH = os.path.join(project_root, "data", "extracted", "chefaa_products_eg.json")
+
+def resolve_db_path(db_path: str) -> str:
+    if os.path.exists(db_path):
+        return db_path
+    if db_path == DEFAULT_DB_PATH and os.path.exists(RAW_DB_PATH):
+        console.print(f"⚠️ [yellow]Warning: Normalized database not found at {DEFAULT_DB_PATH}. Falling back to raw database at {RAW_DB_PATH}...[/yellow]")
+        return RAW_DB_PATH
+    return db_path
 
 NAME_COLUMN_CANDIDATES = [
     "name", "Name", "NAME",
@@ -196,7 +204,8 @@ class ProductIndex:
                 if brand_data:
                     brand_obj = {
                         "name": brand_data.get("title_en") or brand_data.get("title_ar"),
-                        "slug": brand_data.get("slug")
+                        "slug": brand_data.get("slug"),
+                        "image": brand_data.get("images")
                     }
                 
                 cat_data = product.get("level_one_category")
@@ -265,7 +274,8 @@ _global_index = None
 
 def init_worker(db_path: str):
     global _global_index
-    with open(db_path, "r", encoding="utf-8") as f:
+    resolved_path = resolve_db_path(db_path)
+    with open(resolved_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     _global_index = ProductIndex(data)
 
@@ -309,7 +319,8 @@ def run_sheet(file_path: str, index: ProductIndex, args):
             results_list = []
             stats = {"matched": 0, "review": 0, "no_match": 0, "sum_score": 0.0, "sum_score_matched": 0.0}
             
-            with concurrent.futures.ProcessPoolExecutor(max_workers=workers, initializer=init_worker, initargs=(args.db,)) as executor:
+            resolved_db = resolve_db_path(args.db)
+            with concurrent.futures.ProcessPoolExecutor(max_workers=workers, initializer=init_worker, initargs=(resolved_db,)) as executor:
                 # Use executor.map to maintain row order
                 for matches in executor.map(match_row_task, queries, [args.top]*total_rows, [args.jaccard_weight]*total_rows, [args.seq_weight]*total_rows):
                     results_list.append(process_matches(matches, m_thresh, r_thresh, stats, args))
@@ -386,6 +397,56 @@ def process_matches(matches, m_thresh, r_thresh, stats, args):
         stats["no_match"] += 1; res_row.update({"match_status": "no_match", "match_score": 0.0})
     return res_row
 
+def run_single(query: str, index: ProductIndex, args):
+    norm_q = normalize(query)
+    matches = index.search(norm_q, top_k=args.top, w_j=args.jaccard_weight, w_s=args.seq_weight)
+    
+    if args.json:
+        serializable_matches = []
+        for m in matches:
+            prod = m["entry"]["product"]
+            var = m["entry"]["variant"]
+            serializable_matches.append({
+                "score": round(m["score"], 3),
+                "id": prod.get("id"),
+                "sku": var.get("sku") if var else None,
+                "name_en": prod.get("name_en") or prod.get("title_en"),
+                "normalized": m["entry"]["normalized"]
+            })
+        print(json.dumps(serializable_matches, indent=2, ensure_ascii=False))
+        return
+
+    console.print(f"\n🔍 [bold cyan]Query:[/bold cyan] [bold]{query}[/bold] (Normalized: [italic]{norm_q}[/italic])\n")
+    
+    if not matches:
+        console.print("[bold red]❌ No matches found.[/bold red]")
+        return
+        
+    t = Table(title="Matching Results", box=box.ROUNDED, header_style="bold magenta")
+    t.add_column("Rank", justify="center", style="dim")
+    t.add_column("Score", justify="right", style="bold green")
+    t.add_column("Matched ID", justify="center")
+    t.add_column("Matched Name (EN)", style="green")
+    t.add_column("DB Normalized", style="cyan")
+    
+    for idx, m in enumerate(matches):
+        prod = m["entry"]["product"]
+        score_pct = m["score"] * 100
+        score_str = f"{score_pct:.1f}%"
+        if score_pct < 50:
+            score_str = f"[red]{score_str}[/red]"
+        elif score_pct < 80:
+            score_str = f"[yellow]{score_str}[/yellow]"
+            
+        t.add_row(
+            str(idx + 1),
+            score_str,
+            str(prod.get("id")),
+            prod.get("name_en") or prod.get("title_en") or "",
+            m["entry"]["normalized"]
+        )
+    console.print(t)
+
 def main():
     parser = argparse.ArgumentParser(description="Drug Matcher CLI Tool (Turbo v8)")
     parser.add_argument("query", nargs="?", help="Single product name to match")
@@ -411,12 +472,12 @@ def main():
     norm_fn = create_pipeline(enable_arabic=True)
     index = None if args.parallel else load_reference(args.db)
     if args.query: 
-        from tools.matcher import run_single # Fallback for single mode
         run_single(args.query, index, args)
     elif args.file: run_sheet(args.file, index, args)
 
 def load_reference(db_path: str) -> ProductIndex:
-    with open(db_path, "r", encoding="utf-8") as f:
+    resolved_path = resolve_db_path(db_path)
+    with open(resolved_path, "r", encoding="utf-8") as f:
         return ProductIndex(json.load(f))
 
 if __name__ == "__main__":

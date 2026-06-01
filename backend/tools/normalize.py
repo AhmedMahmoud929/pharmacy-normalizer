@@ -185,14 +185,14 @@ def normalize_sheet(
 def _detect_json_name_fields(data: any) -> list[str]:
     """
     Recursively scan a JSON structure and collect all unique keys
-    that contain 'name' (case-insensitive).
+    that contain 'name' (case-insensitive) or match 'title_en' / 'title_ar'.
     """
     found = set()
 
     def _scan(obj):
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if "name" in key.lower() and isinstance(value, str):
+                if ("name" in key.lower() or key.lower() in ["title_en", "title_ar"]) and isinstance(value, str):
                     found.add(key)
                 _scan(value)
         elif isinstance(obj, list):
@@ -203,16 +203,18 @@ def _detect_json_name_fields(data: any) -> list[str]:
     return sorted(found)
 
 
-def _normalize_json_recursive(data, fields: list[str], stats: dict, norm_fn=None) -> any:
+def _normalize_json_recursive(data, fields: list[str], stats: dict, norm_fn=None, depth=0, max_depth=None) -> any:
     """
     Recursively walk a JSON structure and normalize specified fields.
     Adds a 'normalized_<field>' key next to each matched field.
+    Also adds 'normalized_name_en' / 'normalized_name_ar' for compatibility if applicable.
+    Supports a max_depth limit to avoid deep recursions into complex datasets.
     """
     if norm_fn is None:
         norm_fn = normalize
 
     if isinstance(data, list):
-        return [_normalize_json_recursive(item, fields, stats, norm_fn) for item in data]
+        return [_normalize_json_recursive(item, fields, stats, norm_fn, depth, max_depth) for item in data]
 
     if isinstance(data, dict):
         result = {}
@@ -221,11 +223,15 @@ def _normalize_json_recursive(data, fields: list[str], stats: dict, norm_fn=None
                 normalized = norm_fn(value)
                 result[key] = value
                 result[f"normalized_{key}"] = normalized
+                if key == "title_en":
+                    result["normalized_name_en"] = normalized
+                elif key == "title_ar":
+                    result["normalized_name_ar"] = normalized
                 if value.strip() != normalized:
                     stats["changed"] += 1
                 stats["total"] += 1
-            elif isinstance(value, (dict, list)):
-                result[key] = _normalize_json_recursive(value, fields, stats, norm_fn)
+            elif isinstance(value, (dict, list)) and (max_depth is None or depth < max_depth):
+                result[key] = _normalize_json_recursive(value, fields, stats, norm_fn, depth + 1, max_depth)
             else:
                 result[key] = value
         return result
@@ -239,6 +245,7 @@ def normalize_json_file(
     output: str | None = None,
     norm_fn=None,
     english_only: bool = False,
+    max_depth: int | None = None,
 ) -> None:
     """
     Read a JSON file, normalize name fields recursively,
@@ -269,10 +276,15 @@ def normalize_json_file(
     if norm_fn is None:
         norm_fn = normalize
 
+    # Auto-optimize for the standard Chefaa products database to bypass redundant nested metadata
+    if max_depth is None and "chefaa_products_eg" in os.path.basename(file_path):
+        print("  ⚡ Detected Chefaa products database. Using max_depth=0 to optimize normalization speed.")
+        max_depth = 0
+
     stats = {"total": 0, "changed": 0}
 
     print(f"  [*] Normalizing fields: {fields}...")
-    normalized_data = _normalize_json_recursive(data, fields, stats, norm_fn)
+    normalized_data = _normalize_json_recursive(data, fields, stats, norm_fn, depth=0, max_depth=max_depth)
 
     print(f"     {stats['changed']}/{stats['total']} values modified by normalization")
 
