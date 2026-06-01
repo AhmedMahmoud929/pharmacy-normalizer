@@ -33,7 +33,6 @@ backend/data/input/
 backend/data/normalized/
 backend/data/archeive/
 shefaa-crawler/data/categories.json
-data/
 **/*.xlsx
 **/*.json.bak
 
