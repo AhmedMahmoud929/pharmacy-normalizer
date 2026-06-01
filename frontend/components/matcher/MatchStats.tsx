@@ -28,23 +28,7 @@ export const MatchStats: React.FC<MatchStatsProps> = ({ stats, isComplete }) => 
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
         >
-          {/* Main Stats Card Loop */}
-          {[
-            { label: "Total Processed", value: stats.total, color: "text-foreground", icon: BarChart3 },
-            { label: "Matched", value: stats.matched, color: "text-success", icon: CheckCircle2 },
-            { label: "Needs Review", value: stats.review, color: "text-warning", icon: AlertCircle },
-            { label: "No Match Found", value: stats.noMatch, color: "text-error", icon: X },
-          ].map((s, i) => (
-            <div key={i} className="p-4 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/10 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{s.label}</p>
-                <p className={cn("text-2xl font-bold mt-1", s.color)}>{s.value}</p>
-              </div>
-              <s.icon className={cn("w-8 h-8 opacity-20", s.color)} />
-            </div>
-          ))}
-
-          {/* High-importance Accuracy/Match Percentage Card - 2 Columns Wide */}
+          {/* High-importance Accuracy/Match Percentage Card - First Card & 2 Columns Wide */}
           <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent dark:from-primary/20 dark:via-purple-500/5 dark:to-transparent border border-primary/30 dark:border-primary/40 shadow-lg shadow-primary/5 overflow-hidden flex items-center justify-between col-span-1 sm:col-span-2 lg:col-span-2">
             {/* Subtle background glow decorative circle */}
             <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/20 rounded-full blur-2xl pointer-events-none" />
@@ -61,6 +45,22 @@ export const MatchStats: React.FC<MatchStatsProps> = ({ stats, isComplete }) => 
               <Percent className="w-5 h-5 text-primary dark:text-purple-400 stroke-[3.5]" />
             </div>
           </div>
+
+          {/* Main Stats Card Loop */}
+          {[
+            { label: "Total Processed", value: stats.total, color: "text-foreground", icon: BarChart3 },
+            { label: "Matched", value: stats.matched, color: "text-success", icon: CheckCircle2 },
+            { label: "Needs Review", value: stats.review, color: "text-warning", icon: AlertCircle },
+            { label: "No Match Found", value: stats.noMatch, color: "text-error", icon: X },
+          ].map((s, i) => (
+            <div key={i} className="p-4 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/10 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{s.label}</p>
+                <p className={cn("text-2xl font-bold mt-1", s.color)}>{s.value}</p>
+              </div>
+              <s.icon className={cn("w-8 h-8 opacity-20", s.color)} />
+            </div>
+          ))}
         </motion.div>
       )}
     </AnimatePresence>
