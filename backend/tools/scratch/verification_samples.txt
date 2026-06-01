@@ -1,0 +1,91 @@
+=== HIGH SCORE MATCHES (>= 0.95) ===
+                     normalized_query                   db_normalized  match_score  jaccard_score  sequence_score                       matched_tokens
+1077          eltroxin 50 mcg 100 tab         eltroxin 50 mcg 100 tab          1.0         1.0000          1.0000          eltroxin, 50, mcg, 100, tab
+3                abilify 10 mg 10 tab            abilify 10 mg 10 tab          1.0         1.0000          1.0000             abilify, 10, mg, 10, tab
+4                abilify 15 mg 10 tab            abilify 15 mg 10 tab          1.0         1.0000          1.0000             abilify, 15, mg, 10, tab
+5                abimol 500 mg 20 tab            abimol 500 mg 20 tab          1.0         1.0000          1.0000             abimol, 500, mg, 20, tab
+6          abimol extra 500 mg 20 tab      abimol extra 500 mg 20 tab          1.0         1.0000          1.0000      abimol, extra, 500, mg, 20, tab
+10    acetylcisteine 200 mg 10 sachet  acetylcistein 200 mg 10 sachet          1.0         0.9667          0.9836  acetylcisteine, 200, mg, 10, sachet
+1041            duricef 500 mg 12 cap           duricef 500 mg 12 cap          1.0         1.0000          1.0000            duricef, 500, mg, 12, cap
+1037           duphaston 10 mg 60 tab          duphaston 10 mg 60 tab          1.0         1.0000          1.0000           duphaston, 10, mg, 60, tab
+1033          doxymycin 100 mg 10 cap         doxymycin 100 mg 10 cap          1.0         1.0000          1.0000          doxymycin, 100, mg, 10, cap
+1031             doxium 500 mg 30 cap            doxium 500 mg 30 cap          1.0         1.0000          1.0000             doxium, 500, mg, 30, cap
+1030           doxirazol 60 mg 14 cap          doxirazol 60 mg 14 cap          1.0         1.0000          1.0000           doxirazol, 60, mg, 14, cap
+1029           doxirazol 30 mg 14 cap         doxiprazol 30 mg 14 cap          1.0         0.9825          0.9778           doxirazol, 30, mg, 14, cap
+1028    doxiproct 30 gm plus ointment   doxiproct 30 gm plus ointment          1.0         1.0000          1.0000    doxiproct, 30, gm, plus, ointment
+1027         doxiproct 30 gm ointment        doxiproct 30 gm ointment          1.0         1.0000          1.0000          doxiproct, 30, gm, ointment
+1026         downoprazol 40 mg 14 cap        downoprazol 40 mg 14 cap          1.0         1.0000          1.0000         downoprazol, 40, mg, 14, cap
+1022                dosin 4 mg 20 tab               dosin 4 mg 20 tab          1.0         1.0000          1.0000                dosin, 4, mg, 20, tab
+1021                dosin 2 mg 20 tab               dosin 2 mg 20 tab          1.0         1.0000          1.0000                dosin, 2, mg, 20, tab
+60              aldomet 250 mg 30 tab           aldomet 250 mg 30 tab          1.0         1.0000          1.0000            aldomet, 250, mg, 30, tab
+55              aironyl 2.5 mg 20 tab           aironyl 2.5 mg 20 tab          1.0         1.0000          1.0000            aironyl, 2.5, mg, 20, tab
+49                aggrex 75 mg 60 tab             aggrex 75 mg 60 tab          1.0         1.0000          1.0000              aggrex, 75, mg, 60, tab
+
+=== BORDERLINE MATCHES (0.85 - 0.87) ===
+                                  normalized_query                                                db_normalized  match_score  jaccard_score  sequence_score                                   matched_tokens
+11                            achtenon 2 mg 20 tab                                         achtenon 2 mg 30 tab        0.852         0.7000          0.9500                             achtenon, 2, mg, tab
+21                              acretin 0.05 cream                                     acretin 30 gm 0.05 cream        0.860         0.7500          0.8571                             acretin, 0.05, cream
+50                             aggrex 75 mg 20 tab                                          aggrex 75 mg 60 tab        0.852         0.7000          0.9474                              aggrex, 75, mg, tab
+52                               agnucaston 30 tab                                      agnucaston 20 mg 30 tab        0.858         0.7500          0.8500                              agnucaston, 30, tab
+62                             alerid 10 mg 20 tab                                          alerid 10 mg 30 tab        0.852         0.7000          0.9474                              alerid, 10, mg, tab
+72                           alkapress 5 mg 10 tab                                        alkapress 5 mg 20 tab        0.853         0.7000          0.9524                            alkapress, 5, mg, tab
+75                     alkapress 5 160 plus 14 tab                alkapress 14 film coated 5 mg 160 mg plus tab        0.853         0.8226          0.6667                 alkapress, 5, 160, plus, 14, tab
+101                          alzental 200 mg 2 tab                                        alzental 200 mg 6 tab        0.853         0.7000          0.9524                           alzental, 200, mg, tab
+203            arixtra 2.5 mg 0.5 ml 10 injectable         arixtra 10 prefilled fridge 2.5 mg injectable 0.5 ml        0.850         0.8571          0.5747        arixtra, 2.5, mg, 0.5, ml, 10, injectable
+206              artelac eye 2 bottles drops 10 ml                  artelac 2 bottles eye 3.2 mg ml drops 10 ml        0.857         0.7857          0.7632          artelac, eye, 2, bottles, drops, 10, ml
+273                    ayapenam for i.v injectable                                      ayapenam i.v injectable        0.859         0.8333          0.9200                        ayapenam, i.v, injectable
+282           azi once 200 for powder 5 ml 22.5 ml  azi once for oral 200 mg dry powder suspension 5 ml 22.5 ml        0.867         0.8187          0.7158     azi, once, 200, for, powder, 5, ml, 22.5, ml
+283             azi once 200 for powder 5 ml 30 ml    azi once for oral 200 mg dry powder suspension 5 ml 30 ml        0.862         0.8187          0.7033       azi, once, 200, for, powder, 5, ml, 30, ml
+289  azrolid for oral 200 mg suspension 5 ml 30 ml              azrolid for oral 200 mg powder suspension 30 ml        0.864         0.7500          0.8696  azrolid, for, oral, 200, mg, suspension, ml, 30
+309                                bambedil 30 tab                                        bambedil 10 mg 30 tab        0.852         0.7500          0.8333                                bambedil, 30, tab
+352                          betaserc 16 mg 20 tab                                        betaserc 16 mg 60 tab        0.853         0.7000          0.9524                            betaserc, 16, mg, tab
+382                                 bisadyl 30 tab                                          bisadyl 5 mg 30 tab        0.857         0.7500          0.8485                                 bisadyl, 30, tab
+458                              cabergamoun 2 tab                                     cabergamoun 0.5 mg 2 tab        0.851         0.7500          0.8293                              cabergamoun, 2, tab
+477             cal heparine 5000 i.u 3 injectable                 cal heparin fridge 5000 iu 3 injectable 1 ml        0.854         0.7462          0.8462          cal, heparine, 5000, i.u, 3, injectable
+483                                cal preg 30 tab                                       cal preg 640 mg 30 tab        0.866         0.7778          0.8108                               cal, preg, 30, tab
+
+=== HIGH SCORE REVIEWS (0.80 - 0.84) ===
+                       normalized_query                                db_normalized  match_score  jaccard_score  sequence_score                       matched_tokens
+603                      cetal 1000 tab                         cetal 1000 mg 15 tab        0.849         0.7500          0.8235                     cetal, 1000, tab
+248        atropine sulphate injectable           atropine sulphate 0.1 6 injectable        0.848         0.7143          0.9032       atropine, sulphate, injectable
+590                    cerazette 28 tab                      cerazette 75 mcg 28 tab        0.848         0.7500          0.8205                   cerazette, 28, tab
+393           bistol 5 12.5 plus 20 tab  bistol 20 film coated 5 mg 12.5 mg plus tab        0.847         0.8226          0.6471       bistol, 5, 12.5, plus, 20, tab
+1005                      dolphin 3 gel                          dolphin 30 gm 3 gel        0.846         0.7500          0.8125                      dolphin, 3, gel
+619                       chito 500 cap                          chito 500 mg 60 cap        0.846         0.7500          0.8125                      chito, 500, cap
+51                    agiolax 12 sachet                    agiolax 5000 mg 12 sachet        0.845         0.7500          0.8095                  agiolax, 12, sachet
+354                     betasone 12 tab                       betasone 0.5 mg 12 tab        0.845         0.7500          0.8108                    betasone, 12, tab
+781                     cortilon 20 tab                       cortilon 0.1 mg 20 tab        0.845         0.7500          0.8108                    cortilon, 20, tab
+810                 crestor 10 mg 7 tab                         crestor 10 mg 28 tab        0.844         0.7000          0.9231                 crestor, 10, mg, tab
+402               blokium 100 mg 15 tab              blokium diu 100 mg 25 mg 15 tab        0.844         0.7500          0.8077            blokium, 100, mg, 15, tab
+546   cefaxone i.m 1000 mg 1 injectable   cefaxone i.m 1000 mg injectable injectable        0.842         0.7273          0.8533  cefaxone, i.m, 1000, mg, injectable
+813                  crestor 5 mg 7 tab                          crestor 5 mg 28 tab        0.842         0.7000          0.9189                  crestor, 5, mg, tab
+272                      avosoya 30 cap                        avosoya 300 mg 30 cap        0.841         0.7500          0.8000                     avosoya, 30, cap
+160                      antinal 24 cap                        antinal 200 mg 24 cap        0.841         0.7500          0.8000                     antinal, 24, cap
+108           alzmenda oral drops 20 ml           alzmenda oral 10 mg gm drops 20 ml        0.840         0.7273          0.8475        alzmenda, oral, drops, 20, ml
+140            amrizole 5 v.supp 500 mg             amrizole n 5 vaginal 500 mg supp        0.840         0.8000          0.6786         amrizole, 5, v.supp, 500, mg
+1025           doucheal solution 250 ml   doucheal intimate feminine solution 250 ml        0.839         0.7778          0.7273          doucheal, solution, 250, ml
+513                     cardixin 40 tab                      cardixin 0.25 mg 40 tab        0.838         0.7500          0.7895                    cardixin, 40, tab
+801               coversyl 10 mg 30 tab                        coversyl 10 mg 15 tab        0.838         0.7000          0.9048                coversyl, 10, mg, tab
+
+=== MID SCORE REVIEWS (0.70 - 0.79) ===
+                                        normalized_query                                                db_normalized  match_score  jaccard_score  sequence_score                                     matched_tokens
+12                   aciclovir mylan 500 mg 5 injectable                                  aciclovir 500 mg injectable        0.751         0.7000          0.8710                     aciclovir, 500, mg, injectable
+31                  actrapid penfill 100 iu 5 injectable                     insulin actrapid 5 penfill fridge 100 iu        0.777         0.7500          0.6053                      actrapid, penfill, 100, iu, 5
+39                                     adol extra 24 cap                                            adol extra 24 tab        0.770         0.7222          0.8824                                    adol, extra, 24
+40                                     adol sinns 24 cap                                            adol sinus 24 tab        0.755         0.7250          0.8235                                    adol, sinns, 24
+47                                    aerius 5 mg 10 tab                               aerius 20 film coated 5 mg tab        0.735         0.6863          0.6250                                 aerius, 5, mg, tab
+54                                  aironyl syrup 120 ml                             aironyl 1.5 mg syrup 5 ml 120 ml        0.744         0.6364          0.7692                            aironyl, syrup, 120, ml
+95                                  alphanova plus drops                                alphanova eye plus drops 5 ml        0.719         0.5833          0.8163                             alphanova, plus, drops
+118                            ambroxol oral drops 15 ml                     ambroxol oral oral 7.5 mg ml drops 15 ml        0.767         0.6667          0.7692                      ambroxol, oral, drops, 15, ml
+121                         amikacin lotion spray 100 ml                                 amikacin 250 mg spray 100 ml        0.798         0.7000          0.7857                           amikacin, spray, 100, ml
+147                              anapramine 75 mg 10 tab                                   anapramine sr 75 mg 20 tab        0.786         0.6364          0.8980                            anapramine, 75, mg, tab
+163                          antodine 20 mg 3 injectable                            antodine 30 film coated 20 mg tab        0.787         0.7647          0.6000                                antodine, 20, mg, 3
+181                                aprovel 150 mg 14 tab                            aprovel 28 film coated 150 mg tab        0.748         0.6863          0.6667                              aprovel, 150, mg, tab
+184                              aptamil 2 400 gm powder                               aptamil advance stage 2 400 gm        0.759         0.7273          0.6038                                aptamil, 2, 400, gm
+204                                arixtra 7.5 mg 0.6 ml         arixtra 10 prefilled fridge 7.5 mg injectable 0.6 ml        0.723         0.6923          0.5753                          arixtra, 7.5, mg, 0.6, ml
+211                               articavol 3 injectable                            articavol 75 mg 3 ml 3 injectable        0.726         0.6000          0.8000                           articavol, 3, injectable
+264                                     avazir eye drops                                   avazir 0.3 eye drops 10 ml        0.733         0.6250          0.7619                                 avazir, eye, drops
+284                    azi once syrp 200 mg 5 ml 22.5 ml  azi once for oral 200 mg dry powder suspension 5 ml 22.5 ml        0.768         0.7182          0.6522                azi, once, 200, mg, 5, ml, 22.5, ml
+287  azrolid for oral 900 200 mg suspension 5 ml 22.5 ml            azrolid for oral 900 mg powder suspension 22.5 ml        0.719         0.6667          0.8400  azrolid, for, oral, 900, mg, suspension, ml, 22.5
+295                            calm sekem baby 10 sachet                                      sekem calm 10 bags baby        0.736         0.7778          0.4167                              calm, sekem, baby, 10
+302                    bacticlor 125 mg suspension 60 ml       bacticlor for oral 125 mg sachet suspension 5 ml 60 ml        0.764         0.6667          0.7586             bacticlor, 125, mg, suspension, 60, ml

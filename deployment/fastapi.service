@@ -1,0 +1,19 @@
+[Unit]
+Description=FastAPI Pharmatch AI Service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/pharmatcher.bya3online.com/backend
+Environment="PATH=/var/www/pharmatcher.bya3online.com/backend/venv/bin"
+ExecStart=/var/www/pharmatcher.bya3online.com/backend/venv/bin/uvicorn tools.api:app --host 127.0.0.1 --port 8000 --workers 4
+
+Restart=always
+RestartSec=5
+
+# Increase standard limits to allow long-running crawling operations
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

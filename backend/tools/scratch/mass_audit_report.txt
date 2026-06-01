@@ -1,0 +1,923 @@
+====================================================
+      DRUG MATCHER MASS AUDIT REPORT (Chunks 1 & 2)  
+      Total Items Analyzed: 2160
+====================================================
+
+--- TOP 100 UNMATCHED TOKENS ---
+These are likely missing brands, forms, or units in our DB:
+1: 30
+ml: 28
+mg: 22
+syrup: 20
+20: 19
+10: 19
+5: 17
+cap: 12
+drops: 9
+gm: 9
+solution: 8
+eye: 8
+tab: 8
+effervescent: 7
+2: 7
+15: 7
+powder: 6
+30: 6
+spray: 6
+14: 6
+3: 6
+60: 6
+ointment: 5
+sterile: 5
+dose: 5
+imported: 5
+24: 5
+free: 5
+infant: 4
+1000: 4
+450: 4
+100: 4
+ad: 4
+oil: 4
+supp: 4
+plus: 4
+a: 4
+7: 4
+ophthalmic: 4
+effox: 4
+u: 4
+cream: 4
+with: 4
+sachet: 3
+25: 3
+stop: 3
+mcg: 3
+50: 3
+wash: 3
+injectable: 3
+for: 3
+comp: 3
+calcium: 3
+forte: 3
+250: 3
+green: 3
+500: 3
+150: 3
+8: 3
+2.5: 3
+28: 3
+nasal: 3
+v: 3
+123: 2
+instant: 2
+s: 2
+mycin: 2
+0.1: 2
+lotion: 2
+amoclawin: 2
+milk: 2
+200: 2
+ton: 2
+sugar: 2
+balkis: 2
+n: 2
+bepanthene: 2
+21: 2
+elixir: 2
+bonecare: 2
+calcipoheal: 2
+mix: 2
+gripe: 2
+castor: 2
+pure: 2
+z: 2
+from: 2
+to: 2
+champix: 2
+0.4: 2
+corneregel: 2
+gel: 2
+chew: 2
+entocid: 2
+h: 2
+esomelodan: 2
+625: 2
+oral: 2
+chocolate: 2
+pieces: 2
+
+--- PENALTY SAFETY CHECK (138 items) ---
+Items penalized by Brand/Dose logic (Check for False Negatives):
+                               normalized_query                              db_normalized  match_score  sequence_score
+13      acicone s 540 mg suspension 5 ml 120 ml    farcotilium 5 mg suspension 5 ml 120 ml        0.348          0.7949
+14                       acitretin 25 mg 30 cap                   iso acnetin 10 mg 30 cap        0.477          0.7391
+57                      akne mycin lotion 25 ml                   acne biotic lotion 15 ml        0.360          0.7234
+124                          amilo 10 mg 20 tab                        adolor 10 mg 20 tab        0.374          0.8649
+135                               amrase 30 tab                              dalras 30 tab        0.277          0.8462
+141              amrizole 5 rectal 1000 mg supp           amrizole n 5 vaginal 500 mg supp        0.548          0.7742
+208                       arthfree 20 mg 30 tab                      lelafree 20 mg 30 tab        0.372          0.8571
+256                augmentin 312 mg syrup 60 ml                focustin 250 mg syrup 60 ml        0.260          0.7636
+267                 avetrix emollient 30 gm gel                         avetrix 100 gm gel        0.542          0.7111
+269                        avipect syrup 100 ml                        marvit syrup 100 ml        0.306          0.8718
+271                        avodart .5 mg 30 tab                      mavilor 2.5 mg 30 tab        0.247          0.8293
+279                      azelast eye drops 5 ml                      azarga eye drops 5 ml        0.352          0.8372
+280                        azgobion 5 mg 30 tab                         biotin 5 mg 30 tab        0.370          0.8421
+292                       babe ton syrup 120 ml                      babetone syrup 120 ml        0.298          0.9524
+294                       rest baby drops 15 ml                  gar oral baby drops 15 ml        0.341          0.7826
+299                      babyrhino syrup 100 ml                   bronchinova syrup 100 ml        0.299          0.8261
+305             balkis 0.1 ad nasal drops 10 ml         rhinex adult 0.1 nasal drops 10 ml        0.299          0.7385
+310                        bambino syrup 120 ml                         total syrup 120 ml        0.308          0.7368
+320                         bebe vit oral drops                  tera vit oral drops 30 ml        0.203          0.7273
+335         bepanthene 250 mg 2 ml 6 injectable    antodine fridge 20 mg 2 ml 6 injectable        0.382          0.7838
+348                     betadine 20 gm ointment         betadine 10 topical 60 gm ointment        0.555          0.7719
+401                        blokium 50 mg 15 tab            blokium diu 100 mg 25 mg 15 tab        0.594          0.7451
+407                      bonecare 0.5 mg 30 cap                   bone care 0.5 mcg 30 cap        0.379          0.9565
+408                       bonecare 1 mcg 30 cap                     bone care 1 mcg 30 cap        0.390          0.9767
+444                    buccazole oral 20 gm gel                    micazole oral 40 gm gel        0.480          0.8511
+446                      burinex 1000 mg 20 tab                  valysernex 1000 mg 20 tab        0.364          0.8085
+447               burnazin 1000 mg 100 gm cream                     burnazin 20 gm 1 cream        0.591          0.7451
+451                  buscopan comp 3 injectable           buscopan 20 mg 6 injectable 1 ml        0.438          0.7586
+459                     caberglobe 0.5 mg 2 tab                   cabergamoun 0.5 mg 2 tab        0.371          0.8511
+492                       candistan 15 gm cream              candistan topical 40 gm cream        0.594          0.7600
+514                 cardixin 0.025 5 injectable         cardixin 500 mcg 2 ml 5 injectable        0.596          0.8197
+527                           carno 50 mg cream                         pacify 50 mg cream        0.286          0.7429
+585                      centrum silver 125 tab           centrum adults 50 silver 100 tab        0.544          0.7407
+586                  ceporex 125 mg syrup 60 ml       predsol forte 15 mg syrup 5 ml 60 ml        0.299          0.7097
+617                         champix 1 mg 28 tab                       arimidex 1 mg 28 tab        0.366          0.8205
+633                    cidocetine 250 mg 12 cap                 tetracycline 250 mg 12 cap        0.356          0.7600
+650                       ciprapro 10 mg 10 tab                   pyralerosis 10 mg 10 tab        0.363          0.8000
+705                         clomid 50 mg 10 tab                     dicloflam 50 mg 10 tab        0.368          0.8293
+716                              cloxide 30 cap                              calcid 30 cap        0.272          0.8148
+734                      colchicine 1 mg 20 tab                          dosin 1 mg 20 tab        0.358          0.7692
+761                   contafever n syrup 120 ml                     guaflex n syrup 120 ml        0.340          0.7660
+779            corneregel fluid eye drops 10 ml                   trillerg eye drops 10 ml        0.282          0.7143
+890                  dentocalm 5000 mg ointment                  dexatrol 5000 mg ointment        0.304          0.8627
+926                       dexaphen syrup 120 ml                         total syrup 120 ml        0.305          0.7179
+937                          diaben 5 mg 20 tab                      glibenase 5 mg 20 tab        0.366          0.8205
+940                            diacerein 30 tab                             datrini 30 tab        0.270          0.8000
+945                      diamicron 80 mg 20 tab                  diamicron mr 30 mg 30 tab        0.492          0.8511
+952                diax syrup suspension 120 ml                     caro suspension 120 ml        0.276          0.8000
+964                             digenorm 20 tab                            digestin 20 tab        0.270          0.8000
+1045                        ebaglow 50 gm cream                          extra 50 gm cream        0.314          0.7778
+1059                         effox 25 mg 30 cap                      angiofox 25 mg 30 cap        0.366          0.8205
+1060                         effox 20 mg 20 tab                      angiofox 20 mg 20 tab        0.366          0.8205
+1061                         effox 40 mg 20 tab                       famotin 40 mg 20 tab        0.361          0.7895
+1062                      effox sr 50 mg 20 cap                      angiofox 50 mg 20 cap        0.305          0.7619
+1094                  emudil hair lotion 120 ml                endovill hair lotion 120 ml        0.360          0.8846
+1106                           entocid h 20 tab                            moventor 20 tab        0.238          0.7097
+1137             epoetin 4000 1. u 1 injectable          eposino fridge 4000 iu injectable        0.517          0.7302
+1150                    esomelodan 20 mg 20 tab                        selgon 20 mg 20 tab        0.372          0.8571
+1151                    esomelodan 40 mg 20 tab                     spasmomen 40 mg 20 tab        0.363          0.8000
+1152                  eso protocol 40 mg 10 cap                     epirazole 40 mg 10 cap        0.306          0.7660
+1160                     etodolac 600 mg 10 tab                       ketolac 10 mg 20 tab        0.532          0.8095
+1173                     evaculax 625 mg 20 cap                            evaculax 20 tab        0.561          0.7027
+1181                            excedrin 20 tab                            carbotin 20 tab        0.260          0.7333
+1183                        exforge 5 mg 14 tab                        tritace 5 mg 14 tab        0.353          0.7368
+1193                 ezafluor mouth wash 120 ml                   sucair mouth wash 120 ml        0.346          0.8000
+1218                       faro viga 100 mg tab                        viagra 100 mg 4 tab        0.332          0.7692
+1244                        ferose syrup 100 ml                     ferramino syrup 100 ml        0.299          0.8293
+1248                            ferrocal 14 cap                           ferromack 30 cap        0.472          0.7097
+1252                         fever n flu 20 tab                               noflu 20 tab        0.274          0.7333
+1292                    flumitol eye drops 5 ml                     xolamol eye drops 5 ml        0.353          0.8444
+1293                        flumol syrup 120 ml                         total syrup 120 ml        0.319          0.8108
+1340              fucithalmic eye 5000 mg drops         ofusidic viscous eye 5000 mg drops        0.313          0.7302
+1344              fungistatian oral drops 30 ml                ginkoravia oral drops 30 ml        0.327          0.7857
+1350                     fusisone m 15 gm cream                           fusi 15 gm cream        0.282          0.8421
+1356                       gm.tab.n 30 gm cream                        momenta 30 gm cream        0.290          0.7692
+1364                     ganfort eye drops 5 ml                   travonorm eye drops 5 ml        0.350          0.8261
+1392               gatigrand 0.3 eye drops 5 ml                  tobrin 0.3 eye drops 5 ml        0.382          0.8302
+1393                          gatilox eye drops                     timolol eye drops 5 ml        0.195          0.7179
+1397                      gentacure 30 gm cream                       vitasure 30 gm cream        0.299          0.8293
+1398                      gentazone 15 gm cream                       nizoderm 15 gm cream        0.292          0.7805
+1404                        geskan spray 100 ml                       bioment spray 100 ml        0.290          0.7692
+1409                             ginsana 30 cap                            kingosan 30 cap        0.274          0.8276
+1419                              glimet 30 tab                               liton 30 tab        0.270          0.8000
+1428                glustacomb 15 500 mg 20 tab                     stopadol 500 mg 20 tab        0.285          0.7347
+1429                     glustazon 15 mg 21 tab                        duracin 1 mg 21 tab        0.241          0.7317
+1445            grand vit ca honey syrup 120 ml                   rainbow vit syrup 120 ml        0.268          0.7273
+1449         gripe watersmile baby syrup 120 ml                     free baby syrup 120 ml        0.305          0.7500
+1451                   gripe water syrup 148 ml                   gripe water smile 120 ml        0.517          0.7500
+1452                gripe water original 150 ml                   gripe water smile 120 ml        0.554          0.7843
+1468            gynotra zonagen 3 ovules 600 mg     gynotrazonagen 3 vaginal ovules 600 mg        0.305          0.8696
+1479                            haemoton 28 cap                           haemoglob 20 cap        0.490          0.7742
+1481  hairback scaip plus spray 2 lotion 100 ml       back 2 scalp hair plus lotion 100 ml        0.295          0.7273
+1507                             hepaton 20 tab                              regton 20 tab        0.272          0.8148
+1508                  hepatovirin 400 mg 30 cap                       gaptin 400 mg 30 cap        0.363          0.8000
+1511             herbamix scalp solution 100 ml                 trujet scalp lotion 100 ml        0.320          0.7143
+1529                       hi forte 50 gm cream                      highforte 50 gm cream        0.380          0.9268
+1542                    hostacortin 5 mg 30 tab                     strakopina 5 mg 30 tab        0.363          0.8000
+1543                  hostacortin h 5 mg 30 tab                     strakopina 5 mg 30 tab        0.306          0.7660
+1544      humalog mix 70 30 5 cartridges 100 iu  humalog mix 75 25 5 penfill fridge 100 iu        0.591          0.7436
+1554    hydrocortisone eye pos 1.0 w w ointment            hydrocortisone 1 20 gm ointment        0.570          0.7714
+1555         hydrocortison pos 2.5 eye ointment            hydrocortisone 1 20 gm ointment        0.428          0.8000
+1577                 immunvita oral drops 25 ml                   dalukan oral drops 25 ml        0.323          0.7600
+1587                  indomethacin 25 mg 24 cap                       indocid 25 mg 30 cap        0.241          0.7556
+1591                 influvactetra 1 injectable                      irinovar 1 injectable        0.265          0.7660
+1606                isomack retard 40 mg 20 cap                iso mak retard 40 mg 20 cap        0.383          0.9630
+1628                      ivypront syrup 120 ml                         total syrup 120 ml        0.313          0.7692
+1684                        kifpan syrup 120 ml                         total syrup 120 ml        0.311          0.7568
+1701                            lactocal 30 tab                             totacal 30 tab        0.274          0.8276
+1729                           lasix 500 mg tab                         lasix 40 mg 24 tab        0.572          0.8235
+1747                     lergicare syrup 120 ml                       ivycare syrup 120 ml        0.304          0.8571
+1751                        levcet syrup 120 ml                         total syrup 120 ml        0.311          0.7568
+1779        lili 50 gm cream moisturizing cream             sofam 50 gm moisturizing cream        0.290          0.7692
+1815                          lolawest 6 sachet                         lola west 6 sachet        0.277          0.9714
+1819                         loral 30 mg 10 cap                         soral 20 mg 30 cap        0.537          0.8333
+1826                          losec 20 mg 7 cap                         omepak 20 mg 7 cap        0.363          0.8000
+1850                 malva vaginal douch 240 ml           top vortex vaginal douche 240 ml        0.314          0.7586
+1873                      medexaflam injectable       medexaflam 15 mg 1.5 ml 3 injectable        0.585          0.7368
+1879                            megalase 20 tab                              jelace 20 tab        0.268          0.7857
+1885                      megy one 10 mg 20 tab                   allergetone 10 mg 20 tab        0.311          0.8000
+1892                           mentholax 24 cap                           mentoplex 20 cap        0.519          0.8125
+1894                      mentoprofen 20 gm gel                         gelinose 20 gm gel        0.283          0.7179
+1896                            mepacure 30 cap                              neured 30 cap        0.268          0.7857
+1929                           michaelon 20 tab                            caltonex 20 tab        0.266          0.7742
+1940              midathetic 15 mg 3 injectable                 mobitil 15 mg 3 injectable        0.369          0.8364
+1941     midathetic iv im 5 mg ml 10 injectable   antikramp i.v i.m 5 mg 2 ml 1 injectable        0.358          0.7692
+1949                           mineravit 20 cap                            cervitam 20 cap        0.266          0.7742
+1958                    misoprost 200 mg 20 tab                     modifree 200 mg 20 tab        0.356          0.7556
+1959                        misotac 200 mcg tab                  selenostar 200 mcg 30 tab        0.265          0.7273
+1979                     monicure 7 v plus supp                 monicure nh 6 vaginal supp        0.463          0.7083
+1980                 moniliarret 6 vaginal supp                 monicure nh 6 vaginal supp        0.277          0.8077
+1991                      morlimin 10 mg 30 tab                        biotin 10 mg 30 tab        0.363          0.8000
+2008                         msm 1000 mg 30 tab                     tiratam 1000 mg 30 tab        0.363          0.8000
+2036                nalufin 20 mg 10 injectable           padcev fridge 20 mg 1 injectable        0.344          0.7458
+2044                  naphcon a eye drops 15 ml                 naphcozole eye drops 10 ml        0.424          0.8235
+2067             neo mercazole imp 5 mg 100 tab              natrol melatonin 5 mg 100 tab        0.268          0.7119
+2117              nimotop imported 30 mg 30 tab                     aripiprex 30 mg 30 tab        0.303          0.7451
+2127                     nizatect 300 mg 20 cap                      mucotec 300 mg 20 cap        0.361          0.7907
+2154                    novaldol 1000 mg 15 tab                       cetal 1000 mg 15 tab        0.361          0.7907
+
+--- ALL REVIEW ITEMS (425 items) ---
+                                                normalized_query                                                                db_normalized  match_score  jaccard_score  sequence_score                    unmatched_query
+1771                                  lidocaine 5 20 gm ointment                                                       lignocaine 20 gm 5 gel        0.800         0.7526          0.6667                           ointment
+1177                             examide 10 mg 1 ml 1 injectable                                                   examide 10 mg 1 injectable        0.799         0.7500          0.9123                              ml, 1
+1905                                merional 75 i.u 1 injectable                                           epigonal fridge 75 mg 1 injectable        0.798         0.7178          0.7419                                i.u
+1676                                          ketofan s r 100 mg                                                     ketofan sr 100 mg 30 cap        0.798         0.6900          0.8095                                  r
+121                                 amikacin lotion spray 100 ml                                                 amikacin 250 mg spray 100 ml        0.798         0.7000          0.7857                             lotion
+1271                                        flatidyl 30 chew tab                                                     flatidyl 30 chewable tab        0.798         0.7500          0.9091                               chew
+1187                                        extrauma 25 gm cream                                              extrauma dna 280 iu 25 gm cream        0.798         0.7000          0.7843                                NaN
+1946                                             migracid 20 tab                                                     stopadol migraine 20 tab        0.797         0.7500          0.6667                                NaN
+303                            bacticlor 250 mg suspension 60 ml                       bacticlor for oral 250 mg sachet suspension 5 ml 60 ml        0.796         0.7092          0.7586                                NaN
+891                                        depakine syrup 125 ml                                            depakine 57.64 mg ml syrup 125 ml        0.796         0.7000          0.7778                                NaN
+302                            bacticlor 125 mg suspension 60 ml                       bacticlor for oral 125 mg sachet suspension 5 ml 60 ml        0.796         0.7092          0.7586                                NaN
+427                             bronchicum elixir s syrup 100 ml                                                      bronchicum syrup 100 ml        0.795         0.7778          0.8364                          elixir, s
+573                          ceftriaxone i.v 500 mg 1 injectable                                            cefrone i.m i.v 500 mg injectable        0.795         0.6667          0.8529                                  1
+395                              bistol 2.5 6.25 plus tab 20 tab                                bistol 20 film coated 2.5 mg 6.25 mg plus tab        0.795         0.7612          0.6316                                tab
+1424                                       glucophage xr 1000 mg                               glucophage xr 30 prolonged release 1000 mg tab        0.793         0.7609          0.6269                                NaN
+1951                                minirin 60 sublingual 30 tab                                                   minirin melt 60 mcg 30 tab        0.792         0.7273          0.7037                         sublingual
+118                                    ambroxol oral drops 15 ml                                     ambroxol oral oral 7.5 mg ml drops 15 ml        0.792         0.6990          0.7692                                NaN
+2089                                  neurorubine fort 20 lactab                                                     neurorubine forte 20 tab        0.792         0.7375          0.9200                             lactab
+1565                                ibidroxil 250 mg syrup 60 ml                            ibidroxil for oral 250 mg powder suspension 60 ml        0.791         0.7377          0.6753                              syrup
+422                                    brimonocond e.d plus 5 ml                                              brimonocond eye plus drops 5 ml        0.790         0.6739          0.8214                                e.d
+1091                                e moxclav 312 mg syrup 60 ml                          e moxclav for oral 312.5 mg powder suspension 60 ml        0.789         0.7424          0.6582                              syrup
+1314                                      foradil inhaler 60 cap                                         foradil inhaler sandoz 12 mcg 60 cap        0.789         0.7000          0.7586                                NaN
+1286                                      floxabact 500 mg 5 tab                                               floxabact 10 coated 500 mg tab        0.788         0.6931          0.7692                                  5
+394                                bistol 5 6.25 plus tab 20 tab                                  bistol 20 film coated 5 mg 6.25 mg plus tab        0.788         0.7612          0.6111                                tab
+1498                               hebitaxime 1000 mg injectable                             hebitaxime i.m i.v 1000 mg injectable injectable        0.788         0.7000          0.7532                                NaN
+163                                  antodine 20 mg 3 injectable                                            antodine 30 film coated 20 mg tab        0.787         0.7647          0.6000                         injectable
+1241                             feroglobin b 12 imported 30 cap                                           feroglobin , zinc b 12 iron 30 cap        0.787         0.6923          0.7692                           imported
+836                                     cyclogest 400 mg 15 supp                                         cyclogest 15 pessaries fridge 400 mg        0.786         0.7921          0.5333                               supp
+147                                      anapramine 75 mg 10 tab                                                   anapramine sr 75 mg 20 tab        0.786         0.6364          0.8980                                 10
+625                                             choletimb 14 tab                                                      choletemib 10 mg 14 tab        0.786         0.6908          0.7692                                NaN
+704                                               clobutra cream                                                         clobutra 25 gm cream        0.785         0.6667          0.8235                                NaN
+758                                       congestal syrup 120 ml                                        congestal and cough cold syrup 120 ml        0.785         0.7000          0.7458                                NaN
+832                                               cutacort cream                                                         cutacort 15 gm cream        0.785         0.6667          0.8235                                NaN
+1580                                           incont l.a 30 tab                                                       incont a 4 mg l 30 tab        0.785         0.6900          0.7692                                NaN
+476                                              caldin c 30 cap                                                              caldin c 30 tab        0.785         0.7500          0.8667                                cap
+315                                      bebelac 400 gm 1 powder                                        bebelac stage formula 400 gm 1 infant        0.785         0.7767          0.5667                             powder
+554                                  cefidime 1000 mg injectable                               cefidime i.m i.v 1000 mg injectable injectable        0.783         0.7000          0.7397                                NaN
+1315                                 forcetex 1000 mg injectable                               forcetex i.m i.v 1000 mg injectable injectable        0.783         0.7000          0.7397                                NaN
+1379                                          gastorelive 30 tab                                         gastorelive 30 film coated 50 mg tab        0.783         0.7317          0.6667                                NaN
+552                                  cefepime 1000 mg injectable                               cefepime i.m i.v 1000 mg injectable injectable        0.783         0.7000          0.7397                                NaN
+91                         alpha chymotrypsine 3 injectable 5 ml                                         alpha chymotrypsin 3 injectable 3 ml        0.782         0.7182          0.9589                                  5
+565                                   cefotax 2000 mg injectable                                cefotax i.m i.v 2000 mg injectable injectable        0.781         0.7000          0.7324                                NaN
+374                               bioglita 500 15 mg plus 20 tab                                               bioglita 15 500 mg plus 30 tab        0.780         0.7541          0.8667                                 20
+2007                                            moxitrix 400 tab                                            moxitrix 5 film coated 400 mg tab        0.779         0.7317          0.6531                                NaN
+1769                                                licid lotion                                                           licid lotion 30 ml        0.777         0.6667          0.8000                                NaN
+1954                                  minoxidil fort 50 gm 5 gel                                                   minoxidil fort 60 gm 5 gel        0.777         0.7091          0.9615                                  5
+1878                                              megalase syrup                                                        megalase syrup 125 ml        0.777         0.6667          0.8000                                NaN
+1260                            flagellt forte suspension 100 ml                                flagellat forte 200 mg suspension 5 ml 100 ml        0.776         0.6520          0.8312                                NaN
+1306                                     fluvermal 100 mg 18 tab                                                          fluver 100 mg 6 tab        0.776         0.6400          0.8571                                 18
+1123                                     epifenac eye drops 5 ml                                          epifenac 0.1 eye 1 mg ml drops 5 ml        0.775         0.6667          0.7931                                NaN
+919                                              deslorat 20 tab                                             deslorat 20 film coated 5 mg tab        0.774         0.7317          0.6383                                NaN
+362                               b fresh mouth mint wash 250 ml                                   b fresh with flavour mouthwash mint 250 ml        0.773         0.7066          0.6944                               wash
+1549                                 hyfresh eye lubricant 10 ml                                                  hyfresh 0.2 eye drops 10 ml        0.771         0.7000          0.7037                          lubricant
+1920                                     methotrexate 50 mg 2 ml                                                   methotrexate 2.5 mg 50 tab        0.771         0.7800          0.7755                                 ml
+460                                         cafamol extra 20 tab                                                          paramol plus 20 tab        0.771         0.8163          0.6667                              extra
+1216                               farcotilium suspension 120 ml                                      farcotilium 5 mg suspension 5 ml 120 ml        0.771         0.6364          0.8529                                NaN
+1634                                             januvia 100 tab                                            januvia 28 film coated 100 mg tab        0.770         0.7317          0.6250                                NaN
+1002                               dolphin 12.5 mg infant 5 supp                                            dolphin infantile 12.5 mg 10 supp        0.770         0.7091          0.6774                                  5
+39                                             adol extra 24 cap                                                            adol extra 24 tab        0.770         0.7222          0.8824                                cap
+550                                cefazone 1000 mg 1 injectable                                          cefazone i.m i.v 1000 mg injectable        0.768         0.6364          0.8438                                  1
+1656                                        kefentech 30 plaster                                             kefentech 7 sheets 30 mg plaster        0.767         0.6667          0.7692                                NaN
+1493                                                  harvy soap                                                             harvy 80 gm soap        0.767         0.6667          0.7692                                NaN
+557                                 cefobid 1000 mg 1 injectable                                           cefobid i.m i.v 1000 mg injectable        0.767         0.6364          0.8387                                  1
+551                                 cefazone 500 mg 1 injectable                                           cefazone i.m i.v 500 mg injectable        0.767         0.6364          0.8387                                  1
+939                                         diabride 3 mg 10 tab                                                         diabride 2 mg 10 tab        0.767         0.7000          0.9500                                  3
+1074                                           elonda 5 mg 2 tab                                                          elonda 0.5 mg 2 tab        0.766         0.7000          0.9444                                  5
+558                                  cefobid 500 mg 1 injectable                                            cefobid i.m i.v 500 mg injectable        0.765         0.6364          0.8333                                  1
+1988                                         movy up 40 gm cream                                                     moov 40 gm massage cream        0.765         0.6944          0.6977                                 up
+1054                                         efexor 75 mg 28 cap                                                       efexor xr 75 mg 14 cap        0.764         0.6364          0.8293                                 28
+1460                                                 guava syrup                                                           guava syrup 120 ml        0.764         0.6667          0.7586                                NaN
+1997                                      mosedin sr plus 10 cap                                                       mosedin sr plus 30 cap        0.763         0.6341          0.9545                                 10
+621                                     chloride sodium 9 500 ml                                                   sodium chloride 0.9 500 ml        0.763         0.7000          0.6800                                  9
+1003                                 dolphin 25 mg infant 5 supp                                              dolphin infantile 25 mg 10 supp        0.762         0.7091          0.6552                                  5
+1956                                         miopan syrup 100 ml                                                     miopan suspension 100 ml        0.762         0.7500          0.7907                              syrup
+982                                       gasiflatyl chew 30 tab                                                   gasiflatyl 30 chewable tab        0.762         0.7500          0.7917                               chew
+714                                     clovacort 20 gm ointment                                                          clovacort 20 gm gel        0.762         0.7500          0.7907                           ointment
+931                                        dexazone 25 mg 20 tab                                                       dexazone 0.5 mg 20 tab        0.761         0.7000          0.9302                                 25
+1840                                    maalox stomach 20 sachet                                                       maalox lemon 20 sachet        0.760         0.7500          0.7826                            stomach
+684                                             clarinase 14 tab                                                        clarinase 14 repetabs        0.759         0.7143          0.8649                                tab
+2015                                 mucosol infant syrup 120 ml                                   mucosol infantile 125 mg syrup 5 ml 120 ml        0.759         0.6500          0.7826                                NaN
+687                                       claritine syrup 100 ml                                             claritine 5 mg syrup 5 ml 100 ml        0.759         0.6364          0.8148                                NaN
+993                                        dolcyl 1000 mg 30 tab                                                           dolcyl 1 mg 30 tab        0.759         0.7000          0.9231                               1000
+639                                     cidophage 1000 mg 20 tab                                         cidophage 30 film coated 1000 mg tab        0.759         0.6863          0.7000                                 20
+2035                               nalbuphine 20 mg 1 injectable                                                 navelbine fridge 20 mg 1 cap        0.758         0.7139          0.6316                         injectable
+1614                                   isotretinoin 20 mg 10 cap                                                    isotretinoin 10 mg 30 cap        0.758         0.7000          0.9200                                 20
+739                                    colmediten 500 mg 100 tab                                                    colmediten 0.5 mg 100 tab        0.758         0.7000          0.9200                                500
+1390                               gastromotil suspension 200 ml                                     gastrolmotil 5 mg suspension 5 ml 200 ml        0.758         0.6245          0.8406                                NaN
+2080                                   neurobion imported 30 tab                                                              neuroton 30 tab        0.757         0.7815          0.7000                           imported
+1412                                     glaptivia 100 mg 28 tab                                          glaptivia 30 film coated 100 mg tab        0.756         0.6863          0.6897                                 28
+1764                                     levohistam syrup 120 ml                                           levohistam 5 mg syrup 10 ml 120 ml        0.756         0.6364          0.8070                                NaN
+1321                                              fortzaar 8 tab                                                     fortzaar 100 25 mg 8 tab        0.756         0.6667          0.7368                                NaN
+40                                             adol sinns 24 cap                                                            adol sinus 24 tab        0.755         0.7250          0.8235                                cap
+1887                         meloquin bleaching 20 gm skin cream                                                       meloquin 20 gm 4 cream        0.754         0.7609          0.7368                    bleaching, skin
+1238                                        fenistil drops 15 ml                                               fenistil 1 mg drops 1 ml 15 ml        0.754         0.6364          0.8000                                NaN
+2081                                      neurobion 3 injectable                                                   neurovit 3 ml 6 injectable        0.754         0.6397          0.7917                                NaN
+1064                                      egycusate syrup 100 ml                                            egycusate 50 mg syrup 5 ml 100 ml        0.754         0.6364          0.8000                                NaN
+1006                                      dolphin k 3 injectable                                            dolphin k 75 mg 3 ml 6 injectable        0.754         0.6364          0.8000                                NaN
+1163                            eucal 50 gm herbal massage cream                                                            eucal 50 gm cream        0.753         0.7778          0.6939                    herbal, massage
+631                                                 cialis 20 mg                                               cialis 2 film coated 20 mg tab        0.752         0.7317          0.5714                                NaN
+1971                                               modazar 8 tab                                                      modazar 100 25 mg 8 tab        0.752         0.6667          0.7222                                NaN
+1996                                         mosedin syrup 60 ml                                                mosedin 5 mg syrup 5 ml 60 ml        0.751         0.6364          0.7917                                NaN
+12                           aciclovir mylan 500 mg 5 injectable                                                  aciclovir 500 mg injectable        0.751         0.7000          0.8710                           mylan, 5
+953                                         diclac 150 id 10 tab                                                      diclac id 150 mg 20 tab        0.751         0.6364          0.7907                                 10
+2130                                     no gravida vaginal supp                                     no gravida 12 vaginal fridge 100 mg supp        0.749         0.6593          0.7302                                NaN
+1633                                       januvia 100 mg 14 tab                                            januvia 28 film coated 100 mg tab        0.748         0.6863          0.6667                                 14
+1638                                          joypox 60 mg 3 tab                                               joypox 6 film coated 60 mg tab        0.748         0.6863          0.6667                                  3
+1973                                         moflox 400 mg 5 tab                                             moflox 10 film coated 400 mg tab        0.748         0.6863          0.6667                                  5
+812                                          crestor 20 mg 7 tab                                             crestor 28 film coated 20 mg tab        0.748         0.6863          0.6667                                  7
+1288                                       flub suspension 30 ml                                            flub 100 mg suspension 5 ml 30 ml        0.747         0.6364          0.7778                                NaN
+1838                                 maalox 40 chewable plus tab                                                    maalox 200 mg plus 40 tab        0.747         0.6739          0.6923                           chewable
+1239                                feroglobin b 12 syrup 120 ml                                                      feroglobin syrup 120 ml        0.747         0.6800          0.9020                             b, 120
+1661                                     kellagon 10 effe sachet                                              kellagon sachet 10 effervescent        0.747         0.7500          0.7407                               effe
+452                                         buscopan plus 20 tab                                                        buscopan 10 mg 20 tab        0.746         0.7317          0.7805                               plus
+2114                                            nido milk 576 gm                                           nido milk with honey 576 gm 1 plus        0.745         0.6931          0.6400                                NaN
+604                                          cetal 120 mg 5 supp                               cetal 5 rectal for children fridge 120 mg supp        0.745         0.7438          0.5231                                NaN
+1221                                        fastel 120 mg 10 tab                                             fastel 20 film coated 120 mg tab        0.744         0.6863          0.6538                                 10
+317                                             bebelac 2 400 gm                                     bebelac stage 2 follow formula 400 gm on        0.744         0.7207          0.5714                                NaN
+927                                 dexatobrin eye 5 mg ointment                                              dexatobrin eye 5000 mg ointment        0.744         0.6667          0.9492                                  5
+1222                                        fastel 180 mg 10 tab                                             fastel 20 film coated 180 mg tab        0.744         0.6863          0.6538                                 10
+54                                          aironyl syrup 120 ml                                             aironyl 1.5 mg syrup 5 ml 120 ml        0.744         0.6364          0.7692                                NaN
+1632                    janumet antidiabetic 50 mg 850 mg mg tab                                      janumet 56 film coated 50 mg 850 mg tab        0.743         0.7576          0.7089                   antidiabetic, mg
+1999                                  motinorm suspension 125 ml                                    motinorm oral 5 mg suspension 5 ml 125 ml        0.742         0.6306          0.7761                                NaN
+691                                       clear 100 mg face soap                                            lavage clear bar 100 gm face soap        0.742         0.6364          0.7636                                 mg
+1280                  flixotid evohaler 60 dose aerosole 125 mcg                                         flixotide evohaler 60 metered 125 mg        0.742         0.7083          0.8205                     dose, aerosole
+2070                                      neomycin 250 mg 20 tab                                                       neomycin 500 mg 20 tab        0.741         0.6600          0.9545                                 20
+879                                          delarex 5 mg 20 tab                                              delarex 30 film coated 5 mg tab        0.740         0.6863          0.6400                                 20
+1304                                     fluver suspension 30 ml                                         fluver suspensions 100 mg 5 ml 30 ml        0.740         0.6273          0.7797                                NaN
+547                                 cefaxone 250 mg 1 injectable                                    cefaxone i.m 250 mg injectable injectable        0.739         0.6364          0.7536                                  1
+2010                                           muco syrup 100 ml                                                 muco 15 mg syrup 5 ml 100 ml        0.739         0.6364          0.7556                                NaN
+1675                                   ketofan suspension 120 ml                                     ketofan oral 5 mg suspension 5 ml 120 ml        0.739         0.6306          0.7692                                NaN
+275                                       azarga eye drops 10 ml                                                        azarga eye drops 5 ml        0.738         0.6667          0.9302                                 10
+1124                                          epifenac 75 mg tab                       epifenac sr 10 sustained release film coated 75 mg tab        0.738         0.7447          0.5000                                NaN
+559                                         cefoperazone 1000 mg                                      cefoperazone i.m i.v 1000 mg injectable        0.737         0.6667          0.6780                                NaN
+2056                                               nataria cream                                                     nataria 50 gm plus cream        0.737         0.6557          0.7027                                NaN
+1278                                   flix metered 16 gm 50 mcg                                                flix nasal 50 mcg 16 gm spray        0.736         0.7500          0.4815                            metered
+540                                         catafly syrup 140 ml                                               catafly oral suspension 140 ml        0.735         0.7407          0.7200                              syrup
+977                               diprivan 10 mg ml 5 injectable                   diprivan disoprivan 1 fridge 10 mg 1 ml 5 injectable 20 ml        0.735         0.6623          0.6818                                NaN
+47                                            aerius 5 mg 10 tab                                               aerius 20 film coated 5 mg tab        0.735         0.6863          0.6250                                 10
+2149                              nostamine eye nose drops 15 ml                                                     nostamine eye nose drops        0.733         0.6667          0.8889                             15, ml
+1188                                  extrauma forte 25 gm cream                                              extrauma dna 280 iu 25 gm cream        0.733         0.6364          0.7368                              forte
+1223                                    fastel suspension 110 ml                                     fastel oral 30 mg suspension 5 ml 110 ml        0.733         0.6306          0.7500                                NaN
+264                                             avazir eye drops                                                   avazir 0.3 eye drops 10 ml        0.733         0.6250          0.7619                                NaN
+287          azrolid for oral 900 200 mg suspension 5 ml 22.5 ml                            azrolid for oral 900 mg powder suspension 22.5 ml        0.733         0.6871          0.8400                         200, 5, ml
+1201                                         ezogast 20 mg 7 cap                                         ezogast 14 delayed release 20 mg cap        0.732         0.6863          0.6182                                  7
+1884                                         megavit zinc 20 cap                                                               megonat 20 cap        0.732         0.7347          0.7273                               zinc
+1202                                         ezogast 40 mg 7 cap                                         ezogast 14 delayed release 40 mg cap        0.732         0.6863          0.6182                                  7
+403                                           blokium diu 15 tab                                              blokium diu 100 mg 25 mg 15 tab        0.732         0.6364          0.7347                                NaN
+1119                                   epidron 4 mg 1 injectable                                              epidron 4 mg ml injectable 2 ml        0.732         0.5833          0.8571                                  1
+1100                                                enrich drops                                                      enrich oral drops 30 ml        0.731         0.6557          0.6857                                NaN
+480                                        cal mag 900 mg 30 tab                                                               cal mag 30 tab        0.730         0.7000          0.8000                            900, mg
+471                              calcitron calcium stress 30 cap                                                             calcitron 30 cap        0.729         0.7500          0.6809                    calcium, stress
+1174                               evastine oral solution 100 ml                                                        evastine syrup 100 ml        0.728         0.7317          0.7200                     oral, solution
+707                                        close up green 100 ml                                close up fresh menthol ever toothpaste 100 ml        0.728         0.6863          0.6061                              green
+1394                                               gatistar 5 ml                                                  gatistar 0.5 eye drops 5 ml        0.728         0.6667          0.6500                                NaN
+1411                                glaptiva 50 1000 plus 14 tab                                 glaptivia 50 30 film coated 1000 mg plus tab        0.727         0.6471          0.6944                                 14
+655                                      ciprocin 0.3 drops 5 ml                                ciprocin 0.3 sterile ophthalmic solution 5 ml        0.727         0.6667          0.6471                              drops
+211                                       articavol 3 injectable                                            articavol 75 mg 3 ml 3 injectable        0.726         0.6000          0.8000                                NaN
+985                                       dispercam 6 injectable                                            dispercam 20 mg 6 injectable 1 ml        0.726         0.6000          0.8000                                NaN
+293                             babe ton sugar free syrup 120 ml                                                       free baby syrup 120 ml        0.726         0.7679          0.6296                         ton, sugar
+1308                                          foldex cream 50 ml                                                           foldex 50 gm cream        0.725         0.7500          0.6667                                 ml
+2024                                          medrapid 0.5 drops                                                 mydrapid 0.5 eye drops 10 ml        0.725         0.6250          0.7391                                NaN
+607                                       cetal suspension 60 ml                                      cetal oral 250 mg suspension 5 ml 60 ml        0.724         0.6306          0.7213                                NaN
+1198                                           ezapril co 20 tab                                              ezapril co 20 mg 12.5 mg 30 tab        0.724         0.6364          0.7083                                NaN
+448                                        buscopan 6 injectable                                             buscopan 20 mg 6 injectable 1 ml        0.724         0.6000          0.7925                                NaN
+708                                         close up green 50 ml                                 close up fresh menthol ever toothpaste 50 ml        0.724         0.6863          0.5938                              green
+1462                                 gyno trosyd 2 vaginal cream                                                gynozol 2 vaginal 40 gm cream        0.724         0.6182          0.7500                             trosyd
+2064                                     nebilet 5 plus 2514 tab                                   nebilet 14 film coated 5 mg 25 mg plus tab        0.723         0.7018          0.5538                                NaN
+1130                               epimag effervescent 12 sachet                                      epimag × 5000 mg sachet 12 effervescent        0.723         0.7000          0.5588                                NaN
+524                                       carnitol 500 mg 30 cap                                     soda carbonil gelatin 500 mg cap 30 hard        0.721         0.6875          0.5806                                NaN
+432                                      broncho vaxom 10 sachet                                  broncho vaxom for children 3.5 mg 10 sachet        0.720         0.6364          0.6970                                NaN
+95                                          alphanova plus drops                                                alphanova eye plus drops 5 ml        0.719         0.5833          0.8163                                NaN
+759                                       congestal 60 mg 20 tab                                                             congestal 20 tab        0.719         0.6667          0.8421                             60, mg
+1281                                      flixotide 125 evohaler                                         flixotide evohaler 60 metered 125 mg        0.718         0.6667          0.6207                                NaN
+1875                                         mega mineral 20 cap                                                               megonat 20 cap        0.718         0.7403          0.6667                            mineral
+2023                                 mycostatin suspension 30 ml                                      orastatin 100,000 u ml suspension 30 ml        0.718         0.6211          0.7273                                NaN
+249                atrovent unit dose 250 mcg gm injectable 2 ml                                          atrovent 250 mcg 2 ml 20 injectable        0.718         0.7143          0.7250                     unit, dose, gm
+775                                         corasore drops 15 ml                                        corasore n oral 305 mg drops ml 15 ml        0.717         0.6306          0.7018                                NaN
+582                                           centrum a z 30 tab                                                           centrum men 30 tab        0.717         0.6667          0.8333                               a, z
+917                                             desa syrp 100 ml                                                desa 2.5 mg syrup 5 ml 100 ml        0.717         0.6263          0.7111                                NaN
+253                                       augmentin 156 mg 80 ml                       augmentin for oral 156 mg powder suspension 5 ml 80 ml        0.716         0.6818          0.5789                                NaN
+1862                                         matrix ca 20 pieces                                                      matrix chelation 20 cap        0.716         0.7375          0.6667                             pieces
+349                                           betafos injectable                                                    betafos 1 injectable 2 ml        0.716         0.5714          0.8372                                NaN
+1442                            gonapure 150 i.u injectable 1 ml                                    gonapure im sc fridge 150 iu 1 injectable        0.716         0.7273          0.7123                                 ml
+1242                                        ferosac 5 injectable                                             ferosac 100 mg 5 ml 5 injectable        0.716         0.6000          0.7692                                NaN
+450                                         buscopan comp 20 tab                                                        buscopan 10 mg 20 tab        0.715         0.6667          0.8293                               comp
+923                                         dexaglobe injectable                                                 dexaglobe 14 mg 1 injectable        0.715         0.5714          0.8333                                NaN
+334                                     bepanthene lotion 250 ml                                     cosmo appe panthenol baume lotion 250 ml        0.715         0.6211          0.7188                                NaN
+2155                                       novalgin 3 injectable                                           novalgin 1000 mg 3 injectable 2 ml        0.714         0.6000          0.7636                                NaN
+1443                             gonapure 75 i.u injectable 1 ml                                     gonapure im sc fridge 75 iu 1 injectable        0.713         0.7273          0.7042                                 ml
+512                                      cardioton 300 mg 20 tab                                                             cardioton 20 tab        0.713         0.6667          0.8205                            300, mg
+1189                         extreme calcium 20 pieces chocolate                                                     extreme 20 pieces fridge        0.712         0.7407          0.6441                 calcium, chocolate
+1190                         extreme calcium 20 pieces chocolate                                                     extreme 20 pieces fridge        0.712         0.7407          0.6441                 calcium, chocolate
+1520                                hero mixed fruits juice baby                                            hero mixed fruits 190 gm baby jar        0.711         0.6000          0.7541                              juice
+1953                                 minophylline n 5 injectable                                    minophylline n 25 mg ml 5 injectable 5 ml        0.711         0.5833          0.7941                                NaN
+1058                                     effegad er 75 mg 10 cap                                                         effegad 75 mg 14 cap        0.711         0.6364          0.8837                             er, 10
+1384                                 gast reg 50 mg 3 injectable                           gast reg iv im fridge 50 mg 5 ml 3 injectable 5 ml        0.710         0.6211          0.7013                                NaN
+774                                       corasore 150 mg 20 tab                                                              corasore 20 tab        0.710         0.6667          0.8108                            150, mg
+1755                                       levepex 500 mg 30 tab                                                               levepex 500 mg        0.707         0.6667          0.8000                            30, tab
+970                                           dimra 50 mg 20 tab                                                                 dimra 20 tab        0.707         0.6667          0.8000                             50, mg
+605                                            cetal drops 15 ml                                           cetal oral 100 mg drops 1 ml 15 ml        0.706         0.6306          0.6667                                NaN
+1837                               maalox plus suspension 355 ml                                                maalox plus suspension 180 ml        0.706         0.6341          0.8966                                355
+2058                                      natrilix 2.5 mg 30 tab                                                    natrilix sr 1.5 mg 30 tab        0.706         0.6364          0.8936                                2.5
+1023                                   dostinex 0.5 mg jar 8 tab                                                        dostinex 0.5 mg 2 tab        0.706         0.6364          0.8696                             jar, 8
+1275                     flector sachet 50 effervescent 9 sachet                                                       flector 50 mg 9 sachet        0.706         0.7273          0.6557               effervescent, sachet
+433                                      broncho vaxom ad 10 cap                                         broncho vaxom for adults 7 mg 10 cap        0.706         0.5833          0.7797                                 ad
+1521                              hero nutra defense baby 1 plus                              hero nutradefense stage 1 milk 400 gm baby plus        0.704         0.6139          0.7013                              nutra
+1270                             flash act effervescent 5 sachet                                                     flash act 50 mg 9 sachet        0.703         0.6800          0.6545                       effervescent
+2145                        normo tears sterile ophthalmic 15 ml                                                   normo tears solution 15 ml        0.703         0.7000          0.7097                sterile, ophthalmic
+881                               deltaclav 228.5 mg syrup 80 ml                     deltaclav for oral 228.5 mg powder suspension 5 ml 80 ml        0.703         0.6338          0.6512                              syrup
+1859                             marvit with antioxidants 14 cap                                                                marvit 14 cap        0.702         0.7500          0.5909                 with, antioxidants
+664                                         ciprofloxacin 500 mg                               ciprofloxacin 10 film coated amriya 500 mg tab        0.702         0.6522          0.6061                                NaN
+434                                  broncho vaxom infant 10 cap                                         broncho vaxom for adults 7 mg 10 cap        0.701         0.5833          0.7619                             infant
+419                                                  bran 60 cap                                                 bran mepaco medi food 60 cap        0.699         0.6667          0.5641                                NaN
+1961                                       mixtard 100 i.u 10 ml                         insulin mixtard 30 hm fridge 100 iu injectable 10 ml        0.698         0.6718          0.5479                                NaN
+869                                          declophen 12.5 supp                                declophen for infantile fridge 12.5 mg 5 supp        0.698         0.6522          0.5938                                NaN
+257                                 augmentin 457 mg syrup 70 ml                       augmentin for oral 457 mg powder suspension 5 ml 70 ml        0.697         0.6338          0.6341                              syrup
+390                                 bisolvon elixir syrup 115 ml                                              bisolvon 4 mg syrup 5 ml 115 ml        0.695         0.5833          0.7458                             elixir
+1939                                      mictonorm 15 mg 28 tab                                                    mictonorm xl 30 mg 28 tab        0.694         0.6364          0.8511                                 15
+555                                  cefixime 100 mg syrup 60 ml                        cefixime for oral 100 mg powder suspension 5 ml 60 ml        0.694         0.6338          0.6250                              syrup
+187                                         arbateg 2 100 mlsusp                                                  arbateg 2 suspension 100 ml        0.694         0.7000          0.6809                             mlsusp
+396                               bivatracin 150 mg powder spray                                                      bivatracin spray 150 ml        0.693         0.7317          0.6038                         mg, powder
+1683                                      kidmin solution 250 ml                                                   kidmin i.v infusion 250 ml        0.692         0.6667          0.7500                           solution
+1277                                             flexofan 20 cap                                                 flexofan 250 mg 50 mg 20 cap        0.692         0.6000          0.6977                                NaN
+1298                                  flumox 250 mg syrup 100 ml                         flumox for oral 250 mg powder suspension 5 ml 100 ml        0.691         0.6338          0.6154                              syrup
+2071                                    neostigmine 5 injectable                                           epistigmin 0.25 mg injectable 5 ml        0.691         0.5873          0.7241                                NaN
+2096       neutrogena visibly clear blackhead eliminating 150 ml                         neutrogena blackhead eliminating facial scrub 150 ml        0.690         0.6667          0.7429                     visibly, clear
+463              calci dietry supplement 30 film coated plus tab                                               hacaci 30 film coated plus tab        0.689         0.6723          0.7273                 dietry, supplement
+1822                        lornoxicam for im iv 8 mg injectable                                                 lornoxicam 8 mg 1 injectable        0.689         0.6364          0.8125                        for, im, iv
+1448                                            coffee 120 green                                                  isis coffee green 20 sachet        0.687         0.7000          0.5581                                NaN
+71                                           alka misr 10 sachet                                                          alka misr 12 sachet        0.686         0.6250          0.9474                                 10
+786                                        cosmofer 5 injectable                                    cosmofer 50 mg injectable ml 5 injectable        0.686         0.6000          0.6774                                NaN
+1357                                        gabalepsy 300 10 cap                                                      gabalepsy 300 mg 30 cap        0.685         0.6000          0.8837                                 10
+560                                 ceforan 1000 mg 1 injectable                                           cefrone i.m i.v 1000 mg injectable        0.685         0.5584          0.7742                                  1
+680                                 claforan 500 mg 1 injectable                                claforan i.v i.m 500 mg injectable injectable        0.684         0.5833          0.7123                                  1
+1654                                kefadim 1000 mg 1 injectable                                kefadim i.v i.m 1000 mg injectable injectable        0.684         0.5833          0.7123                                  1
+895                               depofort b 12 i.m 2 injectable                                     depofort b 12 i.m 1 mg 5 injectable 1 ml        0.684         0.5333          0.8286                                  2
+562                                  ceforan 500 mg 1 injectable                                            cefozon i.m i.v 500 mg injectable        0.683         0.5584          0.7667                                  1
+2038                                 nan 3 milk with 400 gm iron                                       nan optipro stage milk 400 gm 3 powder        0.683         0.7377          0.5538                         with, iron
+1004                                 dolphin 50 mg infant 5 supp                                                        dolphin 50 mg 10 supp        0.683         0.6364          0.7917                          infant, 5
+1318                                 fortum 1000 mg 1 injectable                                 fortum i.v i.m 1000 mg injectable injectable        0.682         0.5833          0.7042                                  1
+218                                aspirin protect 100 mg 20 tab                             aspirin protect 30 enteric coated 100 mg tab tab        0.682         0.5854          0.7013                                 20
+564                                  cefotax 250 mg 1 injectable                                 cefotax i.m i.v 250 mg injectable injectable        0.682         0.5833          0.7042                                  1
+575                                  cefzim 1000 mg 1 injectable                                 cefzim i.m i.v 1000 mg injectable injectable        0.682         0.5833          0.7042                                  1
+1655                                 kefadim 500 mg 1 injectable                                 kefadim i.v i.m 500 mg injectable injectable        0.682         0.5833          0.7042                                  1
+1689                                    klacid 250 mg 5 ml 70 ml                          klacid for oral 125 mg sachet suspension 5 ml 70 ml        0.681         0.6211          0.6133                                250
+1319                                  fortum 500 mg 1 injectable                                  fortum i.v i.m 500 mg injectable injectable        0.679         0.5833          0.6957                                  1
+954                                           diclac 30 gm 5 gel                                                         diclac n 50 gm 4 gel        0.679         0.6182          0.8421                                 30
+576                                   cefzim 500 mg 1 injectable                                  cefzim i.m i.v 500 mg injectable injectable        0.679         0.5833          0.6957                                  1
+1328                                  foxime 500 mg 1 injectable                                  foxime i.m i.v 500 mg injectable injectable        0.679         0.5833          0.6957                                  1
+1093                                e moxclave 457 mg suspension                       e moxclav for oral 457 mg powder suspension 5 ml 70 ml        0.678         0.5985          0.6585                                NaN
+214                                          ascizadex n top gel                                                        ascizadex n 40 gm gel        0.677         0.6250          0.8000                                top
+2062                                           navoproxin 20 tab                                           navoproxin 25 mg 50 mg plus 20 tab        0.677         0.5941          0.6667                                NaN
+1682                                         kevork 500 mg 5 tab                                     kevork 10 coated organopharma 500 mg tab        0.676         0.6306          0.5763                                  5
+313                              be active wheat germ oil 30 cap                                                             be active 30 cap        0.676         0.6739          0.6809                   wheat, germ, oil
+899                                      depram 10 f.c 40 mg tab                                                          depram 40 mg 20 tab        0.674         0.6364          0.7619                            10, f.c
+2105                           newclav 642.9 mg suspension 50 ml       new clav extra strength for oral 642.9 mg powder suspension 5 ml 50 ml        0.674         0.6001          0.6408                                NaN
+2144                                             normaten 30 tab                                             normaten 50 30 scored 2.5 mg tab        0.673         0.6000          0.6383                                NaN
+1805                                  livabion 6 injectable 2 ml                                                     livabion im 6 injectable        0.672         0.6000          0.8400                              2, ml
+980                                     diprosone 10 gm ointment                                                   diprosone 10 gm 0.05 cream        0.671         0.6667          0.6800                           ointment
+1778                                             ligocaine spray                                                    lignocaine 10 spray 15 ml        0.670         0.5489          0.7500                                NaN
+1469                                      gynozol 6 v 200 mg cap                                              gynozol 6 vaginal ovules 200 mg        0.670         0.6667          0.6792                             v, cap
+1470                                      gynozol 3 v 400 mg cap                                              gynozol 3 vaginal ovules 400 mg        0.670         0.6667          0.6792                             v, cap
+1820                                                loraz 14 tab                                                   loraz 50 mg 12.5 mg 14 tab        0.670         0.6000          0.6316                                NaN
+1753                                      levemir flexpen 5 pens                                  levemir flexpen 100 u 5 pens fridge ml 3 ml        0.669         0.5785          0.6769                                NaN
+2014                                     mucosol ad syrup 120 ml                                   mucosol infantile 125 mg syrup 5 ml 120 ml        0.669         0.5785          0.6769                                 ad
+1440                          cleansr vaganial douch gold 250 ml                                                    gold plus cleanser 250 ml        0.665         0.7473          0.4746                    vaganial, douch
+1472                                            haema cap 14 cap                                                             haema cap 28 cap        0.665         0.6250          0.8750                                 14
+928                        dexatobrin ophthalmic suspension 5 ml                                                        dexatobrin drops 5 ml        0.663         0.6667          0.6552             ophthalmic, suspension
+592                 cerebrocetam i.m or i.v 1000 mg 6 injectable                                     cerebrocetam × 1000 mg 6 injectable 5 ml        0.663         0.6000          0.8095                       i.m, or, i.v
+1519                                         hero whear oat baby                                         hero wheat oat with milk 300 gm baby        0.663         0.5800          0.6545                                NaN
+9     acetylcistein instant in 600 mg effervescent sachet sachet                                               acetylcistein 600 mg 10 sachet        0.662         0.6731          0.6364  instant, in, effervescent, sachet
+1814                             lolawest iv infusion 5 mg 10 ml                                            lolawest i.v × 5 injectable 10 ml        0.661         0.6769          0.6250                       infusion, mg
+1159                                      ethyl 70 alcohol spray                              ethyl 70 al abdellatif lab alcohol spray 100 ml        0.660         0.5833          0.6377                                NaN
+785                                               cosamine cream                                                 cosamine 50 gm massage cream        0.660         0.5714          0.6667                                NaN
+1736                                        carnitine l plus cap                                                      carnitine l plus 20 tab        0.659         0.5833          0.8372                                cap
+1687                                   klacid 125 mg syrup 70 ml                          klacid for oral 125 mg sachet suspension 5 ml 70 ml        0.659         0.5960          0.6053                              syrup
+1395                               gaviscon advance syrup 150 ml                         gaviscon oral double action liquid suspension 150 ml        0.659         0.6977          0.5679                     advance, syrup
+255                                      augmentin 62.5 mg 20 ml           augmentin for oral 62.5 mg infant drops ml powder suspension 20 ml        0.659         0.6338          0.5169                                NaN
+1550                                       hydrafeet cream 60 ml                                                   hydrafeet foot 60 gm cream        0.658         0.6667          0.6383                                 ml
+259                                 augmentin es 600 syrup 75 ml                    augmentin es for oral 600 mg powder suspension 5 ml 75 ml        0.658         0.5921          0.6118                              syrup
+325                                          becozyme injectable                                                  bécozyme 12 injectable 2 ml        0.657         0.5179          0.7826                                NaN
+65                          alfacalcidol oral dps 2 mcg ml 10 ml                                         alfacalcidol oral fridge drops 10 ml        0.656         0.6150          0.7500                         2, mcg, ml
+817                                   cryptonaz suspension 60 ml                       cryptonaz for oral 100 mg powder suspension 5 ml 60 ml        0.656         0.5738          0.6500                                NaN
+1432                              glycerin bicarbonate ear drops                       glycerin bicarbonate al abdellatif lab ear drops 15 ml        0.656         0.5455          0.7143                                NaN
+1856                                  marimer nasal spray 100 ml                                                    marimer hypertonic 100 ml        0.655         0.6667          0.6275                       nasal, spray
+2113                        nicorette sugar 105 pieces 4 mg free                                                 nicorette 30 pieces 4 mg gum        0.655         0.6140          0.7500                   sugar, 105, free
+1101                                                 enrich syrp                                                        enrich n syrup 100 ml        0.655         0.5556          0.6875                                NaN
+1410                                       ginseng 100 mg 24 cap                                                marnys ginseng 1000 mg 30 cap        0.654         0.6182          0.7600                                 24
+1535                              high seas cod liver oil 120 ml                                                       high seas syrup 120 ml        0.653         0.6364          0.6923                    cod, liver, oil
+251                        atrovent comp inhaler 20 50 mcg 10 ml                                            atrovent 20 50 comp inhaler 15 ml        0.651         0.7143          0.7429                            mcg, 10
+1678                                  ketolac 30 mg 5 injectable                        ketolac i.m or i.v infusion × 30 mg 5 injectable 2 ml        0.650         0.5625          0.6582                                NaN
+27                                               actos tab 15 ml                                                           actos 15 mg 30 tab        0.648         0.6667          0.6061                                 ml
+185                                       aptamil lf milk 400 mg                                                 aptamil prosyneo milk 400 gm        0.648         0.6000          0.7600                             lf, mg
+1916                                           methorelax 20 tab                                                            methorelax 30 tab        0.648         0.5714          0.9412                                 20
+28                                               actos tab 30 ml                                                           actos 30 mg 30 tab        0.648         0.6667          0.6061                                 ml
+2150                                   notussil suspension 60 ml                                                   notussil suspension 120 ml        0.648         0.6250          0.9412                                 60
+472                                             calcitron 20 cap                                                             calcitron 30 cap        0.647         0.5714          0.9375                                 20
+1251                                            ferrotron 20 cap                                                             ferrotron 30 cap        0.647         0.5714          0.9375                                 20
+921                                         devarol s 200000 i.u                                       devarol s 200.000 iu 1 injectable 2 ml        0.647         0.6042          0.6552                                NaN
+1276                                     flector 50 65 mg 30 tab                                                         flector 50 mg 30 cap        0.646         0.6667          0.8372                            65, tab
+1408                                             ginkofit 10 cap                                                              ginkofit 30 cap        0.646         0.5714          0.9333                                 10
+1455                     growth formula fo kids 250 gm chocolate                                         growth formula kids 400 gm chocolate        0.646         0.6364          0.9067                            fo, 250
+1703                                             lactomax 30 cap                                                              lactomax 20 cap        0.646         0.5714          0.9333                                 30
+25                                                actimar 50 cap                                                               actimar 30 cap        0.645         0.5714          0.9286                                 50
+1513                                              herbana 20 cap                                                               herbana 30 cap        0.645         0.5714          0.9286                                 20
+261                                           avamys nasal spray                                        avamys nasal 120 doses 27.5 mcg spray        0.644         0.5556          0.6545                                NaN
+136                                          amri k 5 injectable                                         amri k im 10 mg ml 5 injectable 1 ml        0.643         0.5385          0.6909                                NaN
+2000                                    motival 10 mg tab 20 tab                                                               motival 20 tab        0.641         0.6000          0.7368                        10, mg, tab
+332                                               kapritage soap                                             kapritage 100 gm antiseptic soap        0.641         0.5714          0.6087                                NaN
+1694                                               kly jel 42 gm                                                    kly lubricating 42 gm gel        0.640         0.6667          0.5789                                jel
+281                                         azgovanc 20 mg 7 cap                                                 azgovanc 40 mg 1100 mg 7 cap        0.639         0.5833          0.7917                                 20
+1942                                     midodrine 1 drops 10 ml                                                        midodrine 10 mg drops        0.638         0.5800          0.7727                             10, ml
+521                                              carelyte sachet                                          carelyte 280 gm effervescent sachet        0.638         0.5714          0.6000                                NaN
+1209                                        farcocin 15 gm cream                                                         farcocin 20 gm cream        0.637         0.6250          0.9000                                 15
+474                               calcium effervescent 10 sachet                                              orga collagen calcium 10 sachet        0.634         0.6667          0.5574                       effervescent
+681                                claforan 1000 mg 1 injectable                                ceforan i.m i.v 1000 mg injectable injectable        0.634         0.5333          0.6757                                  1
+319                                     bebelac fl 400 gm powder                                             bebelac ar infantile milk 400 gm        0.634         0.6452          0.6071                         fl, powder
+2027                                   myfortic 120,s 360 gm cap                                                      myfortic 360 mg 120 tab        0.633         0.6182          0.6667                            gm, cap
+1120                                       epifasi ampol 5000 iu                                          epifasi fridge 5000 iu 1 injectable        0.633         0.6593          0.5714                              ampol
+8                         acetylcistein 200 mg 5000 mg 20 sachet                                               acetylcistein 200 mg 10 sachet        0.633         0.5385          0.8529                       5000, mg, 20
+481                         calmi mix gripe mixture syrup 120 ml                                                        calminal syrup 120 ml        0.631         0.6308          0.6316                mix, gripe, mixture
+1079                              emend 125 mg 80 mg 1 cap 2 cap                                                        emend 125 80 mg 3 cap        0.629         0.5625          0.7843                      mg, 1, 2, cap
+566                           cefotax eipico 500 mg 1 injectable                                                cefoctam 1500 mg 1 injectable        0.628         0.8114          0.8254                             eipico
+598                          cerelac wheat no milk 250 gm infant                                    cerelac cereal 3 fruits wheat milk 250 gm        0.628         0.6154          0.6579                         no, infant
+429                                   bronchopro 30 mloral drops                                                      bronchopro liquid 30 ml        0.628         0.6173          0.6531                      mloral, drops
+922                             dexaflox sterile ophthalmic 5 ml                                                      dexaflox eye drops 5 ml        0.627         0.6000          0.6909                sterile, ophthalmic
+1596                         insulin novorapid flexpen 100 ug ml                              insulin novorapid flexpens 5 pens fridge 100 iu        0.626         0.5702          0.7561                             ug, ml
+1035                                      drinking 120 gm powder                                                    drinking powder 10 sachet        0.625         0.6667          0.6383                                 gm
+1                                               123 syrup 120 ml                                                           total syrup 120 ml        0.624         0.5634          0.7647                                123
+1603                        ipanten 30 mg suspension 5 ml 125 ml                                                    ipanten suspension 125 ml        0.623         0.5385          0.8197                      30, mg, 5, ml
+2158                                          novomix flexpen 30                                     novomix flexpen 70 30 5 pens fridge 3 ml        0.621         0.5405          0.6207                                NaN
+523                                carminex 6 packt effervescent                                                            carminex 6 sachet        0.620         0.6250          0.6087                packt, effervescent
+2059                                       nausilex 3 injectable                                       nausilex im iv 50 mg 2 ml 3 injectable        0.620         0.5000          0.7119                                NaN
+2107                                       neximash 40 mg 14 cap                           neximash 28 delayed release gelatin 40 mg hard cap        0.618         0.5738          0.5352                                 14
+1501                                            heli cure 14 tab                                         heli cure 20 mg 500 mg 500 mg 14 tab        0.618         0.5385          0.6154                                NaN
+1279                            flixonase 120 dose aqueous nasal                                                flixonase 0.05 120 dose spray        0.617         0.6000          0.6557                     aqueous, nasal
+2103                                  newclav 457 mg syrup 80 ml                        new clav for oral 457 mg powder suspension 5 ml 80 ml        0.615         0.5383          0.6076                              syrup
+1450                              gripe water bambino baby syrup                                                   gripe water bambino 120 ml        0.614         0.5556          0.7500                        baby, syrup
+201                                        aripiprex 1 mg 100 ml                                                 aripiprex oral 1 mg solution        0.612         0.5941          0.6531                            100, ml
+610                                cetazime 1000 mg 1 injectable                                 cefzim i.m i.v 1000 mg injectable injectable        0.611         0.5119          0.6575                                  1
+1829                                             lubrivisc drops                                                lubrivisc 0.1 eye drops 10 ml        0.610         0.5000          0.6818                                NaN
+651                                        cipro ear drops 10 ml                                                    cipro otic solution 10 ml        0.603         0.6000          0.6087                         ear, drops
+7                                           abimol infant 5 supp                                                  abimol 5 rectal 300 mg supp        0.599         0.6000          0.5957                             infant
+2088                                    neurorubine 6 injectable              neurorubine intramuscular fridge l injectable 6 injectable 1 ml        0.598         0.5405          0.5517                                NaN
+231                                            atenoretic 30 cap                                         atenoretic 50 mg 25 mg 2.5 mg 30 cap        0.597         0.5000          0.6415                                NaN
+514                                  cardixin 0.025 5 injectable                                           cardixin 500 mcg 2 ml 5 injectable        0.596         0.5000          0.8197                              0.025
+492                                        candistan 15 gm cream                                                candistan topical 40 gm cream        0.594         0.6173          0.7600                                 15
+401                                         blokium 50 mg 15 tab                                              blokium diu 100 mg 25 mg 15 tab        0.594         0.5385          0.7451                                 50
+1548                    humulin 70 30 100 i.u penfil 3 ml.5 cart                                    humaxin mix 70 30 × 5 penfill 300 iu 3 ml        0.593         0.5821          0.6173                          100, cart
+1547                             humalog mix 50 100 u kwikpen ml                                           humalog 5 penfill fridge 100 iu ml        0.592         0.5954          0.5846                    mix, u, kwikpen
+1044                                    extra 1000 sedico 30 cap                                                           carla extra 30 cap        0.591         0.6000          0.5714                       1000, sedico
+1544                       humalog mix 70 30 5 cartridges 100 iu                                    humalog mix 75 25 5 penfill fridge 100 iu        0.591         0.5263          0.7436                 70, 30, cartridges
+447                                burnazin 1000 mg 100 gm cream                                                       burnazin 20 gm 1 cream        0.591         0.6182          0.7451                           1000, mg
+312                                           b com 6 injectable                                             cortiplex b 6 adult 3 injectable        0.588         0.6000          0.5600                                com
+1873                                       medexaflam injectable                                         medexaflam 15 mg 1.5 ml 3 injectable        0.585         0.4444          0.7368                                NaN
+1731                                          laxeol pi 25 strip                                                       laxeol pi 5 mg 250 tab        0.585         0.5800          0.7000                              strip
+1274                                             flector patches                                         flector ep tissugel 5 dermal patches        0.579         0.5000          0.5882                                NaN
+1302                                fluroquinomox eye drops 5 ml                                   fluroquinomox 0.5 ophthalmic solution 5 ml        0.579         0.5455          0.6571                         eye, drops
+421                                   brimonidine eye drops 5 ml                                 brimonidine sterile ophthalmic solution 5 ml        0.579         0.5455          0.6571                         eye, drops
+219                                aspirin c effervescent 10 tab                                                           septrin d.s 10 tab        0.579         0.5714          0.5957                    c, effervescent
+1476                                     haemopower 5 injectable                                           ampofer × 100 mg 5 ml 5 injectable        0.578         0.4652          0.6667                                NaN
+1962                 mixtard 30 penfill 100 iu 3 ml 5 injectable                         insulin mixtard 30 hm fridge 100 iu injectable 10 ml        0.576         0.5525          0.6316                      penfill, 3, 5
+1898                                    mepa furan 100 mg 20 cap                                                    arpimune 100 mg me 50 cap        0.575         0.5583          0.6122                          furan, 20
+1881                                  megamox 228 mg syrup 70 ml  megamox for oral after reconstitution 228.5 mg powder suspension 5 ml 70 ml        0.575         0.5432          0.4752                              syrup
+1067                                        water for injectable                           distilled water for injectable 120 injectable 5 ml        0.574         0.5000          0.5714                                NaN
+1523                                    hero milk baby rice free                                             hero zucchini soup baby rice jar        0.573         0.5435          0.6429                         milk, free
+265                                 averozolid suspention 100 mg                                                     averozolid 600 mg 10 tab        0.572         0.6444          0.6154                         suspention
+1729                                            lasix 500 mg tab                                                           lasix 40 mg 24 tab        0.572         0.5556          0.8235                                500
+777                                       cordo antiseptic spray                                                       cordo plus spray 60 ml        0.572         0.5634          0.5909                         antiseptic
+1554                     hydrocortisone eye pos 1.0 w w ointment                                              hydrocortisone 1 20 gm ointment        0.570         0.4833          0.7714                     eye, pos, w, w
+1514                                      hero 7 vegetables baby                                          bembo hero 72 pieces baby wet wipes        0.569         0.6304          0.5263                         vegetables
+361                                      betoptic eye drops 5 ml                                    betoptic sterile ophthalmic solution 5 ml        0.569         0.5455          0.6250                         eye, drops
+372                                                biofreeze gel                                           biofreeze pain relieving gel 59 ml        0.568         0.5000          0.5532                                NaN
+1783                                     liometacen 6 injectable               liometacen 6 lyophilized 6 solvent 50 mg injectable injectable        0.564         0.5000          0.5412                                NaN
+1546                     humalog 100 u kwikpen 5 pens ml 3000 ml                          humalog kwikpen 5 prefilled pens fridge 100 iu 3 ml        0.563         0.6173          0.6444                        u, 3000, ml
+2034                                       nactalia 2 tahya misr                                                      nactalia stage 2 400 gm        0.562         0.5495          0.5909                        tahya, misr
+178                                      apidra solo star 100 ml                                            apidra 5 penfill fridge 100 iu ml        0.561         0.5405          0.6071                         solo, star
+1545                           humalog 100 u 5 cartidges ml 3 ml                          humalog kwikpen 5 prefilled pens fridge 100 iu 3 ml        0.561         0.6173          0.4286                   u, cartidges, ml
+1173                                      evaculax 625 mg 20 cap                                                              evaculax 20 tab        0.561         0.5000          0.7027                       625, mg, cap
+1352                                         n cram 20 mg gm tab                                                             flurest n 20 tab        0.557         0.6000          0.4571                       cram, mg, gm
+857                                              lux 175 gm soap                                                lux random choice 165 gm soap        0.556         0.6098          0.6364                                175
+348                                      betadine 20 gm ointment                                           betadine 10 topical 60 gm ointment        0.555         0.5495          0.7719                                 20
+1452                                 gripe water original 150 ml                                                     gripe water smile 120 ml        0.554         0.5435          0.7843                      original, 150
+1194                                      ezalline paint 2 60 ml                                                   evasiline hand cream 60 ml        0.551         0.5017          0.6667                           paint, 2
+583                         centrum from a to z complete 100 tab                                                        centrum women 100 tab        0.550         0.5000          0.6667           from, a, to, z, complete
+1382                                       gast reg syrup 125 ml                        gast reg for oral 24 mg powder suspension 5 ml 125 ml        0.549         0.4930          0.5135                              syrup
+342                                          betadine dry powder                                          betadine 55 gm powder spray 2.5 dry        0.549         0.4595          0.5926                                NaN
+141                               amrizole 5 rectal 1000 mg supp                                             amrizole n 5 vaginal 500 mg supp        0.548         0.5385          0.7742                       rectal, 1000
+630                           chromium picolinate 200 mcg 20 cap                    nation chromium picolinate 100 coated 200 mcg organic tab        0.545         0.4965          0.6593                            20, cap
+16                                              acne stop lotion                                                     acne biotic lotion 15 ml        0.545         0.5000          0.6500                               stop
+468                                      calcionate 6 injectable                    calcionate × iv or infusion injectable 6 injectable 10 ml        0.545         0.4615          0.5750                                NaN
+585                                       centrum silver 125 tab                                             centrum adults 50 silver 100 tab        0.544         0.5000          0.7407                                125
+267                                  avetrix emollient 30 gm gel                                                           avetrix 100 gm gel        0.542         0.5556          0.7111                      emollient, 30
+911                                dermofix spray solution 15 ml                                                        dermofix 15 gm powder        0.541         0.5495          0.5200                spray, solution, ml
+1720                           lantus solostar 1 pen 100 iu 3 ml                          lantus solostar 100 unit 5 prefilled pens fridge ml        0.540         0.5066          0.6190                         100, iu, 3
+534                                        castor oil pure 60 ml              with flavor al abdellatif lab castor oil syrup strawberry 60 ml        0.539         0.4965          0.4762                               pure
+1640                                     k y sterile 82 gm jelly                                                    kly lubricating 82 gm gel        0.538         0.5182          0.5833                  y, sterile, jelly
+780                                           cornetears eye gel                   cornetears artificial tears lubricant eye fridge 10 gm gel        0.538         0.4950          0.4737                                NaN
+1819                                          loral 30 mg 10 cap                                                           soral 20 mg 30 cap        0.537         0.6400          0.8333                                 10
+760                                    conjyclear eye drops 5 ml                              conjyclear 0.1 sterile ophthalmic solution 5 ml        0.533         0.5000          0.6111                         eye, drops
+247                                    atropine sulphate 1 drops                                    atropine sulphate 1 mg 1 ml 25 injectable        0.532         0.5000          0.6061                              drops
+1160                                      etodolac 600 mg 10 tab                                                         ketolac 10 mg 20 tab        0.532         0.6400          0.8095                                600
+2063                   acne stop facial for acne stop wash cream                                           melano facial for acne wash 200 ml        0.531         0.4615          0.6933            stop, acne, stop, cream
+553                                 cefepime 500 gm 1 injectable                                cefepime i.m i.v 500 mg injectable injectable        0.529         0.4615          0.6849                              gm, 1
+1329                          nose nasal 0 كبار free spray 30 ml              beegu nose brand isotonic 0.9 soothing moisturizing spray 30 ml        0.529         0.5432          0.4948                  nasal, كبار, free
+1867                                maxipime 500 gm 1 injectable                                maxipime i.v i.m 500 mg injectable injectable        0.529         0.4615          0.6849                              gm, 1
+22                                       act life 200 mcg 20 cap                                                                 lacty 20 cap        0.525         0.5050          0.5714                      life, mcg, 20
+19                                                    acnidu gel                                                  meditopic acnimed gel 75 ml        0.524         0.4725          0.4865                                NaN
+1811                                     locasten solution 20 ml                                                       locasten 20 gm 1 cream        0.523         0.5000          0.5778                       solution, ml
+1246                                         ferro sanol gyn cap                                                             vee ferro 30 cap        0.521         0.5000          0.5714                         sanol, gyn
+1436                                              glycerin borax                                       glycerin borax al abdellatif lab 13 ml        0.520         0.4444          0.5385                                NaN
+1892                                            mentholax 24 cap                                                             mentoplex 20 cap        0.519         0.4762          0.8125                                 24
+330                                        benox eye drops 10 ml                                  benox 0.4 sterile ophthalmic solution 10 ml        0.519         0.5000          0.5625                         eye, drops
+1848                                 malinda cleanser gel 200 ml                            bluebell malinda formula rich gel cleanser 250 ml        0.518         0.5000          0.5789                                200
+1137                              epoetin 4000 1. u 1 injectable                                            eposino fridge 4000 iu injectable        0.517         0.4250          0.7302                           1., u, 1
+1451                                    gripe water syrup 148 ml                                                     gripe water smile 120 ml        0.517         0.5000          0.7500                         syrup, 148
+1719                          lantus 5 cartridges 100 iu ml 3 ml                                         lantus 100 units 5 penfill fridge ml        0.517         0.5298          0.4857              cartridges, iu, 3, ml
+1086                                    e mox 250 mg syrup 60 ml                           e mox for oral 250 mg powder suspension 5 ml 80 ml        0.516         0.4938          0.5676                          syrup, 60
+825                                       cure pro 0.4 mg 10 cap                                                            royal care 10 cap        0.514         0.5147          0.5128                       pro, 0.4, mg
+1048                       ectomethrin 2.5 children 50 gm lotion                                             ectomethrin 5 adult lotion 50 ml        0.514         0.4615          0.6377                  2.5, children, gm
+183                                 aptamil milk 1 450 gm powder                                               aptamil advance stage 1 400 gm        0.512         0.5769          0.5517                  milk, 450, powder
+710                                closol topical soluthon 40 ml                                              ingram cool shaving cream 40 ml        0.511         0.5294          0.4667                  topical, soluthon
+322                                   beclosone 200 dose inhaler                                     beclosone 200 metered inhalations 50 mcg        0.509         0.4545          0.6364                      dose, inhaler
+30                                         actrapid 100 iu 10 ml                                 insulin actrapid hm fridge 100 iu injectable        0.504         0.4959          0.5231                             10, ml
+0                                                     123 20 tab                                                                  larw 20 tab        0.500         0.4286          0.6667                                123
+
+--- ALL NO MATCH ITEMS (243 items) ---
+                                        normalized_query                                                        db_normalized  match_score  jaccard_score  sequence_score                          unmatched_query
+383                        bisadyl for child 5 mg 5 supp                                                  bisadyl 5 mg 30 tab        0.498         0.4615          0.5833                      for, child, 5, supp
+1399                                      gentian violet                         gentian violet paint al abdellatif lab 30 ml        0.498         0.4396          0.4828                                      NaN
+1578                              imodium imp 2 mg 6 cap                                                imodium instant 6 tab        0.497         0.4505          0.6047                          imp, 2, mg, cap
+86                                  allerzone 0.1 lotion                                       allerzone topical lotion 20 ml        0.495         0.4938          0.6800                                      0.1
+1801                                     libosense cream                                                  libosense 30 gm gel        0.494         0.4286          0.6471                                    cream
+494                             candistan solution 20 ml                                      candistan 2 vaginal 20 gm cream        0.493         0.4545          0.5818                             solution, ml
+945                               diamicron 80 mg 20 tab                                            diamicron mr 30 mg 30 tab        0.492         0.4167          0.8511                                   80, 20
+1479                                     haemoton 28 cap                                                     haemoglob 20 cap        0.490         0.4454          0.7742                                       28
+1693   klenva hygienic for female liquid cleanser 250 ml                                 klenva intimate feminine wash 250 ml        0.488         0.4545          0.5647  hygienic, for, female, liquid, cleanser
+1353                             n 2 pieces gm tab cream                                                     flurest n 20 tab        0.488         0.5800          0.3590                        pieces, gm, cream
+318                             bebelac ec 450 gm powder                                    bebelac extra care ec milk 400 gm        0.487         0.5319          0.5614                              450, powder
+1156                       etaphylline ad 500 mg 10 supp                                 etaphylline 500 mg 6 injectable 5 ml        0.485         0.4286          0.6154                             ad, 10, supp
+1599                                      iodine 5 60 ml                         infinity povidone iodine 10 antiseptic 60 ml        0.484         0.5000          0.4483                                        5
+1594                   insulatard hm nph 100 iu ml 10 ml                      insulin insulatard 5 penfill fridge 100 iu 3 ml        0.484         0.4348          0.6000                          hm, nph, 10, ml
+1611                        isopto fenicol 0.5 eye drops                                               episopt eye drops 5 ml        0.482         0.4308          0.6000                             fenicol, 0.5
+444                             buccazole oral 20 gm gel                                              micazole oral 40 gm gel        0.480         0.5265          0.8511                                       20
+496                                     candy menthol 12                               candy c honey flavor lemon 12 lozenges        0.480         0.4950          0.4444                                  menthol
+14                                acitretin 25 mg 30 cap                                             iso acnetin 10 mg 30 cap        0.477         0.5682          0.7391                                       25
+913                                    dermotracin spray                                    dermotracin aerosol powder 150 ml        0.476         0.4225          0.6000                                    spray
+1316                          forcetex 500 mg injectable                       forcetex i.m i.v 1000 mg injectable injectable        0.474         0.4545          0.6944                                      500
+1248                                     ferrocal 14 cap                                                     ferromack 30 cap        0.472         0.4454          0.7097                                       14
+324              beconase 200 dose n 50 mcg 100 mg spray                             beclosone 200 metered inhalations 50 mcg        0.471         0.4449          0.5316                  dose, n, 100, mg, spray
+1097                            enemacort enema 4 bottle                                    enemacort 4 tab 4 solution 115 ml        0.471         0.4167          0.5965                            enema, bottle
+561                              ceforan 2 mg injectable                        ceforan i.m i.v 2000 mg injectable injectable        0.469         0.4545          0.6765                                        2
+901            depzabid sterile ophthalmic solution 5 ml                                      depzabid eye 5 mg ml drops 5 ml        0.467         0.4286          0.5556            sterile, ophthalmic, solution
+696                          clexane 0.2 ml 2 injectable                 clexane 2000 i.u 2 prefilled fridge 20 mg injectable        0.464         0.4545          0.6582                                  0.2, ml
+2129                                    no cal 50 sachet                                                no uric 100 mg 50 tab        0.464         0.4545          0.4865                              cal, sachet
+1979                              monicure 7 v plus supp                                           monicure nh 6 vaginal supp        0.463         0.3922          0.7083                               7, v, plus
+1433                                 glycerin pure 60 ml                               glycerin al abdellatif lab pure 100 ml        0.457         0.4545          0.6316                                       60
+1247                                      ferro 6 24 cap                                                     vee ferro 30 cap        0.456         0.4000          0.6667                                    6, 24
+376                                    bio strong 21 cap                                                      1600 bio 14 cap        0.456         0.4444          0.5625                               strong, 21
+1052                          efalex efamol syrup 150 ml                                                 efalex liquid 120 ml        0.453         0.4396          0.6522                       efamol, syrup, 150
+698                          clexane 0.6 ml 2 injectable                 clexane 6000 i.u 2 prefilled fridge 60 mg injectable        0.450         0.4545          0.6076                                  0.6, ml
+699                          clexane 0.8 ml 2 injectable                 clexane 8000 i.u 2 prefilled fridge 80 mg injectable        0.450         0.4545          0.6076                                  0.8, ml
+1770                                   licid spray 90 ml                                                   licid lotion 30 ml        0.450         0.4444          0.6286                                spray, 90
+697                          clexane 0.4 ml 2 injectable                 clexane 4000 i.u 2 prefilled fridge 40 mg injectable        0.450         0.4545          0.6076                                  0.4, ml
+1845                            magnabiotic 625 mg 8 tab                               magnabiotic 10 film coated 1000 mg tab        0.447         0.4464          0.6129                                   625, 8
+935                     dg past for teaht long sensitive                        dg for 75 gm white toothpaste sensitive teeth        0.444         0.4000          0.5455                        past, teaht, long
+2055                                      nassar 1 strip                                                        nassar 96 tab        0.439         0.3750          0.6667                                 1, strip
+451                           buscopan comp 3 injectable                                     buscopan 20 mg 6 injectable 1 ml        0.438         0.3333          0.7586                                  comp, 3
+475                 calcium sandoz forte 10 effervescent                                      orga collagen calcium 10 sachet        0.435         0.4545          0.3881              sandoz, forte, effervescent
+848                                   daivobet 15 gm gel                                             daivobet ointement 30 gm        0.434         0.4444          0.5714                                  15, gel
+341                             betadine 14 vaginal supp                                      betadine vaginal 10 wash 120 ml        0.428         0.3636          0.6545                                 14, supp
+1555                  hydrocortison pos 2.5 eye ointment                                      hydrocortisone 1 20 gm ointment        0.428         0.3364          0.8000                            pos, 2.5, eye
+2001                            move schiff free 120 tab                                         fast move 120 gm massage gel        0.428         0.4464          0.3846                        schiff, free, tab
+679                         claforan 250 mg 1 injectable                        claforan i.v i.m 500 mg injectable injectable        0.427         0.3846          0.6849                                   250, 1
+2044                           naphcon a eye drops 15 ml                                           naphcozole eye drops 10 ml        0.424         0.5118          0.8235                                    a, 15
+2037                  nan with 450 gm iron powder 2 baby                               nan optipro stage milk 400 gm 2 powder        0.423         0.4336          0.5556                    with, 450, iron, baby
+1866                          maxipime 1 mg 1 injectable                       maxipime i.v i.m 1000 mg injectable injectable        0.422         0.3846          0.6667                                     1, 1
+1330                       nose nose propolis free spray                                             so life nose spray 70 ml        0.422         0.3922          0.4906                     nose, propolis, free
+1568                               ictamol acid ointment                          ichthammol al abdellatif lab 30 gm ointment        0.421         0.3471          0.5938                                     acid
+588                           ceporex 250 mg syrup 60 ml                                 orex mouth with clove mg wash 250 ml        0.416         0.4416          0.3548                                syrup, 60
+377                         biotin bepanthene injectable                                                  biotin forte 60 cap        0.416         0.3750          0.5106                   bepanthene, injectable
+897                             deposilin 1.2 injectable                                        adenosin forte 3 3 injectable        0.402         0.3464          0.6792                                      1.2
+533                               first castor oil 60 ml                                               first map syrup 120 ml        0.401         0.3636          0.6364                          castor, oil, 60
+87                                allerzone 0.1 ointment                                                allerzone 25 gm cream        0.394         0.3333          0.6047                            0.1, ointment
+1698                                     k y 85 gm cream                                  nanotreat 24 k eye 15 gm gold cream        0.394         0.3846          0.5600                                    y, 85
+408                                bonecare 1 mcg 30 cap                                               bone care 1 mcg 30 cap        0.390         0.5941          0.9767                                 bonecare
+2112                            nice 20 gm baby ointment                                      nice plate with spoon baby pink        0.386         0.3333          0.5091                         20, gm, ointment
+1606                         isomack retard 40 mg 20 cap                                          iso mak retard 40 mg 20 cap        0.383         0.5833          0.9630                                  isomack
+335                  bepanthene 250 mg 2 ml 6 injectable                              antodine fridge 20 mg 2 ml 6 injectable        0.382         0.6565          0.7838                               bepanthene
+1392                        gatigrand 0.3 eye drops 5 ml                                            tobrin 0.3 eye drops 5 ml        0.382         0.6364          0.8302                                gatigrand
+715                                 clove oil pure 15 ml          signal 8 clove offer 15 complete sensitive toothpaste 50 ml        0.382         0.4545          0.3544                                oil, pure
+1529                                hi forte 50 gm cream                                                highforte 50 gm cream        0.380         0.5893          0.9268                                       hi
+407                               bonecare 0.5 mg 30 cap                                             bone care 0.5 mcg 30 cap        0.379         0.5743          0.9565                                 bonecare
+1322                                 fosamax once weekly                                                  fosamax 70 mg 2 tab        0.375         0.3333          0.4737                             once, weekly
+124                                   amilo 10 mg 20 tab                                                  adolor 10 mg 20 tab        0.374         0.6000          0.8649                                    amilo
+208                                arthfree 20 mg 30 tab                                                lelafree 20 mg 30 tab        0.372         0.6000          0.8571                                 arthfree
+1150                             esomelodan 20 mg 20 tab                                                  selgon 20 mg 20 tab        0.372         0.6000          0.8571                               esomelodan
+459                              caberglobe 0.5 mg 2 tab                                             cabergamoun 0.5 mg 2 tab        0.371         0.6000          0.8511                               caberglobe
+280                                 azgobion 5 mg 30 tab                                                   biotin 5 mg 30 tab        0.370         0.6000          0.8421                                 azgobion
+1940                       midathetic 15 mg 3 injectable                                           mobitil 15 mg 3 injectable        0.369         0.6000          0.8364                               midathetic
+705                                  clomid 50 mg 10 tab                                               dicloflam 50 mg 10 tab        0.368         0.6000          0.8293                                   clomid
+1060                                  effox 20 mg 20 tab                                                angiofox 20 mg 20 tab        0.366         0.6000          0.8205                                    effox
+1059                                  effox 25 mg 30 cap                                                angiofox 25 mg 30 cap        0.366         0.6000          0.8205                                    effox
+617                                  champix 1 mg 28 tab                                                 arimidex 1 mg 28 tab        0.366         0.6000          0.8205                                  champix
+937                                   diaben 5 mg 20 tab                                                glibenase 5 mg 20 tab        0.366         0.6000          0.8205                                   diaben
+446                               burinex 1000 mg 20 tab                                            valysernex 1000 mg 20 tab        0.364         0.6000          0.8085                                  burinex
+1151                             esomelodan 40 mg 20 tab                                               spasmomen 40 mg 20 tab        0.363         0.6000          0.8000                               esomelodan
+1508                           hepatovirin 400 mg 30 cap                                                 gaptin 400 mg 30 cap        0.363         0.6000          0.8000                              hepatovirin
+1542                             hostacortin 5 mg 30 tab                                               strakopina 5 mg 30 tab        0.363         0.6000          0.8000                              hostacortin
+1826                                   losec 20 mg 7 cap                                                   omepak 20 mg 7 cap        0.363         0.6000          0.8000                                    losec
+1991                               morlimin 10 mg 30 tab                                                  biotin 10 mg 30 tab        0.363         0.6000          0.8000                                 morlimin
+2008                                  msm 1000 mg 30 tab                                               tiratam 1000 mg 30 tab        0.363         0.6000          0.8000                                      msm
+650                                ciprapro 10 mg 10 tab                                             pyralerosis 10 mg 10 tab        0.363         0.6000          0.8000                                 ciprapro
+1016                    dormicum 15 mg 3 ml 5 injectable                                 sunnydarone 150 mg 5 injectable 3 ml        0.363         0.6769          0.6176                                 dormicum
+1061                                  effox 40 mg 20 tab                                                 famotin 40 mg 20 tab        0.361         0.6000          0.7895                                    effox
+2127                              nizatect 300 mg 20 cap                                                mucotec 300 mg 20 cap        0.361         0.6000          0.7907                                 nizatect
+2154                             novaldol 1000 mg 15 tab                                                 cetal 1000 mg 15 tab        0.361         0.6000          0.7907                                 novaldol
+1094                           emudil hair lotion 120 ml                                          endovill hair lotion 120 ml        0.360         0.5556          0.8846                                   emudil
+57                               akne mycin lotion 25 ml                                             acne biotic lotion 15 ml        0.360         0.4250          0.7234                                mycin, 25
+734                               colchicine 1 mg 20 tab                                                    dosin 1 mg 20 tab        0.358         0.6000          0.7692                               colchicine
+1941              midathetic iv im 5 mg ml 10 injectable                             antikramp i.v i.m 5 mg 2 ml 1 injectable        0.358         0.6000          0.7692                               midathetic
+1958                             misoprost 200 mg 20 tab                                               modifree 200 mg 20 tab        0.356         0.6000          0.7556                                misoprost
+2101                      new tonoscalpine lotion 190 ml                                                new akim spray 120 ml        0.356         0.3636          0.4706                tonoscalpine, lotion, 190
+633                             cidocetine 250 mg 12 cap                                           tetracycline 250 mg 12 cap        0.356         0.6000          0.7600                               cidocetine
+365                      bibo 10 gm plus powder 5 sachet                                  tech 330 gm bio chocolate 10 sachet        0.355         0.5300          0.4545                          plus, powder, 5
+1292                             flumitol eye drops 5 ml                                               xolamol eye drops 5 ml        0.353         0.5556          0.8444                                 flumitol
+1183                                 exforge 5 mg 14 tab                                                  tritace 5 mg 14 tab        0.353         0.6000          0.7368                                  exforge
+279                               azelast eye drops 5 ml                                                azarga eye drops 5 ml        0.352         0.5556          0.8372                                  azelast
+58                     alambuphine 20 mg injectable 2 ml                             optivisc prefilled 20 mg injectable 2 ml        0.351         0.6306          0.6575                              alambuphine
+1364                              ganfort eye drops 5 ml                                             travonorm eye drops 5 ml        0.350         0.5556          0.8261                                  ganfort
+13               acicone s 540 mg suspension 5 ml 120 ml                              farcotilium 5 mg suspension 5 ml 120 ml        0.348         0.6533          0.7949                               acicone, s
+1193                          ezafluor mouth wash 120 ml                                             sucair mouth wash 120 ml        0.346         0.5556          0.8000                                 ezafluor
+2036                         nalufin 20 mg 10 injectable                                     padcev fridge 20 mg 1 injectable        0.344         0.5743          0.7458                                  nalufin
+294                                rest baby drops 15 ml                                            gar oral baby drops 15 ml        0.341         0.5495          0.7826                                     rest
+761                            contafever n syrup 120 ml                                               guaflex n syrup 120 ml        0.340         0.5556          0.7660                               contafever
+304                 balkis nasal drops 0.05 infant 10 ml                              rhinex 0.05 infantile nasal drops 10 ml        0.338         0.6500          0.5333                                   balkis
+637                            cidomycin 0.3 15 gm cream                                           nerhamicin 15 gm 0.3 cream        0.335         0.6000          0.6275                                cidomycin
+1218                                faro viga 100 mg tab                                                  viagra 100 mg 4 tab        0.332         0.5333          0.7692                                     faro
+1344                       fungistatian oral drops 30 ml                                          ginkoravia oral drops 30 ml        0.327         0.5122          0.7857                             fungistatian
+1846                    magna biotic 1000 mg plus 10 tab                               magnabiotic 10 film coated 1000 mg tab        0.324         0.6448          0.6571                              magna, plus
+1577                          immunvita oral drops 25 ml                                             dalukan oral drops 25 ml        0.323         0.5122          0.7600                                immunvita
+1511                      herbamix scalp solution 100 ml                                           trujet scalp lotion 100 ml        0.320         0.5238          0.7143                                 herbamix
+1293                                 flumol syrup 120 ml                                                   total syrup 120 ml        0.319         0.5634          0.8108                                   flumol
+1569                               idibact 550 mg 20 tab                                 traviguard 20 film coated 550 mg tab        0.319         0.5882          0.5614                                  idibact
+1914                      methergin 200 mcg 5 injectable                              medrelaxmidine 200 mcg injectable 50 ml        0.318         0.5273          0.6957                                methergin
+1974                            molivart 5 160 mg 14 tab                        alkapress 14 film coated 5 mg 160 mg plus tab        0.318         0.6015          0.5217                                 molivart
+1850                          malva vaginal douch 240 ml                                     top vortex vaginal douche 240 ml        0.314         0.4900          0.7586                                    malva
+1045                                 ebaglow 50 gm cream                                                    extra 50 gm cream        0.314         0.5634          0.7778                                  ebaglow
+1628                               ivypront syrup 120 ml                                                   total syrup 120 ml        0.313         0.5634          0.7692                                 ivypront
+1340                       fucithalmic eye 5000 mg drops                                   ofusidic viscous eye 5000 mg drops        0.313         0.5000          0.7302                              fucithalmic
+1751                                 levcet syrup 120 ml                                                   total syrup 120 ml        0.311         0.5634          0.7568                                   levcet
+1885                               megy one 10 mg 20 tab                                             allergetone 10 mg 20 tab        0.311         0.5455          0.8000                                megy, one
+1684                                 kifpan syrup 120 ml                                                   total syrup 120 ml        0.311         0.5634          0.7568                                   kifpan
+971                                  dinar 125 mg 100 ml                                 cedenir 125 mg dry suspension 100 ml        0.310         0.5405          0.6182                                    dinar
+310                                 bambino syrup 120 ml                                                   total syrup 120 ml        0.308         0.5634          0.7368                                  bambino
+212               pic intim 12 solution wash size 450 ml                                                 pic ice spray 400 ml        0.308         0.2817          0.4828     intim, 12, solution, wash, size, 450
+1543                           hostacortin h 5 mg 30 tab                                               strakopina 5 mg 30 tab        0.306         0.5455          0.7660                           hostacortin, h
+1152                           eso protocol 40 mg 10 cap                                               epirazole 40 mg 10 cap        0.306         0.5455          0.7660                            eso, protocol
+269                                 avipect syrup 100 ml                                                  marvit syrup 100 ml        0.306         0.5000          0.8718                                  avipect
+1449                  gripe watersmile baby syrup 120 ml                                               free baby syrup 120 ml        0.305         0.5495          0.7500                        gripe, watersmile
+926                                dexaphen syrup 120 ml                                                   total syrup 120 ml        0.305         0.5634          0.7179                                 dexaphen
+1062                               effox sr 50 mg 20 cap                                                angiofox 50 mg 20 cap        0.305         0.5455          0.7619                                effox, sr
+1468                     gynotra zonagen 3 ovules 600 mg                               gynotrazonagen 3 vaginal ovules 600 mg        0.305         0.5000          0.8696                         gynotra, zonagen
+890                           dentocalm 5000 mg ointment                                            dexatrol 5000 mg ointment        0.304         0.5000          0.8627                                dentocalm
+1747                              lergicare syrup 120 ml                                                 ivycare syrup 120 ml        0.304         0.5000          0.8571                                lergicare
+2117                       nimotop imported 30 mg 30 tab                                               aripiprex 30 mg 30 tab        0.303         0.5455          0.7451                        nimotop, imported
+1244                                 ferose syrup 100 ml                                               ferramino syrup 100 ml        0.299         0.5000          0.8293                                   ferose
+1397                               gentacure 30 gm cream                                                 vitasure 30 gm cream        0.299         0.5000          0.8293                                gentacure
+299                               babyrhino syrup 100 ml                                             bronchinova syrup 100 ml        0.299         0.5000          0.8261                                babyrhino
+586                           ceporex 125 mg syrup 60 ml                                 predsol forte 15 mg syrup 5 ml 60 ml        0.299         0.4714          0.7097                                  ceporex
+130                     amoclawin 457 mg suspension 5 ml                              zithrodose 100 mg suspension 5 ml 45 ml        0.299         0.5231          0.5915                                amoclawin
+305                      balkis 0.1 ad nasal drops 10 ml                                   rhinex adult 0.1 nasal drops 10 ml        0.299         0.5385          0.7385                               balkis, ad
+748          combigan eye 2 mg 5 mg ml ml drops solution                             levcet oral 5 mg ml drops solution 20 ml        0.298         0.5828          0.6265                        combigan, eye, mg
+292                                babe ton syrup 120 ml                                                babetone syrup 120 ml        0.298         0.4444          0.9524                                babe, ton
+1481           hairback scaip plus spray 2 lotion 100 ml                                 back 2 scalp hair plus lotion 100 ml        0.295         0.5303          0.7273                          hairback, spray
+1398                               gentazone 15 gm cream                                                 nizoderm 15 gm cream        0.292         0.5000          0.7805                                gentazone
+1779                 lili 50 gm cream moisturizing cream                                       sofam 50 gm moisturizing cream        0.290         0.5000          0.7692                              lili, cream
+1404                                 geskan spray 100 ml                                                 bioment spray 100 ml        0.290         0.5000          0.7692                                   geskan
+1356                                gm.tab.n 30 gm cream                                                  momenta 30 gm cream        0.290         0.5000          0.7692                                 gm.tab.n
+94                 alphanova 0.15 sterile ophth solution                                             alphanova eye drops 5 ml        0.288         0.2500          0.4262           0.15, sterile, ophth, solution
+527                                    carno 50 mg cream                                                   pacify 50 mg cream        0.286         0.5000          0.7429                                    carno
+1428                         glustacomb 15 500 mg 20 tab                                               stopadol 500 mg 20 tab        0.285         0.5000          0.7347                           glustacomb, 15
+56                           akne mycin 15 gm 2 ointment                                   eczanogab 2 topical 15 gm ointment        0.283         0.5405          0.6230                              akne, mycin
+1894                               mentoprofen 20 gm gel                                                   gelinose 20 gm gel        0.283         0.5000          0.7179                              mentoprofen
+1350                              fusisone m 15 gm cream                                                     fusi 15 gm cream        0.282         0.4444          0.8421                              fusisone, m
+779                     corneregel fluid eye drops 10 ml                                             trillerg eye drops 10 ml        0.282         0.5000          0.7143                        corneregel, fluid
+1980                          moniliarret 6 vaginal supp                                           monicure nh 6 vaginal supp        0.277         0.4444          0.8077                              moniliarret
+1815                                   lolawest 6 sachet                                                   lola west 6 sachet        0.277         0.3750          0.9714                                 lolawest
+135                                        amrase 30 tab                                                        dalras 30 tab        0.277         0.4286          0.8462                                   amrase
+952                         diax syrup suspension 120 ml                                               caro suspension 120 ml        0.276         0.4444          0.8000                              diax, syrup
+1701                                     lactocal 30 tab                                                       totacal 30 tab        0.274         0.4286          0.8276                                 lactocal
+1409                                      ginsana 30 cap                                                      kingosan 30 cap        0.274         0.4286          0.8276                                  ginsana
+1252                                  fever n flu 20 tab                                                         noflu 20 tab        0.274         0.4688          0.7333                                 fever, n
+1507                                      hepaton 20 tab                                                        regton 20 tab        0.272         0.4286          0.8148                                  hepaton
+716                                       cloxide 30 cap                                                        calcid 30 cap        0.272         0.4286          0.8148                                  cloxide
+964                                      digenorm 20 tab                                                      digestin 20 tab        0.270         0.4286          0.8000                                 digenorm
+940                                     diacerein 30 tab                                                       datrini 30 tab        0.270         0.4286          0.8000                                diacerein
+1419                                       glimet 30 tab                                                         liton 30 tab        0.270         0.4286          0.8000                                   glimet
+2067                      neo mercazole imp 5 mg 100 tab                                        natrol melatonin 5 mg 100 tab        0.268         0.4615          0.7119                      neo, mercazole, imp
+1896                                     mepacure 30 cap                                                        neured 30 cap        0.268         0.4286          0.7857                                 mepacure
+1445                     grand vit ca honey syrup 120 ml                                             rainbow vit syrup 120 ml        0.268         0.4545          0.7273                         grand, ca, honey
+1879                                     megalase 20 tab                                                        jelace 20 tab        0.268         0.4286          0.7857                                 megalase
+1949                                    mineravit 20 cap                                                      cervitam 20 cap        0.266         0.4286          0.7742                                mineravit
+1929                                    michaelon 20 tab                                                      caltonex 20 tab        0.266         0.4286          0.7742                                michaelon
+1591                          influvactetra 1 injectable                                                irinovar 1 injectable        0.265         0.4286          0.7660                            influvactetra
+1959                                 misotac 200 mcg tab                                            selenostar 200 mcg 30 tab        0.265         0.4444          0.7273                                  misotac
+256                         augmentin 312 mg syrup 60 ml                                          focustin 250 mg syrup 60 ml        0.260         0.4167          0.7636                           augmentin, 312
+1921              methyl prednisolone 1000 mg injectable                                            edicin 1000 mg injectable        0.260         0.4444          0.6984                     methyl, prednisolone
+1181                                     excedrin 20 tab                                                      carbotin 20 tab        0.260         0.4286          0.7333                                 excedrin
+1354                      gm.c.mol effervescent 6 sachet                                         uricol sachet 6 effervescent        0.258         0.5000          0.5517                                 gm.c.mol
+1509                               herba caf syrup 80 ml                                                 takelase syrup 80 ml        0.258         0.4444          0.6829                               herba, caf
+484                     calver 30 chewable chocalate tab                                             glycodal 30 chewable tab        0.257         0.4444          0.6786                        calver, chocalate
+616                           champix 0.5 mg 1 mg 24 tab                                               delcabrin 0.5 mg 2 tab        0.256         0.4462          0.6667                           champix, 1, mg
+129                              amoclawin 228.5 mg 5 ml                                      allear 2.5 mg syrup 5 ml 120 ml        0.255         0.4231          0.5556                                amoclawin
+1541                                     hivit 21 20 cap                                                orgixium 20 mg 21 cap        0.250         0.5000          0.5000                                    hivit
+326                               becozyme c fort 30 tab                                                        c plus 30 tab        0.250         0.4938          0.5143                           becozyme, fort
+2060                                   navidoxine 10 tab                                                     oxilozyme 10 tab        0.250         0.4286          0.6667                               navidoxine
+1724                                      larypro 10 tab                                                     ultrasolv 10 tab        0.250         0.4286          0.6667                                  larypro
+1608                           isoprinosine 500 mg 8 tab                                               ibidroxil 500 mg 8 cap        0.248         0.4545          0.5957                        isoprinosine, tab
+271                                 avodart .5 mg 30 tab                                                mavilor 2.5 mg 30 tab        0.247         0.5600          0.8293                                  avodart
+845                                       cytotec 14 tab                                                       ostoval 14 tab        0.246         0.4286          0.6429                                  cytotec
+162                                       antizole 2 tab                                                      fosavance 2 tab        0.243         0.4286          0.6207                                 antizole
+1429                              glustazon 15 mg 21 tab                                                  duracin 1 mg 21 tab        0.241         0.5800          0.7317                                glustazon
+946                                      diane 35 21 tab                                        estraceptive 35 250 mg 21 tab        0.241         0.4545          0.5455                                    diane
+1587                           indomethacin 25 mg 24 cap                                                 indocid 25 mg 30 cap        0.241         0.3636          0.7556                         indomethacin, 24
+888                          dentinox teething 10 gm gel                                                     descar 10 gm gel        0.239         0.4444          0.5581                       dentinox, teething
+920                        detrusitol retard 4 mg 14 cap                                              inletair 4 mg 14 sachet        0.238         0.4167          0.6154                  detrusitol, retard, cap
+53    aig alfuzosin xr extended release 10 f.c.tab 10 mg  diglifloz xr 30 extended release film coated 10 mg 1000 mg plus tab        0.238         0.4242          0.5983                  aig, alfuzosin, f.c.tab
+1106                                    entocid h 20 tab                                                      moventor 20 tab        0.238         0.3750          0.7097                               entocid, h
+1105                              entocid comp 15 sachet                                                   tendocal 15 sachet        0.236         0.3750          0.7000                            entocid, comp
+70                           alkaline sap wash 12 sachet                                                  renal s n 12 sachet        0.234         0.3900          0.6522                           alkaline, wash
+389                              bisolvon solution 40 ml                                             louvel body lotion 40 ml        0.234         0.4127          0.5957                                 bisolvon
+1082                                emla 5 5 tubes cream                                         panthenol care 50 gm 5 cream        0.233         0.4324          0.5417                              emla, tubes
+1849                          malva vaginal douch 120 ml                                        right vaginal cleanser 120 ml        0.233         0.4000          0.6182                             malva, douch
+1430                              glustazon 30 mg 21 tab                                                schizofy 30 mg 10 tab        0.232         0.3636          0.6977                            glustazon, 21
+1588                           indomethacin 50 mg 24 cap                                                dogmatil 50 mg 30 cap        0.232         0.3636          0.6957                         indomethacin, 24
+778                           corneregel eye 5000 mg gel                                       epidexone eye 5000 mg ointment        0.231         0.4000          0.6071                          corneregel, gel
+1446                          grand vit with iron 120 ml                                           stravita iron syrup 120 ml        0.225         0.3636          0.6538                         grand, vit, with
+1444                                       gr six 16 cap                                                        madera 16 cap        0.224         0.3750          0.6154                                  gr, six
+1176                      evirinse vaginal doushe 250 ml                                    lili vaginal wash solution 250 ml        0.223         0.3636          0.6349                         evirinse, doushe
+876                            declophen s.r 10 mg 8 tab                                                baclofen 10 mg 20 tab        0.221         0.3333          0.6957                        declophen, s.r, 8
+532                          فواكه مشكل castor oil 60 ml                                                      magic oil 60 ml        0.219         0.4000          0.5238                      فواكه, مشكل, castor
+2156                     novo rapid penfill 5 injectable                                                 memoral 5 injectable        0.217         0.3333          0.6667                     novo, rapid, penfill
+1483                                     hairtone 40 cap                                             atmiprazole 40 mg 20 cap        0.209         0.3333          0.6154                                 hairtone
+2157                         novo rapid flexpen 100 u ml                          levemir flexpen 100 u 5 pens fridge ml 3 ml        0.206         0.3546          0.5429                              novo, rapid
+24                                        actifed 12 tab                                                 relaxine 4 mg 12 tab        0.205         0.3333          0.5882                                  actifed
+1990                                     moov spry 50 gm                                                  neemopril 50 gm gel        0.205         0.3333          0.5882                               moov, spry
+320                                  bebe vit oral drops                                            tera vit oral drops 30 ml        0.203         0.2683          0.7273                                     bebe
+1895                                 mentothicone 12 cap                                           tetracycline 250 mg 12 cap        0.197         0.3333          0.5333                             mentothicone
+1393                                   gatilox eye drops                                               timolol eye drops 5 ml        0.195         0.2500          0.7179                                  gatilox
+418                                              bran 30                                                        librax 30 tab        0.190         0.2857          0.6000                                     bran
+1902                               mepecaine 50 carp red                                                       cut bio 50 cap        0.188         0.3175          0.5143                           mepecaine, red
+692                            clearalique forte 4 cream                                               meloquin 20 gm 4 cream        0.182         0.3000          0.5106                       clearalique, forte
+1802               liptomilk 1 milk from born to 6 month                  pedia start milk formula 6 12 month 350 gm 2 infant        0.172         0.3053          0.4318                liptomilk, from, born, to
+1903                           mepecaine 50 carp l green                                                       cut bio 50 cap        0.169         0.2857          0.4615                      mepecaine, l, green
+1874                            medijel oral 12.5 gm gel                                                 fastum 2.5 60 gm gel        0.156         0.4037          0.5455                            medijel, oral
+470                            calcipoheal cort ointment                                        co betapronate 30 gm ointment        0.155         0.2375          0.4815                              calcipoheal
+1803                                         liptomilk 2                                              alpk 2 sphygmomanometer        0.144         0.2857          0.2941                                liptomilk
+469                                    calcipoheal cream                                                  algesal 40 gm cream        0.142         0.1429          0.6111                              calcipoheal
+1070             eldoquin forte.4 imported 14.2 gm cream                                                 dermatin 14 gm cream        0.138         0.3455          0.5085              eldoquin, forte.4, imported
+1695                                             key gel                                                         we 25 gm gel        0.129         0.1429          0.5263                                      key
+903                                        درما رول 0.75                                            zgts derma roller 0.75 mm        0.117         0.2000          0.3158                                درما, رول
+1506                 hepatitis a vaccine i dose imported                      menactra meningitis vaccine fridge 1 injectable        0.113         0.0826          0.5610          hepatitis, a, i, dose, imported
+709                               كلوس اب بالنعناع 25 مل                                               call on plus 25 strips        0.104         0.1802          0.2727                   كلوس, اب, بالنعناع, مل
+1011                       domaco laxative instant drink                                                alpha drink 12 sachet        0.097         0.1220          0.3600                domaco, laxative, instant
+1904                                 mercurochrome paint                                              tineacure 1 paint 15 ml        0.088         0.0278          0.5238                            mercurochrome
+649                                           canncelled                                                                  NaN        0.000            NaN             NaN                                      NaN
+1057                                                 NaN                                  sitz with pump for bath hemorrhoids        0.000         0.0000          0.0000                                      NaN
+1056                                                لاغي                                                                  NaN        0.000            NaN             NaN                                      NaN
+1396                                                 NaN                                  sitz with pump for bath hemorrhoids        0.000         0.0000          0.0000                                      NaN
+1401                                          cancellede                                                                  NaN        0.000            NaN             NaN                                      NaN

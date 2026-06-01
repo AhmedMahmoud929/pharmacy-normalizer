@@ -1,0 +1,46 @@
+# ==============================================================================
+# 🚀 Pharmatch AI — Unified Production Gitignore
+# ==============================================================================
+
+# --- Node / Frontend (Next.js) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.pnpm-debug.log
+frontend/.env*.local
+
+# --- Python / Backend (FastAPI & Crawler) ---
+backend/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/shefaa-crawler/data/categories.json
+backend/tools/data-extractor/data/
+
+# --- Database & Crawler Dynamic Storage (CRITICAL) ---
+**/*.db
+**/*.sqlite
+backend/data/crawler/jobs/
+backend/data/crawler/results.json
+backend/data/crawler/test_results.json
+backend/data/sheets_output/
+backend/data/extracted/
+backend/data/extracted_data/
+backend/data/input/
+backend/data/normalized/
+backend/data/archeive/
+shefaa-crawler/data/categories.json
+data/
+**/*.xlsx
+**/*.json.bak
+
+# --- Backups & Temp files ---
+redeploy_backup*.sh
+*.bak
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
