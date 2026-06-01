@@ -449,8 +449,8 @@ def parse_args():
     )
     parser.add_argument(
         "--output-dir", "-o",
-        default="media",
-        help="Root output directory (default: media)",
+        default="data/media",
+        help="Root output directory (default: data/media)",
     )
     parser.add_argument(
         "--workers", "-w",
