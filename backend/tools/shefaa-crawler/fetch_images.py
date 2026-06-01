@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 import urllib.request
 import urllib.error
@@ -132,12 +132,21 @@ class DownloadResult:
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def sanitize_filename(url: str) -> str:
-    """Derive a clean filename from CDN URL, preserving the original name."""
+    """Derive a clean, ASCII-safe filename from a CDN URL."""
     parsed = urlparse(url)
-    name = Path(parsed.path).name
-    # strip query strings that may appear after the filename
-    name = name.split("?")[0]
-    return name or hashlib.md5(url.encode()).hexdigest() + ".jpg"
+    name = Path(parsed.path).name.split("?")[0]
+    if not name:
+        return hashlib.md5(url.encode()).hexdigest() + ".jpg"
+    # Percent-encode any non-ASCII or unsafe filesystem characters,
+    # then replace the encoded %XX sequences with underscores so the
+    # filename stays readable and won't trip up any OS or shell.
+    name = name.encode("utf-8", errors="replace").decode("ascii", errors="replace")
+    # Replace any character that isn't alphanumeric, dot, dash, or underscore
+    import re
+    name = re.sub(r"[^A-Za-z0-9._-]", "_", name)
+    # Collapse multiple underscores
+    name = re.sub(r"_+", "_", name)
+    return name
 
 
 def extract_tasks(data: list[dict], output_dir: Path, count: Optional[int]) -> list[ImageTask]:
@@ -225,7 +234,11 @@ def download_one(task: ImageTask, attempt: int = 1, backoff: float = _BACKOFF_BA
 
     try:
         logger.debug("GET    %s", task.url)
-        req = urllib.request.Request(task.url, headers=HEADERS)
+        # Percent-encode non-ASCII characters in the URL path (e.g. accented letters)
+        # while leaving the scheme, host, and already-encoded sequences intact.
+        parsed = urlparse(task.url)
+        safe_url = parsed._replace(path=quote(parsed.path, safe="/%+")).geturl()
+        req = urllib.request.Request(safe_url, headers=HEADERS)
 
         with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
             data = response.read()
@@ -370,16 +383,11 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
-        "file", 
-        nargs="?", 
-        default="data/extracted/chefaa_products_eg.json", 
-        help="Path to the JSON products file [default: data/extracted/chefaa_products_eg.json]"
-    )
+    parser.add_argument("file", help="Path to the JSON products file")
     parser.add_argument(
         "--output-dir", "-o",
-        default="media",
-        help="Root output directory (default: media)",
+        default="./data/media",
+        help="Root output directory (default: ./data/media)",
     )
     parser.add_argument(
         "--workers", "-w",
