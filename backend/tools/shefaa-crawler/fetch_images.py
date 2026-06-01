@@ -383,11 +383,16 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("file", help="Path to the JSON products file")
+    parser.add_argument(
+        "file", 
+        nargs="?", 
+        default="data/extracted/chefaa_products_eg.json", 
+        help="Path to the JSON products file [default: data/extracted/chefaa_products_eg.json]"
+    )
     parser.add_argument(
         "--output-dir", "-o",
-        default="./data/media",
-        help="Root output directory (default: ./data/media)",
+        default="media",
+        help="Root output directory (default: media)",
     )
     parser.add_argument(
         "--workers", "-w",
