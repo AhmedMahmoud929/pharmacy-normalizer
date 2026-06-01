@@ -29,6 +29,7 @@ backend/data/crawler/test_results.json
 backend/data/sheets_output/
 backend/data/extracted/
 backend/data/extracted_data/
+backend/data/media/
 backend/data/input/
 backend/data/normalized/
 backend/data/archeive/
