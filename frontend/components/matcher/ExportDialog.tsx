@@ -18,23 +18,33 @@ type ExportScope = "all" | "slice";
 interface ColumnOption {
   key: string;
   label: string;
+  group: "matcher" | "product";
+  defaultChecked?: boolean;
 }
 
 const columnOptions: ColumnOption[] = [
-  { key: "row_index", label: "Row Number" },
-  { key: "original_name", label: "Original Product Name" },
-  { key: "normalized_name", label: "Normalized Query" },
-  { key: "match_status", label: "Match Status" },
-  { key: "match_score", label: "Confidence Score" },
-  { key: "matched_name_en", label: "Matched Title (EN)" },
-  { key: "matched_name_ar", label: "Matched Title (AR)" },
-  { key: "matched_sku", label: "Matched SKU" },
-  { key: "price", label: "Catalog Retail Price" },
-  { key: "brand", label: "Manufacturer Brand" },
-  { key: "category", label: "Store Category" },
-  { key: "jaccard", label: "Jaccard Token Overlap" },
-  { key: "sequence", label: "Sequence Similarity" },
-  { key: "matched_tokens", label: "Aligned Tokens" }
+  // Matcher Fields
+  { key: "row_index", label: "Row Number", group: "matcher", defaultChecked: false },
+  { key: "original_name", label: "Original Product Name", group: "matcher", defaultChecked: false },
+  { key: "normalized_name", label: "Normalized Query", group: "matcher", defaultChecked: false },
+  { key: "match_status", label: "Match Status", group: "matcher", defaultChecked: true },
+  { key: "match_score", label: "Confidence Score", group: "matcher", defaultChecked: true },
+  { key: "jaccard", label: "Jaccard Token Overlap", group: "matcher", defaultChecked: false },
+  { key: "sequence", label: "Sequence Similarity", group: "matcher", defaultChecked: false },
+  { key: "matched_tokens", label: "Aligned Tokens", group: "matcher", defaultChecked: false },
+  
+  // Product Fields
+  { key: "id", label: "Product ID", group: "product", defaultChecked: true },
+  { key: "name_en", label: "English Name", group: "product", defaultChecked: true },
+  { key: "name_ar", label: "Arabic Name", group: "product", defaultChecked: true },
+  { key: "sku", label: "Reference SKU", group: "product", defaultChecked: true },
+  { key: "brand", label: "Brand / Manufacturer", group: "product", defaultChecked: true },
+  { key: "category", label: "Classification Category", group: "product", defaultChecked: true },
+  { key: "price", label: "Catalog Price", group: "product", defaultChecked: true },
+  { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: true },
+  { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: true },
+  { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: true },
+  { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: true }
 ];
 
 export const ExportDialog: React.FC<ExportDialogProps> = ({
@@ -52,7 +62,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   
   // Selected Columns Checklist
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    columnOptions.map(o => o.key)
+    columnOptions.filter(o => o.defaultChecked).map(o => o.key)
   );
 
   const [isExporting, setIsExporting] = useState(false);
@@ -121,24 +131,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             case "match_score":
               record["Match Score"] = topMatch ? (topMatch.score * 100).toFixed(1) + "%" : "0%";
               break;
-            case "matched_name_en":
-              record["Matched Name (EN)"] = topMatch?.name_en || v.name_en || p.name_en || "";
-              break;
-            case "matched_name_ar":
-              record["Matched Name (AR)"] = v.name_ar || p.name_ar || "";
-              break;
-            case "matched_sku":
-              record["Matched SKU"] = topMatch?.sku || v.sku || "";
-              break;
-            case "price":
-              record["Price"] = v.price || p.price || 0;
-              break;
-            case "brand":
-              record["Brand"] = p.brand?.name || "";
-              break;
-            case "category":
-              record["Category"] = p.category?.name || "";
-              break;
             case "jaccard":
               record["Jaccard Score"] = topMatch?.jaccard != null ? (topMatch.jaccard * 100).toFixed(1) + "%" : "";
               break;
@@ -147,6 +139,41 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               break;
             case "matched_tokens":
               record["Matched Tokens"] = Array.isArray(topMatch?.matched_tokens) ? topMatch.matched_tokens.join(", ") : "";
+              break;
+            case "id":
+              record["Product ID"] = v.id || p.id || topMatch?.id || "";
+              break;
+            case "name_en":
+              record["English Name"] = topMatch?.name_en || v.name_en || p.name_en || "";
+              break;
+            case "name_ar":
+              record["Arabic Name"] = v.name_ar || p.name_ar || "";
+              break;
+            case "sku":
+              record["Reference SKU"] = topMatch?.sku || v.sku || "";
+              break;
+            case "brand":
+              record["Brand / Manufacturer"] = p.brand?.name || p.brand || "";
+              break;
+            case "category":
+              record["Classification Category"] = p.category?.name || p.category || "";
+              break;
+            case "price":
+              record["Catalog Price"] = v.price || p.price || 0;
+              break;
+            case "in_stock":
+              const hasStock = v.stock > 0 || p.stock > 0 || (p.in_stock !== false);
+              record["In Stock Flag"] = hasStock ? "Yes" : "No";
+              break;
+            case "stock":
+              record["Quantity Stock"] = v.stock || p.stock || 0;
+              break;
+            case "share_link":
+              const slug = p.slug || "";
+              record["Storefront Web Link"] = slug ? `https://chefaa.com/product/${slug}` : "";
+              break;
+            case "image":
+              record["Asset Thumbnail URL"] = v.image || p.image || topMatch?.image || "";
               break;
             default:
               break;
@@ -320,7 +347,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             ) : (
               /* STAGE 2: Scope & Range Selection */
               <div className="space-y-6">
-                {/* Scope Radio Selection */}
+                {/* Define Scope */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                     Define Data Scope
@@ -355,7 +382,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 </div>
 
-                {/* Slicing Controls (Shows only when 'slice' selected) */}
+                {/* Slicing Controls (Only when slice is active) */}
                 {scope === "slice" && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -391,8 +418,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </motion.div>
                 )}
 
-                {/* Columns Selection Checklist */}
-                <div className="space-y-3">
+                {/* Attributes Checklist */}
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                       Attributes Checklist
@@ -405,28 +432,66 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                    {columnOptions.map(col => {
-                      const isChecked = selectedColumns.includes(col.key);
-                      return (
-                        <button
-                          key={col.key}
-                          onClick={() => handleToggleColumn(col.key)}
-                          className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
-                        >
-                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                            isChecked
-                              ? "bg-primary border-primary text-white"
-                              : "border-zinc-300 dark:border-zinc-700"
-                          }`}>
-                            {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                          </div>
-                          <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
-                            {col.label}
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="space-y-4 max-h-[32vh] overflow-y-auto pr-1">
+                    {/* Product Fields Group */}
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400/90 bg-zinc-55 dark:bg-zinc-800/50 px-2 py-0.5 rounded w-fit">
+                        Product Fields
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                        {columnOptions.filter(col => col.group === "product").map(col => {
+                          const isChecked = selectedColumns.includes(col.key);
+                          return (
+                            <button
+                              key={col.key}
+                              onClick={() => handleToggleColumn(col.key)}
+                              className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                            >
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? "bg-primary border-primary text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
+                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                              <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
+                                {col.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Matcher Fields Group */}
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400/90 bg-zinc-55 dark:bg-zinc-800/50 px-2 py-0.5 rounded w-fit">
+                        Matcher Fields
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                        {columnOptions.filter(col => col.group === "matcher").map(col => {
+                          const isChecked = selectedColumns.includes(col.key);
+                          return (
+                            <button
+                              key={col.key}
+                              onClick={() => handleToggleColumn(col.key)}
+                              className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                            >
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? "bg-primary border-primary text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
+                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                              <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
+                                {col.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
