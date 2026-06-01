@@ -153,8 +153,8 @@ async def health_check():
 async def match_single(
     q: str, 
     top: int = 5, 
-    match_threshold: float = 0.85, 
-    review_threshold: float = 0.50
+    match_threshold: float = 0.60, 
+    review_threshold: float = 0.40
 ):
     if index is None:
         raise HTTPException(status_code=503, detail="Database not loaded")
@@ -244,8 +244,8 @@ async def match_sheet(
     file: UploadFile = File(...),
     column: Optional[str] = Form(None),
     top: int = Form(1),
-    match_threshold: float = Form(0.85),
-    review_threshold: float = Form(0.50),
+    match_threshold: float = Form(0.60),
+    review_threshold: float = Form(0.40),
     parallel: bool = Form(False),
     workers: Optional[int] = Form(None)
 ):

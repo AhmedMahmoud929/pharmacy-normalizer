@@ -38,7 +38,6 @@ from normalizer.core.units import process_units
 from normalizer.core.tokenizer import reorder_tokens
 from normalizer.core.equivalence import map_brands, normalize_form_synonyms, normalize_dose_equivalence
 
-import pandas as pd
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -288,6 +287,7 @@ def match_row_task(q_norm: str, top_k: int, w_j: float, w_s: float):
 # ─────────────────────────────────────────────────────────────────────
 
 def run_sheet(file_path: str, index: ProductIndex, args):
+    import pandas as pd
     if not os.path.exists(file_path): error_console.print(f"[red]Error: {file_path} not found[/red]"); sys.exit(1)
     ext = os.path.splitext(file_path)[1].lower()
     df = pd.read_excel(file_path) if ext in [".xlsx", ".xls"] else pd.read_csv(file_path)
@@ -333,10 +333,51 @@ def run_sheet(file_path: str, index: ProductIndex, args):
 
 
     final_df = pd.concat([df.reset_index(drop=True), pd.DataFrame(results_list)], axis=1)
+    
+    # 1. Apply range filtering if specified
+    if args.export_range:
+        try:
+            parts = args.export_range.split("-")
+            start_idx = max(1, int(parts[0])) - 1
+            end_idx = int(parts[1])
+            final_df = final_df.iloc[start_idx:end_idx]
+            console.print(f"✂️ [yellow]Exporting range bounds: rows {start_idx + 1} to {end_idx} (Total: {len(final_df)} rows)[/yellow]")
+        except Exception as e:
+            console.print(f"⚠️ [yellow]Warning: Failed to parse export range '{args.export_range}'. Exporting all rows. Error: {e}[/yellow]")
+
+    # 2. Apply field selection if specified
+    if args.export_fields:
+        selected_cols = [c.strip() for c in args.export_fields.split(",") if c.strip()]
+        existing_cols = [c for c in selected_cols if c in final_df.columns]
+        if existing_cols:
+            final_df = final_df[existing_cols]
+            console.print(f"📋 [yellow]Exporting selected columns: {', '.join(existing_cols)}[/yellow]")
+        else:
+            console.print("⚠️ [yellow]Warning: None of the specified export-fields were found in the output. Exporting all fields.[/yellow]")
+
+    # 3. Determine output path and format
+    fmt = args.export_type or "xlsx"
+    ext_map = {"xlsx": ".xlsx", "json": ".json", "txt": ".txt"}
+    target_ext = ext_map.get(fmt, ".xlsx")
+
     out_dir = os.path.join(project_root, "data", "normalized")
     os.makedirs(out_dir, exist_ok=True)
-    output_path = args.output or os.path.join(out_dir, f"{os.path.splitext(os.path.basename(file_path))[0]}_matched{ext}")
-    final_df.to_excel(output_path, index=False) if output_path.endswith(".xlsx") else final_df.to_csv(output_path, index=False)
+
+    if args.output:
+        if not args.output.lower().endswith(target_ext):
+            output_path = os.path.splitext(args.output)[0] + target_ext
+        else:
+            output_path = args.output
+    else:
+        output_path = os.path.join(out_dir, f"{os.path.splitext(os.path.basename(file_path))[0]}_matched{target_ext}")
+
+    # 4. Serialize to chosen format
+    if fmt == "xlsx":
+        final_df.to_excel(output_path, index=False)
+    elif fmt == "json":
+        final_df.to_json(output_path, orient="records", indent=2, force_ascii=False)
+    elif fmt == "txt":
+        final_df.to_csv(output_path, index=False, sep="\t")
     
     console.print(f"\n✅ [bold green]Matching complete![/bold green]")
     console.print(f"📂 [cyan]Output saved to:[/cyan] [bold]{output_path}[/bold]")
@@ -455,8 +496,8 @@ def main():
     parser.add_argument("--output", "-o", help="Output file path")
     parser.add_argument("--db", default=DEFAULT_DB_PATH, help="Path to reference JSON")
     parser.add_argument("--top", type=int, default=5, help="Number of candidates")
-    parser.add_argument("--match-threshold", type=float, default=80)
-    parser.add_argument("--review-threshold", type=float, default=50)
+    parser.add_argument("--match-threshold", type=float, default=60.0, help="Minimum score for automatic match (default: 60.0)")
+    parser.add_argument("--review-threshold", type=float, default=40.0, help="Minimum score for pharmacist review (default: 40.0)")
     parser.add_argument("--jaccard-weight", type=float, default=0.7)
     parser.add_argument("--seq-weight", type=float, default=0.3)
     parser.add_argument("--parallel", action="store_true", help="Enable multi-core processing")
@@ -465,6 +506,12 @@ def main():
     parser.add_argument("--yes", "-y", action="store_true", help="Auto-confirm")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show progress")
     parser.add_argument("--json", action="store_true", help="JSON output")
+    
+    # Advanced Export Overrides
+    parser.add_argument("--export-type", choices=["xlsx", "json", "txt"], default="xlsx", help="Export file format type (default: xlsx)")
+    parser.add_argument("--export-fields", type=str, help="Comma-separated list of columns to include in output")
+    parser.add_argument("--export-range", type=str, help="Contiguous subset range to export (e.g. '1-100')")
+    
     args = parser.parse_args()
 
     if not args.query and not args.file: parser.print_help(); sys.exit(0)
@@ -477,8 +524,30 @@ def main():
 
 def load_reference(db_path: str) -> ProductIndex:
     resolved_path = resolve_db_path(db_path)
+    
     with open(resolved_path, "r", encoding="utf-8") as f:
-        return ProductIndex(json.load(f))
+        content = f.read().strip()
+        
+    if content.startswith("["):
+        content = content[1:]
+    if content.endswith("]"):
+        content = content[:-1]
+        
+    raw_objects = content.split("\n  },")
+    products = []
+    
+    for obj_str in raw_objects:
+        obj_str = obj_str.strip()
+        if not obj_str:
+            continue
+        if not obj_str.endswith("}"):
+            obj_str += "}"
+        try:
+            products.append(json.loads(obj_str))
+        except:
+            pass
+            
+    return ProductIndex(products)
 
 if __name__ == "__main__":
     multiprocessing.set_start_method('spawn', force=True) # Required for Windows + Multiprocessing

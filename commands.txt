@@ -1,0 +1,1 @@
+python tools/normalize.py --english-only --file data/extracted/chefaa_products_eg.json
