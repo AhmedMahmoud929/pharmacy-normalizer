@@ -9,7 +9,14 @@ import { API_URL } from "@/lib/utils";
 interface ExportDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  results: any[];
+  jobId: string | null;
+  jobStats?: {
+    matched: number;
+    review: number;
+    noMatch: number;
+    total: number;
+  };
+  initialResults?: any[];
 }
 
 type Stage = 0 | 1 | 2;
@@ -52,13 +59,25 @@ const columnOptions: ColumnOption[] = [
 export const ExportDialog: React.FC<ExportDialogProps> = ({
   isOpen,
   onClose,
-  results
+  jobId,
+  jobStats,
+  initialResults
 }) => {
   const [stage, setStage] = useState<Stage>(0);
   const [exportType, setExportType] = useState<"data" | "media">("data");
   const [mediaTypes, setMediaTypes] = useState<string[]>(["products"]);
   const [format, setFormat] = useState<ExportFormat | null>("xlsx");
   const [scope, setScope] = useState<ExportScope>("all");
+
+  const [fetchedResults, setFetchedResults] = useState<any[]>(initialResults || []);
+
+  useEffect(() => {
+    if (initialResults && initialResults.length > 0) {
+      setFetchedResults(initialResults);
+    } else {
+      setFetchedResults([]);
+    }
+  }, [initialResults, isOpen]);
 
   // Match Status Filtering State
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
@@ -78,25 +97,51 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
+  const [exportStatusText, setExportStatusText] = useState("");
 
-  // Filter results dynamically based on chosen statuses
+  // Calculate status counts either from loaded results or from jobStats prop
+  const counts = React.useMemo(() => {
+    if (fetchedResults && fetchedResults.length > 0) {
+      const matched = fetchedResults.filter(r => (r.matches?.[0]?.status || "no_match") === "matched").length;
+      const review = fetchedResults.filter(r => (r.matches?.[0]?.status || "no_match") === "review").length;
+      const noMatch = fetchedResults.length - matched - review;
+      return { matched, review, noMatch, total: fetchedResults.length };
+    }
+    return {
+      matched: jobStats?.matched ?? 0,
+      review: jobStats?.review ?? 0,
+      noMatch: jobStats?.noMatch ?? 0,
+      total: jobStats?.total ?? 0
+    };
+  }, [fetchedResults, jobStats]);
+
+  // Calculate total filtered items based on checkboxes when we haven't fetched results yet
+  const totalFilteredCount = React.useMemo(() => {
+    let sum = 0;
+    if (selectedStatuses.includes("matched")) sum += counts.matched;
+    if (selectedStatuses.includes("review")) sum += counts.review;
+    if (selectedStatuses.includes("no_match")) sum += counts.noMatch;
+    return sum;
+  }, [selectedStatuses, counts]);
+
+  // Filter results dynamically based on chosen statuses (if we have results loaded)
   const filteredResults = React.useMemo(() => {
-    return results.filter(res => {
+    return fetchedResults.filter(res => {
       const status = res.matches?.[0]?.status || "no_match";
       return selectedStatuses.includes(status);
     });
-  }, [results, selectedStatuses]);
+  }, [fetchedResults, selectedStatuses]);
 
-  // Set default bounds when filtered results are loaded/changed
+  // Set default bounds when filtered results are loaded/changed or filters change
   useEffect(() => {
     if (filteredResults && filteredResults.length > 0) {
       setLimit(filteredResults.length);
       setOffset(0);
     } else {
-      setLimit(0);
+      setLimit(totalFilteredCount);
       setOffset(0);
     }
-  }, [filteredResults]);
+  }, [filteredResults, totalFilteredCount, isOpen]);
 
   if (!isOpen) return null;
 
@@ -115,16 +160,38 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   };
 
   const handleExport = async () => {
-    if (!format || filteredResults.length === 0 || selectedColumns.length === 0) return;
+    if (!format || !jobId || selectedColumns.length === 0) return;
     setIsExporting(true);
     setExportComplete(false);
+    setExportStatusText("Preparing export data...");
 
     try {
-      // Artificially delay slightly to mimic compiling stream UX
-      await new Promise(resolve => setTimeout(resolve, 800));
+      let currentResults = fetchedResults;
+
+      // If we haven't fetched results yet, fetch them now at the last step!
+      if (currentResults.length === 0) {
+        setExportStatusText("Downloading campaign results...");
+        const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
+        if (!response.ok) throw new Error("Failed to fetch results from server");
+        const data = await response.json();
+        currentResults = data.results || [];
+        setFetchedResults(currentResults);
+      }
+
+      if (currentResults.length === 0) {
+        throw new Error("No results found to export");
+      }
+
+      setExportStatusText("Compiling custom dataset...");
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Resolve Range Slicing using status-filtered results
-      let itemsToExport = [...filteredResults].sort((a, b) => a.row_index - b.row_index);
+      const activeFiltered = currentResults.filter(res => {
+        const status = res.matches?.[0]?.status || "no_match";
+        return selectedStatuses.includes(status);
+      });
+
+      let itemsToExport = [...activeFiltered].sort((a, b) => a.row_index - b.row_index);
       if (scope === "slice") {
         itemsToExport = itemsToExport.slice(offset, offset + limit);
       }
@@ -211,6 +278,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
+      setExportStatusText("Generating export file...");
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       if (format === 'xlsx') {
         const worksheet = XLSX.utils.json_to_sheet(finalData);
         const workbook = XLSX.utils.book_new();
@@ -240,24 +310,46 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         URL.revokeObjectURL(url);
       }
 
+      setExportStatusText("Download ready!");
       setExportComplete(true);
       await new Promise(resolve => setTimeout(resolve, 800));
       resetAndClose();
     } catch (err) {
       console.error("Export compilation failed:", err);
+      setExportStatusText("Export compilation failed.");
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleMediaExport = async () => {
+    if (!jobId) return;
     setIsExporting(true);
     setExportComplete(false);
+    setExportStatusText("Preparing media export...");
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      let currentResults = fetchedResults;
 
-      let itemsToExport = [...filteredResults].sort((a, b) => a.row_index - b.row_index);
+      // If we haven't fetched results yet, fetch them now at the last step!
+      if (currentResults.length === 0) {
+        setExportStatusText("Downloading campaign results...");
+        const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
+        if (!response.ok) throw new Error("Failed to fetch results from server");
+        const data = await response.json();
+        currentResults = data.results || [];
+        setFetchedResults(currentResults);
+      }
+
+      setExportStatusText("Compiling image references...");
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const activeFiltered = currentResults.filter(res => {
+        const status = res.matches?.[0]?.status || "no_match";
+        return selectedStatuses.includes(status);
+      });
+
+      let itemsToExport = [...activeFiltered].sort((a, b) => a.row_index - b.row_index);
       if (scope === "slice") {
         itemsToExport = itemsToExport.slice(offset, offset + limit);
       }
@@ -272,6 +364,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         }
       });
 
+      setExportStatusText("Requesting ZIP archive...");
       const response = await fetch(`${API_URL}/db/export/media`, {
         method: "POST",
         headers: {
@@ -287,6 +380,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         throw new Error("Failed to compile media zip");
       }
 
+      setExportStatusText("Downloading ZIP archive...");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -298,11 +392,13 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      setExportStatusText("Download ready!");
       setExportComplete(true);
       await new Promise(resolve => setTimeout(resolve, 800));
       resetAndClose();
     } catch (err) {
       console.error("Media export failed:", err);
+      setExportStatusText("Media export failed.");
     } finally {
       setIsExporting(false);
     }
@@ -315,11 +411,12 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setFormat("xlsx");
     setScope("all");
     setOffset(0);
-    setLimit(results.length || 100);
+    setLimit(fetchedResults.length || jobStats?.total || 100);
     setSelectedStatuses(["matched", "review", "no_match"]);
     setSelectedColumns(columnOptions.map(o => o.key));
     setExportComplete(false);
     setIsExporting(false);
+    setExportStatusText("");
     onClose();
   };
 
@@ -466,9 +563,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </h3>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { key: "matched", label: "Matched", count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "matched").length, selectedClass: "bg-success/10 text-success border-success/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" },
-                      { key: "review", label: "Review", count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "review").length, selectedClass: "bg-warning/10 text-warning border-warning/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" },
-                      { key: "no_match", label: "No Match", count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "no_match").length, selectedClass: "bg-error/10 text-error border-error/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" }
+                      { key: "matched", label: "Matched", count: counts.matched, selectedClass: "bg-success/10 text-success border-success/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" },
+                      { key: "review", label: "Review", count: counts.review, selectedClass: "bg-warning/10 text-warning border-warning/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" },
+                      { key: "no_match", label: "No Match", count: counts.noMatch, selectedClass: "bg-error/10 text-error border-error/30 font-bold", unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500" }
                     ].map(statusOpt => {
                       const isSelected = selectedStatuses.includes(statusOpt.key);
                       return (
@@ -502,20 +599,20 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      disabled={filteredResults.length === 0}
+                      disabled={totalFilteredCount === 0}
                       onClick={() => setScope("all")}
                       className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         scope === "all"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                           ? "border-primary bg-primary/5 text-primary shadow-sm"
+                           : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
                       }`}
                     >
                       <p className="text-xs font-bold">Entire Match List</p>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">All {filteredResults.length} matches</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">All {totalFilteredCount} matches</p>
                     </button>
 
                     <button
-                      disabled={filteredResults.length === 0}
+                      disabled={totalFilteredCount === 0}
                       onClick={() => setScope("slice")}
                       className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         scope === "slice"
@@ -643,21 +740,21 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       {
                         key: "matched",
                         label: "Matched",
-                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "matched").length,
+                        count: counts.matched,
                         selectedClass: "bg-success/10 text-success border-success/30 font-bold",
                         unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
                       },
                       {
                         key: "review",
                         label: "Review",
-                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "review").length,
+                        count: counts.review,
                         selectedClass: "bg-warning/10 text-warning border-warning/30 font-bold",
                         unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
                       },
                       {
                         key: "no_match",
                         label: "No Match",
-                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "no_match").length,
+                        count: counts.noMatch,
                         selectedClass: "bg-error/10 text-error border-error/30 font-bold",
                         unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
                       },
@@ -698,7 +795,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {/* All Option */}
                     <button
-                      disabled={filteredResults.length === 0}
+                      disabled={totalFilteredCount === 0}
                       onClick={() => setScope("all")}
                       className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "all"
                         ? "border-primary bg-primary/5 text-primary shadow-sm"
@@ -706,12 +803,12 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                         }`}
                     >
                       <p className="text-xs font-bold">Entire Sheet</p>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">All {filteredResults.length} items</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">All {totalFilteredCount} items</p>
                     </button>
 
                     {/* Slice Option */}
                     <button
-                      disabled={filteredResults.length === 0}
+                      disabled={totalFilteredCount === 0}
                       onClick={() => setScope("slice")}
                       className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "slice"
                         ? "border-primary bg-primary/5 text-primary shadow-sm"
