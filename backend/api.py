@@ -1648,11 +1648,32 @@ async def get_matcher_job_details(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
     return job
 
+@app.post("/api/matcher/job/{job_id}/stop")
+async def stop_matcher_job(job_id: str):
+    from tools.matcher_db import get_job, finalize_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    if job["status"] not in ["pending", "running"]:
+        return {"status": job["status"], "message": f"Job is already in {job['status']} state."}
+        
+    finalize_job(job_id, "stopped", error_msg="Job stopped by pharmacist.")
+    
+    from tools.matcher_runner import job_listeners
+    if job_id in job_listeners:
+        import json
+        stop_payload = json.dumps({"status": "stopped", "message": "Job cancellation request completed."})
+        for q in list(job_listeners[job_id]):
+            await q.put(f"event: complete\ndata: {stop_payload}\n\n")
+            
+    return {"status": "stopped", "message": "Job execution stopped successfully."}
+
 @app.get("/api/matcher/job/{job_id}/results")
 async def get_matcher_job_results(
     job_id: str,
     offset: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(100, ge=1, le=100000),
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None)
 ):

@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { 
-  Clock, Plus, FileSpreadsheet, Download, Loader2, 
-  CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp 
+import {
+  Clock, Plus, FileSpreadsheet, Download, Loader2,
+  CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ interface MatchJob {
   matched_count: number;
   review_count: number;
   no_match_count: number;
-  status: "pending" | "running" | "completed" | "failed";
+  status: "pending" | "running" | "completed" | "failed" | "stopped";
   error_msg: string | null;
   created_at: string;
 }
@@ -47,7 +47,7 @@ export default function MatcherDashboard() {
 
   useEffect(() => {
     fetchJobs();
-    
+
     // Set up polling for active/running jobs
     const interval = setInterval(() => {
       fetchJobs();
@@ -59,8 +59,8 @@ export default function MatcherDashboard() {
   const filteredJobs = useMemo(() => {
     if (!searchQuery) return jobs;
     const q = searchQuery.toLowerCase();
-    return jobs.filter(j => 
-      j.filename.toLowerCase().includes(q) || 
+    return jobs.filter(j =>
+      j.filename.toLowerCase().includes(q) ||
       (j.column_used && j.column_used.toLowerCase().includes(q))
     );
   }, [jobs, searchQuery]);
@@ -69,7 +69,7 @@ export default function MatcherDashboard() {
   const stats = useMemo(() => {
     const total = jobs.length;
     const completedJobs = jobs.filter(j => j.status === "completed");
-    
+
     // Average accuracy across all completed runs
     let totalAcc = 0;
     completedJobs.forEach(j => {
@@ -78,7 +78,7 @@ export default function MatcherDashboard() {
       }
     });
     const avgAccuracy = completedJobs.length > 0 ? totalAcc / completedJobs.length : 0;
-    
+
     const active = jobs.filter(j => j.status === "running" || j.status === "pending").length;
     const totalRowsMapped = completedJobs.reduce((sum, j) => sum + j.total_rows, 0);
 
@@ -205,9 +205,10 @@ export default function MatcherDashboard() {
                   const isRunning = job.status === "running" || job.status === "pending";
                   const isSuccess = job.status === "completed";
                   const isFailed = job.status === "failed";
-                  
+                  const isStopped = job.status === "stopped";
+
                   const accuracy = job.total_rows > 0 ? (job.matched_count / job.total_rows) * 100 : 0;
-                  
+
                   return (
                     <tr key={job.job_id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/20 transition-colors group">
                       {/* Filename */}
@@ -217,7 +218,8 @@ export default function MatcherDashboard() {
                             "p-2.5 rounded-lg border",
                             isSuccess && "bg-success/10 text-success border-success/20",
                             isRunning && "bg-primary/10 text-primary border-primary/20",
-                            isFailed && "bg-error/10 text-error border-error/20"
+                            isFailed && "bg-error/10 text-error border-error/20",
+                            isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-550 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
                           )}>
                             <FileSpreadsheet className="w-4 h-4" />
                           </div>
@@ -242,7 +244,7 @@ export default function MatcherDashboard() {
 
                       {/* Matches / Accuracy */}
                       <td className="p-4">
-                        {isFailed ? (
+                        {isFailed || isStopped ? (
                           <span className="text-zinc-400">—</span>
                         ) : (
                           <div className="space-y-1">
@@ -252,8 +254,8 @@ export default function MatcherDashboard() {
                             </div>
                             {/* Tiny progress visual */}
                             <div className="w-20 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-success transition-all duration-500" 
+                              <div
+                                className="h-full bg-success transition-all duration-500"
                                 style={{ width: `${accuracy}%` }}
                               />
                             </div>
@@ -267,11 +269,13 @@ export default function MatcherDashboard() {
                           "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1.5",
                           isRunning && "bg-primary/10 text-primary border border-primary/20 animate-pulse",
                           isSuccess && "bg-success/10 text-success border border-success/20",
-                          isFailed && "bg-error/10 text-error border border-error/20"
+                          isFailed && "bg-error/10 text-error border border-error/20",
+                          isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-550 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
                         )}>
                           {isRunning && <Loader2 className="w-3 h-3 animate-spin" />}
                           {isSuccess && <CheckCircle className="w-3 h-3 text-success" />}
                           {isFailed && <AlertCircle className="w-3 h-3 text-error" />}
+                          {isStopped && <Clock className="w-3 h-3 text-zinc-400" />}
                           {job.status}
                         </span>
                       </td>
@@ -287,7 +291,7 @@ export default function MatcherDashboard() {
                           {/* Inspect Results */}
                           <Link
                             href={`/dashboard/matcher/new?job_id=${job.job_id}`}
-                            className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-850 hover:bg-primary hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
+                            className="p-2 cursor-pointer rounded-lg bg-zinc-850 hover:bg-primary hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
                             title="Inspect & Override Results"
                           >
                             <ArrowRight className="w-4 h-4" />
@@ -298,7 +302,7 @@ export default function MatcherDashboard() {
                             <a
                               href={`${API_URL}/api/matcher/job/${job.job_id}/export`}
                               download
-                              className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
+                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
                               title="Export Catalog Spreadsheet"
                             >
                               <Download className="w-4 h-4" />

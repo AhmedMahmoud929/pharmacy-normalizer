@@ -286,6 +286,11 @@ async def run_matcher_background(
                     
                     # Update SQLite database progress dynamically every 10 rows
                     if processed_count % 10 == 0 or processed_count == total_rows:
+                        from tools.matcher_db import get_job
+                        current_job = get_job(job_id)
+                        if current_job and current_job["status"] == "stopped":
+                            print(f"Job {job_id} cancelled by user. Terminating threads.")
+                            return
                         update_job_progress(
                             job_id, 
                             processed_rows=processed_count, 
@@ -340,6 +345,11 @@ async def run_matcher_background(
                 
                 # Update SQLite DB progress
                 if processed_count % 10 == 0 or processed_count == total_rows:
+                    from tools.matcher_db import get_job
+                    current_job = get_job(job_id)
+                    if current_job and current_job["status"] == "stopped":
+                        print(f"Job {job_id} cancelled by user. Terminating sequential run.")
+                        return
                     update_job_progress(
                         job_id, 
                         processed_rows=processed_count, 

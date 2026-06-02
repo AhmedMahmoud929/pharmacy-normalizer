@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from "react";
-import { Loader2, X, ChevronDown, Square, Download, Check, Clock } from "lucide-react";
+import { Loader2, X, ChevronDown, Square, Download, Check, Clock, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 
 // Sub-components
 import { UploadZone } from "./matcher/UploadZone";
@@ -53,6 +55,7 @@ interface ProgressState {
 }
 
 export default function DrugMatcher() {
+  const { toast } = useToast();
   // --- State ---
   const [file, setFile] = useState<File | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
@@ -63,7 +66,7 @@ export default function DrugMatcher() {
   const [results, setResults] = useState<MatchResult[]>([]);
 
   // Background & History states
-  const [background, setBackground] = useState(false);
+  const [background, setBackground] = useState(true);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
@@ -155,6 +158,9 @@ export default function DrugMatcher() {
 
   const selectJob = async (job: any) => {
     setActiveJobId(job.job_id);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", `?job_id=${job.job_id}`);
+    }
     setShowHistory(false);
     setFile(new File([], job.filename)); // Set a placeholder File so MatchConfig doesn't close
     setSelectedColumn(job.column_used || "Unknown");
@@ -165,7 +171,7 @@ export default function DrugMatcher() {
       setIsProcessing(false);
       setIsComplete(true);
       setResults([]);
-      
+
       // Fetch full results
       try {
         const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`);
@@ -181,10 +187,10 @@ export default function DrugMatcher() {
       setIsComplete(false);
       setResults([]);
       setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
-      
+
       // Subscribe to real-time streaming progress SSE channel
       const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
-      
+
       eventSource.addEventListener("info", (e) => {
         const data = JSON.parse(e.data);
         setProgress(prev => ({ ...prev, total: data.total_rows }));
@@ -222,8 +228,24 @@ export default function DrugMatcher() {
       });
     } else {
       setIsProcessing(false);
-      setIsComplete(true);
-      alert(`Job has state: ${job.status}. Error: ${job.error_msg || "None"}`);
+      setIsComplete(false);
+      setResults([]);
+
+      try {
+        const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`);
+        if (response.ok) {
+          const data = await response.json();
+          setResults(data.results || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch partial job results:", err);
+      }
+
+      toast({
+        title: `Job ${job.status.toUpperCase()}`,
+        description: job.error_msg ? `Status: ${job.error_msg}` : `This campaign was ${job.status}.`,
+        type: job.status === "stopped" ? "info" : "error"
+      });
     }
   };
 
@@ -234,13 +256,23 @@ export default function DrugMatcher() {
     setProgress({ current: 0, total: 0 });
     setCurrentPage(1);
     setActiveJobId(null);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", window.location.pathname);
+    }
   };
 
-  const stopMatching = () => {
+  const stopMatching = async () => {
+    if (activeJobId) {
+      try {
+        await fetch(`${API_URL}/api/matcher/job/${activeJobId}/stop`, { method: "POST" });
+      } catch (err) {
+        console.error("Failed to cancel background job:", err);
+      }
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      setIsProcessing(false);
     }
+    setIsProcessing(false);
   };
 
   const startMatching = async () => {
@@ -275,9 +307,58 @@ export default function DrugMatcher() {
         if (response.ok) {
           const data = await response.json();
           setActiveJobId(data.job_id);
-          setIsProcessing(false);
-          alert(`Matching started asynchronously in the background!\nJob ID: ${data.job_id}\nYou can safely navigate away and monitor progress in the 'History Logs'.`);
+          if (typeof window !== "undefined") {
+            window.history.pushState(null, "", `?job_id=${data.job_id}`);
+          }
+          setIsProcessing(true);
+          setProgress({ current: 0, total: data.total_rows || 100 });
+
+          toast({
+            title: "Background Job Started",
+            description: `Campaign queued successfully. Monitoring live progress...`,
+            type: "success"
+          });
+
           fetchHistory();
+
+          // Connect to SSE stream to monitor live progress of background job!
+          const eventSource = new EventSource(`${API_URL}/api/matcher/job/${data.job_id}/stream`);
+
+          eventSource.addEventListener("info", (e) => {
+            const infoData = JSON.parse(e.data);
+            setProgress(prev => ({ ...prev, total: infoData.total_rows }));
+          });
+
+          eventSource.addEventListener("progress", (e) => {
+            const progressData = JSON.parse(e.data);
+            setProgress({
+              current: progressData.processed_rows,
+              total: progressData.total_rows
+            });
+          });
+
+          eventSource.addEventListener("result", (e) => {
+            const payload = JSON.parse(e.data) as MatchResult;
+            setResults(prev => {
+              if (prev.some(r => r.row_index === payload.row_index)) return prev;
+              return [payload, ...prev];
+            });
+          });
+
+          eventSource.addEventListener("complete", (e) => {
+            setIsProcessing(false);
+            setIsComplete(true);
+            eventSource.close();
+            fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=10000`)
+              .then(res => res.json())
+              .then(resData => setResults(resData.results || []));
+          });
+
+          eventSource.addEventListener("error", (e) => {
+            console.error("SSE stream error:", e);
+            setIsProcessing(false);
+            eventSource.close();
+          });
         } else {
           throw new Error("Failed to queue background match job");
         }
@@ -321,7 +402,11 @@ export default function DrugMatcher() {
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error(err);
-        alert("An error occurred during matching.");
+        toast({
+          title: "Execution Error",
+          description: "An error occurred during sheet matching processing.",
+          type: "error"
+        });
       }
     } finally {
       if (!background) {
@@ -520,7 +605,7 @@ export default function DrugMatcher() {
               setShowHistory(true);
               fetchHistory();
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 text-zinc-600 dark:text-zinc-300 font-bold text-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 border-zinc-800 dark:hover:bg-zinc-850 cursor-pointer text-zinc-600 dark:text-zinc-300 font-bold text-sm transition-all"
             title="View History Logs"
           >
             <Clock className="w-4 h-4 text-primary" />
@@ -559,7 +644,7 @@ export default function DrugMatcher() {
                   onClick={reset}
                   className="flex items-center gap-2 px-6 py-2 bg-primary text-white hover:bg-primary-dark rounded-full transition-all font-bold shadow-lg shadow-primary/20"
                 >
-                  <X className="w-4 h-4" />
+                  <Plus className="w-4 h-4" />
                   New Match
                 </button>
               )}
@@ -646,7 +731,7 @@ export default function DrugMatcher() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowHistory(false)}
-              className="fixed inset-0 z-[80] bg-zinc-950/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[9999] w-screen h-screen bg-zinc-950/60 backdrop-blur-sm"
             />
             {/* Drawer */}
             <motion.div
@@ -654,7 +739,7 @@ export default function DrugMatcher() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 z-[90] w-full max-w-md bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 overflow-y-auto"
+              className="fixed right-0 top-0 bottom-0 z-[10000] w-full max-w-md bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-800 pb-4 mb-6">
                 <div>
@@ -678,12 +763,12 @@ export default function DrugMatcher() {
                   No matching jobs found in history.
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {historyJobs.map((job) => {
+                <div className="space-y-4 pb-6">
+                  {historyJobs.slice(0, 3).map((job) => {
                     const isRunning = job.status === "running" || job.status === "pending";
                     const isSuccess = job.status === "completed";
                     const isFailed = job.status === "failed";
-                    
+
                     return (
                       <button
                         key={job.job_id}
@@ -695,7 +780,8 @@ export default function DrugMatcher() {
                             "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
                             isRunning && "bg-primary/10 text-primary border border-primary/20",
                             isSuccess && "bg-success/10 text-success border border-success/20",
-                            isFailed && "bg-error/10 text-error border border-error/20"
+                            isFailed && "bg-error/10 text-error border border-error/20",
+                            job.status === "stopped" && "bg-zinc-150 dark:bg-zinc-800 text-zinc-650 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
                           )}>
                             {job.status}
                           </span>
@@ -730,6 +816,16 @@ export default function DrugMatcher() {
                       </button>
                     );
                   })}
+
+                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                    <Link
+                      href="/dashboard/matcher"
+                      onClick={() => setShowHistory(false)}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all"
+                    >
+                      Show All Campaigns
+                    </Link>
+                  </div>
                 </div>
               )}
             </motion.div>
@@ -753,7 +849,7 @@ export default function DrugMatcher() {
       />
 
       {/* Export Dialog */}
-      <ExportDialog 
+      <ExportDialog
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
         results={results}
