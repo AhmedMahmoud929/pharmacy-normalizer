@@ -64,6 +64,7 @@ export default function DrugMatcher() {
   const [isComplete, setIsComplete] = useState(false);
   const [progress, setProgress] = useState<ProgressState>({ current: 0, total: 0 });
   const [results, setResults] = useState<MatchResult[]>([]);
+  const [previewRows, setPreviewRows] = useState<any[]>([]);
 
   // Background & History states
   const [background, setBackground] = useState(true);
@@ -122,7 +123,7 @@ export default function DrugMatcher() {
     const reader = new FileReader();
     reader.onload = (evt) => {
       const bstr = evt.target?.result;
-      const wb = XLSX.read(bstr, { type: 'binary', sheetRows: 5 });
+      const wb = XLSX.read(bstr, { type: 'binary', sheetRows: 15 });
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
@@ -130,6 +131,10 @@ export default function DrugMatcher() {
       if (data.length > 0) {
         const headers = data[0] as string[];
         setColumns(headers);
+
+        const rawJson = XLSX.utils.sheet_to_json(ws) as any[];
+        setPreviewRows(rawJson.slice(0, 5));
+
         const candidates = ["name", "product", "item", "الاسم", "drug"];
         const found = headers.find(h =>
           candidates.some(c => h.toLowerCase().includes(c.toLowerCase()))
@@ -252,6 +257,9 @@ export default function DrugMatcher() {
   const reset = () => {
     setFile(null);
     setResults([]);
+    setPreviewRows([]);
+    setColumns([]);
+    setSelectedColumn("");
     setIsComplete(false);
     setProgress({ current: 0, total: 0 });
     setCurrentPage(1);
@@ -663,30 +671,116 @@ export default function DrugMatcher() {
         <AnimatePresence>
           {(!isProcessing && !isComplete && results.length === 0) && (
             <motion.div
-              initial={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100, width: 0, marginRight: 0 }}
-              className="space-y-6 w-full overflow-hidden"
+              initial={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full overflow-hidden"
             >
-              <UploadZone file={file} onFileChange={handleFileChange} />
+              {!file ? (
+                <div className="max-w-xl mx-auto py-12">
+                  <UploadZone file={file} onFileChange={handleFileChange} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+                  {/* Left Column: Configuration Parameters */}
+                  <div className="lg:col-span-5 space-y-6">
+                    <MatchConfig
+                      file={file}
+                      columns={columns}
+                      selectedColumn={selectedColumn}
+                      setSelectedColumn={setSelectedColumn}
+                      matchThreshold={matchThreshold}
+                      setMatchThreshold={setMatchThreshold}
+                      reviewThreshold={reviewThreshold}
+                      setReviewThreshold={setReviewThreshold}
+                      parallel={parallel}
+                      setParallel={setParallel}
+                      workers={workers}
+                      setWorkers={setWorkers}
+                      isProcessing={isProcessing}
+                      onStart={startMatching}
+                      background={background}
+                      setBackground={setBackground}
+                    />
+                  </div>
 
-              <MatchConfig
-                file={file}
-                columns={columns}
-                selectedColumn={selectedColumn}
-                setSelectedColumn={setSelectedColumn}
-                matchThreshold={matchThreshold}
-                setMatchThreshold={setMatchThreshold}
-                reviewThreshold={reviewThreshold}
-                setReviewThreshold={setReviewThreshold}
-                parallel={parallel}
-                setParallel={setParallel}
-                workers={workers}
-                setWorkers={setWorkers}
-                isProcessing={isProcessing}
-                onStart={startMatching}
-                background={background}
-                setBackground={setBackground}
-              />
+                  {/* Right Column: Sheet Metadata and Data-Profiling Quick Preview */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <div className="p-6 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/50 shadow-sm space-y-6">
+                      <div className="flex items-center justify-between border-b border-primary/10 pb-4">
+                        <div>
+                          <h3 className="text-md font-bold text-foreground truncate max-w-[280px]">
+                            {file.name}
+                          </h3>
+                          <p className="text-xs text-zinc-400 mt-1">
+                            {(file.size / 1024).toFixed(1)} KB • {columns.length} columns detected
+                          </p>
+                        </div>
+                        <button
+                          onClick={reset}
+                          className="px-4 py-2 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-full transition-all"
+                        >
+                          Change Sheet
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 block">
+                          Spreadsheet Preview (First 5 Rows)
+                        </span>
+
+                        {previewRows.length === 0 ? (
+                          <div className="text-center py-8 text-zinc-500 text-sm">
+                            Loading spreadsheet preview...
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto border border-primary/10 rounded-xl max-h-[350px] scrollbar-thin">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-primary/5 text-zinc-400 font-bold uppercase border-b border-primary/10">
+                                  {columns.slice(0, 4).map((col, idx) => (
+                                    <th key={idx} className="p-3 whitespace-nowrap">
+                                      {col}
+                                    </th>
+                                  ))}
+                                  {columns.length > 4 && (
+                                    <th className="p-3 text-zinc-500 whitespace-nowrap">
+                                      +{columns.length - 4} More
+                                    </th>
+                                  )}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {previewRows.map((row, rowIdx) => (
+                                  <tr key={rowIdx} className="border-b border-zinc-100 dark:border-zinc-800/80 last:border-0 hover:bg-primary/5 transition-colors">
+                                    {columns.slice(0, 4).map((col, colIdx) => (
+                                      <td key={colIdx} className="p-3 text-zinc-600 dark:text-zinc-300 font-medium truncate max-w-[150px]">
+                                        {row[col] !== undefined ? String(row[col]) : "---"}
+                                      </td>
+                                    ))}
+                                    {columns.length > 4 && (
+                                      <td className="p-3 text-zinc-400 italic">
+                                        ...
+                                      </td>
+                                    )}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Informational Profiler Tip */}
+                      <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 animate-pulse" />
+                        <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
+                          <span className="text-primary font-bold">Data Profile Tip:</span> Ensure that you map the correct column key for pharmaceutical brand names on the left dashboard to get the highest fuzzy string sequence scores.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
