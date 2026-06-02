@@ -298,6 +298,13 @@ async def run_matcher_background(
                             review_count=review_count, 
                             no_match_count=no_match_count
                         )
+                        # Save incremental results.json so API users can view ongoing match chunks
+                        try:
+                            results_json_path = os.path.join(jobs_dir, "results.json")
+                            with open(results_json_path, "w", encoding="utf-8") as f:
+                                json.dump(results_list, f, indent=2, ensure_ascii=False)
+                        except Exception as write_err:
+                            print(f"Failed to write incremental results for job {job_id}: {write_err}")
                         
                     # Broadcast to SSE listeners
                     if job_id in job_listeners:
@@ -357,6 +364,13 @@ async def run_matcher_background(
                         review_count=review_count, 
                         no_match_count=no_match_count
                     )
+                    # Save incremental results.json so API users can view ongoing match chunks
+                    try:
+                        results_json_path = os.path.join(jobs_dir, "results.json")
+                        with open(results_json_path, "w", encoding="utf-8") as f:
+                            json.dump(results_list, f, indent=2, ensure_ascii=False)
+                    except Exception as write_err:
+                        print(f"Failed to write incremental results for job {job_id}: {write_err}")
                     
                 # Broadcast progress & row results
                 if job_id in job_listeners:

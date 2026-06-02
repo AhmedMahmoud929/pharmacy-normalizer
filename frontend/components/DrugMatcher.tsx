@@ -196,6 +196,19 @@ export default function DrugMatcher() {
       setResults([]);
       setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
 
+      // Fetch initial already-processed results so the table is not empty
+      fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to fetch initial results");
+        })
+        .then(data => {
+          setResults(data.results || []);
+        })
+        .catch(err => {
+          console.error("Error fetching initial results for running job:", err);
+        });
+
       // Subscribe to real-time streaming progress SSE channel
       const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
 
