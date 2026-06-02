@@ -223,7 +223,10 @@ export default function DrugMatcher() {
         eventSource.close();
         fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`)
           .then(res => res.json())
-          .then(data => setResults(data.results || []));
+          .then(data => {
+            setResults(data.results || []);
+            setIsExportDialogOpen(true);
+          });
       });
 
       eventSource.addEventListener("error", (e) => {
@@ -359,7 +362,10 @@ export default function DrugMatcher() {
             eventSource.close();
             fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=10000`)
               .then(res => res.json())
-              .then(resData => setResults(resData.results || []));
+              .then(resData => {
+                setResults(resData.results || []);
+                setIsExportDialogOpen(true);
+              });
           });
 
           eventSource.addEventListener("error", (e) => {
@@ -636,16 +642,18 @@ export default function DrugMatcher() {
             </div>
           )}
 
-          {(isComplete || (results.length > 0 && !isProcessing)) && (
+          {(isComplete || activeJobId || (results.length > 0 && !isProcessing)) && (
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsExportDialogOpen(true)}
-                className="flex items-center gap-2 px-5 py-2 bg-primary text-white hover:bg-primary/90 rounded-full transition-all font-bold shadow-lg shadow-primary/20"
-                title="Export Results"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
+              {isComplete && (
+                <button
+                  onClick={() => setIsExportDialogOpen(true)}
+                  className="flex items-center gap-2 px-5 py-2 bg-primary text-white hover:bg-primary/90 rounded-full transition-all font-bold shadow-lg shadow-primary/20"
+                  title="Export Results"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Export</span>
+                </button>
+              )}
 
               {(isComplete || activeJobId) && (
                 <button
