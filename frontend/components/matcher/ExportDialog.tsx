@@ -32,7 +32,7 @@ const columnOptions: ColumnOption[] = [
   { key: "jaccard", label: "Jaccard Token Overlap", group: "matcher", defaultChecked: false },
   { key: "sequence", label: "Sequence Similarity", group: "matcher", defaultChecked: false },
   { key: "matched_tokens", label: "Aligned Tokens", group: "matcher", defaultChecked: false },
-  
+
   // Product Fields
   { key: "id", label: "Product ID", group: "product", defaultChecked: true },
   { key: "name_en", label: "English Name", group: "product", defaultChecked: true },
@@ -55,11 +55,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [stage, setStage] = useState<Stage>(1);
   const [format, setFormat] = useState<ExportFormat | null>("xlsx");
   const [scope, setScope] = useState<ExportScope>("all");
-  
+
+  // Match Status Filtering State
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
+    "matched",
+    "review",
+    "no_match"
+  ]);
+
   // Slicing Range State
   const [offset, setOffset] = useState<number>(0);
   const [limit, setLimit] = useState<number>(100);
-  
+
   // Selected Columns Checklist
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
     columnOptions.filter(o => o.defaultChecked).map(o => o.key)
@@ -68,12 +75,24 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
 
-  // Set default bounds when results are loaded
+  // Filter results dynamically based on chosen statuses
+  const filteredResults = React.useMemo(() => {
+    return results.filter(res => {
+      const status = res.matches?.[0]?.status || "no_match";
+      return selectedStatuses.includes(status);
+    });
+  }, [results, selectedStatuses]);
+
+  // Set default bounds when filtered results are loaded/changed
   useEffect(() => {
-    if (results && results.length > 0) {
-      setLimit(results.length);
+    if (filteredResults && filteredResults.length > 0) {
+      setLimit(filteredResults.length);
+      setOffset(0);
+    } else {
+      setLimit(0);
+      setOffset(0);
     }
-  }, [results]);
+  }, [filteredResults]);
 
   if (!isOpen) return null;
 
@@ -92,7 +111,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   };
 
   const handleExport = async () => {
-    if (!format || results.length === 0 || selectedColumns.length === 0) return;
+    if (!format || filteredResults.length === 0 || selectedColumns.length === 0) return;
     setIsExporting(true);
     setExportComplete(false);
 
@@ -100,8 +119,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       // Artificially delay slightly to mimic compiling stream UX
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Resolve Range Slicing
-      let itemsToExport = [...results].sort((a, b) => a.row_index - b.row_index);
+      // Resolve Range Slicing using status-filtered results
+      let itemsToExport = [...filteredResults].sort((a, b) => a.row_index - b.row_index);
       if (scope === "slice") {
         itemsToExport = itemsToExport.slice(offset, offset + limit);
       }
@@ -111,9 +130,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         const topMatch = res.matches?.[0];
         const p = topMatch?.product_data || {};
         const v = topMatch?.variant_data || {};
-        
+
         const record: Record<string, any> = {};
-        
+
         selectedColumns.forEach(fieldId => {
           switch (fieldId) {
             case "row_index":
@@ -179,7 +198,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               break;
           }
         });
-        
+
         return record;
       });
 
@@ -230,6 +249,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setScope("all");
     setOffset(0);
     setLimit(results.length || 100);
+    setSelectedStatuses(["matched", "review", "no_match"]);
     setSelectedColumns(columnOptions.map(o => o.key));
     setExportComplete(false);
     setIsExporting(false);
@@ -286,11 +306,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   {/* Excel Card */}
                   <button
                     onClick={() => setFormat("xlsx")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "xlsx"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "xlsx"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "xlsx" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileSpreadsheet className="w-6 h-6 text-success" />
@@ -306,11 +325,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   {/* JSON Card */}
                   <button
                     onClick={() => setFormat("json")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "json"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "json"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "json" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileJson className="w-6 h-6 text-warning" />
@@ -326,11 +344,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   {/* Tab Delimited Plain Text */}
                   <button
                     onClick={() => setFormat("txt")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "txt"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "txt"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "txt" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileText className="w-6 h-6 text-zinc-500" />
@@ -347,6 +364,62 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             ) : (
               /* STAGE 2: Scope & Range Selection */
               <div className="space-y-6">
+                {/* Filter by Match Status */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    Filter by Match Status
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        key: "matched",
+                        label: "Matched",
+                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "matched").length,
+                        selectedClass: "bg-success/10 text-success border-success/30 font-bold",
+                        unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
+                      },
+                      {
+                        key: "review",
+                        label: "Review",
+                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "review").length,
+                        selectedClass: "bg-warning/10 text-warning border-warning/30 font-bold",
+                        unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
+                      },
+                      {
+                        key: "no_match",
+                        label: "No Match",
+                        count: results.filter(r => (r.matches?.[0]?.status || "no_match") === "no_match").length,
+                        selectedClass: "bg-error/10 text-error border-error/30 font-bold",
+                        unselectedClass: "bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
+                      },
+                    ].map(statusOpt => {
+                      const isSelected = selectedStatuses.includes(statusOpt.key);
+                      return (
+                        <button
+                          key={statusOpt.key}
+                          onClick={() => {
+                            setSelectedStatuses(prev =>
+                              prev.includes(statusOpt.key)
+                                ? prev.filter(s => s !== statusOpt.key)
+                                : [...prev, statusOpt.key]
+                            );
+                          }}
+                          className={`p-3 rounded-xl border text-center transition-all ${isSelected ? statusOpt.selectedClass : statusOpt.unselectedClass
+                            }`}
+                        >
+                          <p className="text-xs font-bold uppercase tracking-wider">{statusOpt.label}</p>
+                          <p className={`text-[9px] mt-0.5 ${isSelected ? "opacity-90 font-semibold" : "opacity-60"}`}>
+                            {statusOpt.count} items
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedStatuses.length === 0 && (
+                    <p className="text-[10px] text-error font-medium">Please select at least one status to export.</p>
+                  )}
+                </div>
+
                 {/* Define Scope */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -356,25 +429,25 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {/* All Option */}
                     <button
+                      disabled={filteredResults.length === 0}
                       onClick={() => setScope("all")}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        scope === "all"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "all"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Entire Sheet</p>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">All {results.length} items</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">All {filteredResults.length} items</p>
                     </button>
 
                     {/* Slice Option */}
                     <button
+                      disabled={filteredResults.length === 0}
                       onClick={() => setScope("slice")}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        scope === "slice"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "slice"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Custom Range</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">Slice offset/limit</p>
@@ -382,8 +455,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 </div>
 
-                {/* Slicing Controls (Only when slice is active) */}
-                {scope === "slice" && (
+                {/* Slicing Controls (Only when slice is active and we have items) */}
+                {scope === "slice" && filteredResults.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -396,7 +469,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={0}
-                        max={results.length - 1}
+                        max={Math.max(0, filteredResults.length - 1)}
                         value={offset}
                         onChange={(e) => setOffset(Math.max(0, parseInt(e.target.value) || 0))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -409,7 +482,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={1}
-                        max={results.length}
+                        max={filteredResults.length}
                         value={limit}
                         onChange={(e) => setLimit(Math.max(1, parseInt(e.target.value) || 1))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -447,11 +520,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               onClick={() => handleToggleColumn(col.key)}
                               className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                             >
-                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                                isChecked
-                                  ? "bg-primary border-primary text-white"
-                                  : "border-zinc-300 dark:border-zinc-700"
-                              }`}>
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                ? "bg-primary border-primary text-white"
+                                : "border-zinc-300 dark:border-zinc-700"
+                                }`}>
                                 {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                               </div>
                               <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
@@ -477,11 +549,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               onClick={() => handleToggleColumn(col.key)}
                               className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                             >
-                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                                isChecked
-                                  ? "bg-primary border-primary text-white"
-                                  : "border-zinc-300 dark:border-zinc-700"
-                              }`}>
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                ? "bg-primary border-primary text-white"
+                                : "border-zinc-300 dark:border-zinc-700"
+                                }`}>
                                 {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                               </div>
                               <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
@@ -524,7 +595,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               </button>
             ) : (
               <button
-                disabled={isExporting || selectedColumns.length === 0}
+                disabled={isExporting || selectedColumns.length === 0 || filteredResults.length === 0}
                 onClick={handleExport}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
               >
