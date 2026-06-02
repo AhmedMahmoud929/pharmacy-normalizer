@@ -161,7 +161,7 @@ export default function DrugMatcher() {
     }
   }, []);
 
-  const selectJob = async (job: any) => {
+  const selectJob = async (job: any, autoOpenExport = false) => {
     setActiveJobId(job.job_id);
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", `?job_id=${job.job_id}`);
@@ -183,6 +183,9 @@ export default function DrugMatcher() {
         if (response.ok) {
           const data = await response.json();
           setResults(data.results || []);
+          if (autoOpenExport) {
+            setIsExportDialogOpen(true);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch job results:", err);

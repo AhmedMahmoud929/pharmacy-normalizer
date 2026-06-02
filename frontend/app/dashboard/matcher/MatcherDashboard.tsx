@@ -7,6 +7,7 @@ import {
   CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ExportDialog } from "@/components/matcher/ExportDialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -30,6 +31,26 @@ export default function MatcherDashboard() {
   const [jobs, setJobs] = useState<MatchJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [selectedJobResults, setSelectedJobResults] = useState<any[]>([]);
+  const [exportingJobId, setExportingJobId] = useState<string | null>(null);
+
+  const handleExportClick = async (jobId: string) => {
+    setExportingJobId(jobId);
+    try {
+      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=10000`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedJobResults(data.results || []);
+        setIsExportDialogOpen(true);
+      }
+    } catch (err) {
+      console.error("Failed to fetch results for export:", err);
+    } finally {
+      setExportingJobId(null);
+    }
+  };
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -299,14 +320,18 @@ export default function MatcherDashboard() {
 
                           {/* Export Compiled Excel */}
                           {isSuccess && (
-                            <a
-                              href={`${API_URL}/api/matcher/job/${job.job_id}/export`}
-                              download
-                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
+                            <button
+                              onClick={() => handleExportClick(job.job_id)}
+                              disabled={exportingJobId !== null}
+                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all disabled:opacity-50 inline-flex items-center justify-center"
                               title="Export Catalog Spreadsheet"
                             >
-                              <Download className="w-4 h-4" />
-                            </a>
+                              {exportingJobId === job.job_id ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-success" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
+                            </button>
                           )}
                         </div>
                       </td>
@@ -318,6 +343,13 @@ export default function MatcherDashboard() {
           </div>
         )}
       </div>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        results={selectedJobResults}
+      />
     </div>
   );
 }
