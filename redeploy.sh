@@ -46,7 +46,7 @@ if [ -d "backend/venv" ]; then
     
     echo -e "${CYAN}Installing backend & crawler packages...${NC}"
     pip install --upgrade pip
-    pip install fastapi uvicorn pandas openpyxl pydantic meilisearch requests rich beautifulsoup4 lxml
+    pip install fastapi uvicorn pandas openpyxl pydantic meilisearch requests rich beautifulsoup4 lxml tqdm
     
     deactivate
     echo -e "${GREEN}✔ Backend packages aligned.${NC}"
