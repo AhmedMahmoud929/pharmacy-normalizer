@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2 } from "lucide-react";
+import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Folder, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ interface ExportWizardModalProps {
   totalProducts: number;
 }
 
-type Stage = 1 | 2;
+type Stage = 0 | 1 | 2;
 type ExportFormat = "xlsx" | "json" | "txt";
 type ExportScope = "all" | "filtered" | "slice";
 
@@ -43,7 +43,9 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   activeSearch,
   totalProducts
 }) => {
-  const [stage, setStage] = useState<Stage>(1);
+  const [stage, setStage] = useState<Stage>(0);
+  const [exportType, setExportType] = useState<"data" | "media">("data");
+  const [mediaTypes, setMediaTypes] = useState<string[]>(["products", "brands"]);
   const [format, setFormat] = useState<ExportFormat | null>(null);
   const [scope, setScope] = useState<ExportScope>("all");
   
@@ -111,8 +113,53 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
     }
   };
 
+  const handleMediaExport = async () => {
+    setIsExporting(true);
+    setExportComplete(false);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      const response = await fetch(`${API_URL}/db/export/media`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          media_types: mediaTypes,
+          image_names: null
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to compile media zip");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      a.href = url;
+      a.download = `chefaa_catalog_media_export_${timestamp}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setExportComplete(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      resetAndClose();
+    } catch (err) {
+      console.error("Media export failed:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const resetAndClose = () => {
-    setStage(1);
+    setStage(0);
+    setExportType("data");
+    setMediaTypes(["products", "brands"]);
     setFormat(null);
     setScope("all");
     setOffset(0);
@@ -149,7 +196,13 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                 Export Catalog Data
               </h2>
               <p className="text-xs text-zinc-500 mt-1">
-                {stage === 1 ? "Step 1: Choose target file format" : "Step 2: Customize export scope & attributes"}
+                {stage === 0
+                  ? "Choose between exporting spreadsheet data or downloading local media assets"
+                  : exportType === "media"
+                  ? "Customize media type scope"
+                  : stage === 1
+                  ? "Step 1: Choose target file format"
+                  : "Step 2: Customize export scope & attributes"}
               </p>
             </div>
             <button
@@ -162,7 +215,103 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
 
           {/* Wizard Body - Scrollable */}
           <div className="p-6 overflow-y-auto flex-1 space-y-6">
-            {stage === 1 ? (
+            {stage === 0 ? (
+              /* STAGE 0: Export Type Selector */
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+                  Select what you want to export:
+                </p>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Data Card */}
+                  <button
+                    onClick={() => setExportType("data")}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
+                      exportType === "data"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <div className={`p-3 rounded-xl ${exportType === "data" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
+                      <FileSpreadsheet className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">Product Catalog Sheets (Spreadsheet)</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Download structured catalog details, prices, stocks, and storefront links in Excel, JSON, or TSV formats.
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Media Card */}
+                  <button
+                    onClick={() => setExportType("media")}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
+                      exportType === "media"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <div className={`p-3 rounded-xl ${exportType === "media" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
+                      <Image className="w-6 h-6 text-success" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">Media Assets Directory (ZIP Archive)</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Compile and download a compressed ZIP package of ALL locally stored brand logos and product images from the storage.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            ) : exportType === "media" ? (
+              /* MEDIA ASSETS CONFIGURATION SCREEN */
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    Select Media Types to Include
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "products", label: "Products Media", desc: "All product image assets" },
+                      { key: "brands", label: "Brands Media", desc: "All manufacturer/brand logos" }
+                    ].map(typeOpt => {
+                      const isSelected = mediaTypes.includes(typeOpt.key);
+                      return (
+                        <button
+                          key={typeOpt.key}
+                          onClick={() => {
+                            setMediaTypes(prev =>
+                              prev.includes(typeOpt.key)
+                                ? prev.filter(t => t !== typeOpt.key)
+                                : [...prev, typeOpt.key]
+                            );
+                          }}
+                          className={`p-4 rounded-2xl border text-left transition-all ${
+                            isSelected
+                              ? "border-primary bg-primary/5 text-primary shadow-sm"
+                              : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="font-bold text-sm">{typeOpt.label}</p>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                              isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-zinc-500 mt-1">{typeOpt.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {mediaTypes.length === 0 && (
+                    <p className="text-[10px] text-error font-medium">Please select at least one media type to export.</p>
+                  )}
+                </div>
+              </div>
+            ) : stage === 1 ? (
               /* STAGE 1: Format Selector */
               <div className="space-y-4">
                 <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
@@ -365,10 +514,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
 
           {/* Action Bar Footer */}
           <div className="p-6 bg-zinc-50 dark:bg-black/20 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-            {stage === 2 ? (
+            {stage > 0 ? (
               <button
                 disabled={isExporting}
-                onClick={() => setStage(1)}
+                onClick={() => setStage(prev => (exportType === "media" ? 0 : (prev - 1) as Stage))}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold rounded-xl text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -378,7 +527,38 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
               <div />
             )}
 
-            {stage === 1 ? (
+            {stage === 0 ? (
+              <button
+                onClick={() => setStage(1)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+              >
+                Continue
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : exportType === "media" ? (
+              <button
+                disabled={isExporting || mediaTypes.length === 0}
+                onClick={handleMediaExport}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Zipping Media...
+                  </>
+                ) : exportComplete ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    ZIP Triggered!
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Generate & Download Media
+                  </>
+                )}
+              </button>
+            ) : stage === 1 ? (
               <button
                 disabled={!format}
                 onClick={() => setStage(2)}
@@ -406,7 +586,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    Generate & Download
+                    Generate & Download Data
                   </>
                 )}
               </button>

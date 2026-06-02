@@ -681,6 +681,49 @@ async def export_database(
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
 
+class MediaExportRequest(BaseModel):
+    media_types: List[str]
+    image_names: Optional[List[str]] = None
+
+@app.post("/db/export/media")
+async def export_media(req: MediaExportRequest):
+    media_types = req.media_types or []
+    image_names_set = set(req.image_names) if req.image_names else None
+    
+    zip_buffer = io.BytesIO()
+    
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        # Check products directory
+        if "products" in media_types:
+            prod_dir = os.path.join(project_root, "data", "media", "products")
+            if os.path.exists(prod_dir):
+                for filename in os.listdir(prod_dir):
+                    file_path = os.path.join(prod_dir, filename)
+                    if os.path.isfile(file_path):
+                        if image_names_set is None or filename in image_names_set:
+                            zipf.write(file_path, os.path.join("products", filename))
+                            
+        # Check brands directory
+        if "brands" in media_types:
+            brand_dir = os.path.join(project_root, "data", "media", "brands")
+            if os.path.exists(brand_dir):
+                for filename in os.listdir(brand_dir):
+                    file_path = os.path.join(brand_dir, filename)
+                    if os.path.isfile(file_path):
+                        if image_names_set is None or filename in image_names_set:
+                            zipf.write(file_path, os.path.join("brands", filename))
+                            
+        if not zipf.namelist():
+            zipf.writestr("info.txt", "No matching local images found for the export.")
+                            
+    zip_buffer.seek(0)
+    
+    headers = {
+        "Content-Disposition": 'attachment; filename="chefaa_media_export.zip"',
+        "Content-Type": "application/zip"
+    }
+    return StreamingResponse(zip_buffer, headers=headers)
+
 # =====================================================================
 # SHEFAA CRAWLER CORE BACKGROUND ORCHESTRATION & TELEMETRY STREAMING
 # =====================================================================
