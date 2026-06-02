@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Folder, Image } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ interface ExportWizardModalProps {
   onClose: () => void;
   activeSearch: string;
   totalProducts: number;
+  mode?: "products" | "brands" | "categories";
 }
 
 type Stage = 0 | 1 | 2;
@@ -37,11 +38,30 @@ const columnOptions: ColumnOption[] = [
   { key: "image_name", label: "Image Name", defaultChecked: true }
 ];
 
+const brandColumnOptions: ColumnOption[] = [
+  { key: "name", label: "Brand Name", defaultChecked: true },
+  { key: "slug", label: "Brand Slug", defaultChecked: true },
+  { key: "image", label: "Logo Asset URL", defaultChecked: true },
+  { key: "count", label: "Product Count", defaultChecked: true },
+  { key: "is_local_image", label: "Local Image Flag", defaultChecked: true },
+  { key: "local_image_url", label: "Local Image Path", defaultChecked: true }
+];
+
+const categoryColumnOptions: ColumnOption[] = [
+  { key: "name_en", label: "English Name", defaultChecked: true },
+  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
+  { key: "slug", label: "Category Slug", defaultChecked: true },
+  { key: "level", label: "Taxonomy Level", defaultChecked: true },
+  { key: "parent_slug", label: "Parent Category Slug", defaultChecked: true },
+  { key: "count", label: "Product Count", defaultChecked: true }
+];
+
 export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   isOpen,
   onClose,
   activeSearch,
-  totalProducts
+  totalProducts,
+  mode = "products"
 }) => {
   const [stage, setStage] = useState<Stage>(0);
   const [exportType, setExportType] = useState<"data" | "media">("data");
@@ -54,14 +74,48 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   const [limit, setLimit] = useState<number>(1000);
   
   // Selected Columns Checklist
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key)
-  );
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  
+  // Selected Levels Checklist (only for categories export)
+  const [selectedLevels, setSelectedLevels] = useState<number[]>([1, 2, 3]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      setExportComplete(false);
+      setIsExporting(false);
+      setFormat(null);
+      setScope("all");
+      setOffset(0);
+      setLimit(1000);
+      
+      if (mode === "categories") {
+        setStage(1); // Categories skip Stage 0
+        setExportType("data");
+        setSelectedColumns(categoryColumnOptions.map(o => o.key));
+        setSelectedLevels([1, 2, 3]);
+      } else if (mode === "brands") {
+        setStage(0);
+        setExportType("data");
+        setMediaTypes(["brands"]);
+        setSelectedColumns(brandColumnOptions.map(o => o.key));
+      } else {
+        setStage(0);
+        setExportType("data");
+        setMediaTypes(["products", "brands"]);
+        setSelectedColumns(columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
+      }
+    }
+  }, [isOpen, mode]);
+
   if (!isOpen) return null;
+
+  const currentColumnOptions = 
+    mode === "brands" ? brandColumnOptions : 
+    mode === "categories" ? categoryColumnOptions : 
+    columnOptions;
 
   const handleToggleColumn = (key: string) => {
     setSelectedColumns(prev =>
@@ -70,11 +124,17 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   };
 
   const handleSelectAllColumns = () => {
-    if (selectedColumns.length === columnOptions.length) {
+    if (selectedColumns.length === currentColumnOptions.length) {
       setSelectedColumns([]);
     } else {
-      setSelectedColumns(columnOptions.map(o => o.key));
+      setSelectedColumns(currentColumnOptions.map(o => o.key));
     }
+  };
+
+  const handleToggleLevel = (lvl: number) => {
+    setSelectedLevels(prev =>
+      prev.includes(lvl) ? prev.filter(l => l !== lvl) : [...prev, lvl]
+    );
   };
 
   const handleExport = async () => {
@@ -83,29 +143,40 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
     setExportComplete(false);
 
     try {
-      // Build Columns Params
       const colParam = selectedColumns.join(",");
-      
-      // Build API URL
-      let url = `${API_URL}/db/export?format=${format}&scope=${scope}&columns=${colParam}`;
-      
-      if (scope === "filtered" && activeSearch) {
-        url += `&search=${encodeURIComponent(activeSearch)}`;
-      } else if (scope === "slice") {
-        url += `&offset=${offset}&limit=${limit}`;
-      }
+      let url = "";
 
-      // Trigger browser download by creating a temporary anchor element
+      if (mode === "products") {
+        url = `${API_URL}/db/export?format=${format}&scope=${scope}&columns=${colParam}`;
+        if (scope === "filtered" && activeSearch) {
+          url += `&search=${encodeURIComponent(activeSearch)}`;
+        } else if (scope === "slice") {
+          url += `&offset=${offset}&limit=${limit}`;
+        }
+      } else if (mode === "brands") {
+        url = `${API_URL}/db/export/brands?format=${format}&scope=${scope}&columns=${colParam}`;
+        if (scope === "slice") {
+          url += `&offset=${offset}&limit=${limit}`;
+        }
+      } else if (mode === "categories") {
+        const lvlParam = selectedLevels.join(",");
+        url = `${API_URL}/db/export/categories?format=${format}&scope=${scope}&columns=${colParam}&levels=${lvlParam}`;
+        if (scope === "slice") {
+          url += `&offset=${offset}&limit=${limit}`;
+        }
+      }
+      
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `chefaa_products_export.${format}`);
+      link.setAttribute("download", `chefaa_${mode}_export.${format}`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // Artificially wait for the download stream initialization before completing
       await new Promise(resolve => setTimeout(resolve, 1500));
       setExportComplete(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      resetAndClose();
     } catch (err) {
       console.error("Export compilation failed:", err);
     } finally {
@@ -140,7 +211,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
       const a = document.createElement("a");
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       a.href = url;
-      a.download = `chefaa_catalog_media_export_${timestamp}.zip`;
+      a.download = `chefaa_${mode}_media_export_${timestamp}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -164,10 +235,28 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
     setScope("all");
     setOffset(0);
     setLimit(1000);
-    setSelectedColumns(columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
+    setSelectedColumns([]);
+    setSelectedLevels([1, 2, 3]);
     setExportComplete(false);
     setIsExporting(false);
     onClose();
+  };
+
+  const getModalTitle = () => {
+    if (mode === "brands") return "Export Brands Catalog";
+    if (mode === "categories") return "Export Categories Taxonomy";
+    return "Export Catalog Data";
+  };
+
+  const getModalSubtitle = () => {
+    if (stage === 0) {
+      return mode === "brands" 
+        ? "Choose between exporting brand spreadsheet data or brand logo assets"
+        : "Choose between exporting spreadsheet data or downloading local media assets";
+    }
+    if (exportType === "media") return "Customize media type scope";
+    if (stage === 1) return "Step 1: Choose target file format";
+    return "Step 2: Customize export scope & attributes";
   };
 
   return (
@@ -193,16 +282,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                Export Catalog Data
+                {getModalTitle()}
               </h2>
               <p className="text-xs text-zinc-500 mt-1">
-                {stage === 0
-                  ? "Choose between exporting spreadsheet data or downloading local media assets"
-                  : exportType === "media"
-                  ? "Customize media type scope"
-                  : stage === 1
-                  ? "Step 1: Choose target file format"
-                  : "Step 2: Customize export scope & attributes"}
+                {getModalSubtitle()}
               </p>
             </div>
             <button
@@ -236,9 +319,13 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                       <FileSpreadsheet className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-sm">Product Catalog Sheets (Spreadsheet)</p>
+                      <p className="font-bold text-sm">
+                        {mode === "brands" ? "Brands Catalog Sheets (Spreadsheet)" : "Product Catalog Sheets (Spreadsheet)"}
+                      </p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Download structured catalog details, prices, stocks, and storefront links in Excel, JSON, or TSV formats.
+                        {mode === "brands"
+                          ? "Download structured brand details, names, reference slugs, and logo URLs in Excel, JSON, or TXT."
+                          : "Download structured catalog details, prices, stocks, and storefront links in Excel, JSON, or TSV formats."}
                       </p>
                     </div>
                   </button>
@@ -258,7 +345,9 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     <div className="flex-1">
                       <p className="font-bold text-sm">Media Assets Directory (ZIP Archive)</p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Compile and download a compressed ZIP package of ALL locally stored brand logos and product images from the storage.
+                        {mode === "brands"
+                          ? "Compile and download a compressed ZIP package of ALL locally stored brand logos from the storage."
+                          : "Compile and download a compressed ZIP package of ALL locally stored brand logos and product images from the storage."}
                       </p>
                     </div>
                   </button>
@@ -273,9 +362,9 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { key: "products", label: "Products Media", desc: "All product image assets" },
-                      { key: "brands", label: "Brands Media", desc: "All manufacturer/brand logos" }
-                    ].map(typeOpt => {
+                      { key: "products", label: "Products Media", desc: "All product image assets", hidden: mode === "brands" },
+                      { key: "brands", label: "Brands Media", desc: "All manufacturer/brand logos", hidden: false }
+                    ].filter(x => !x.hidden).map(typeOpt => {
                       const isSelected = mediaTypes.includes(typeOpt.key);
                       return (
                         <button
@@ -315,7 +404,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
               /* STAGE 1: Format Selector */
               <div className="space-y-4">
                 <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-                  Select how you want to download and open the product catalog:
+                  Select how you want to download and open the spreadsheet feed:
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">
@@ -334,7 +423,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     <div className="flex-1">
                       <p className="font-bold text-sm">Excel Spreadsheet (.xlsx)</p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Ideal for analysis in Excel or Google Sheets. Fully flattens categories and brand slugs.
+                        Ideal for analysis in Excel or Google Sheets. Fully flattens reference data attributes.
                       </p>
                     </div>
                   </button>
@@ -354,7 +443,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     <div className="flex-1">
                       <p className="font-bold text-sm">JSON Data Feed (.json)</p>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Raw nested structures. Optimized for developers, database loading, or automated integrations.
+                        Raw data feeds. Optimized for developers, database loading, or automated integrations.
                       </p>
                     </div>
                   </button>
@@ -399,13 +488,15 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                           : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
                       }`}
                     >
-                      <p className="text-xs font-bold">Entire Catalog</p>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">All ~29k items</p>
+                      <p className="text-xs font-bold">Entire Dataset</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5">
+                        {mode === "products" ? "All ~29k items" : "All reference entries"}
+                      </p>
                     </button>
 
-                    {/* Filtered Option */}
+                    {/* Filtered Option (only available for products) */}
                     <button
-                      disabled={!activeSearch}
+                      disabled={!activeSearch || mode !== "products"}
                       onClick={() => setScope("filtered")}
                       className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                         scope === "filtered"
@@ -415,7 +506,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     >
                       <p className="text-xs font-bold">Active Filters</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">
-                        {activeSearch ? `Query: "${activeSearch}"` : "No Active Search"}
+                        {activeSearch && mode === "products" ? `Query: "${activeSearch}"` : "Not Applicable"}
                       </p>
                     </button>
 
@@ -448,7 +539,6 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                       <input
                         type="number"
                         min={0}
-                        max={totalProducts}
                         value={offset}
                         onChange={(e) => setOffset(Math.max(0, parseInt(e.target.value) || 0))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -461,13 +551,44 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                       <input
                         type="number"
                         min={1}
-                        max={totalProducts}
                         value={limit}
                         onChange={(e) => setLimit(Math.max(1, parseInt(e.target.value) || 1))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                       />
                     </div>
                   </motion.div>
+                )}
+
+                {/* Categories Taxonomy Levels Checklist */}
+                {mode === "categories" && (
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      Include Taxonomy Levels
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2 bg-zinc-50 dark:bg-black/20 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                      {[1, 2, 3].map(lvl => {
+                        const isChecked = selectedLevels.includes(lvl);
+                        return (
+                          <button
+                            key={lvl}
+                            onClick={() => handleToggleLevel(lvl)}
+                            className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                          >
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                              isChecked
+                                ? "bg-primary border-primary text-white"
+                                : "border-zinc-300 dark:border-zinc-700"
+                            }`}>
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className="text-zinc-700 dark:text-zinc-300 font-bold">
+                              Level {lvl}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
                 {/* Columns Selection Checklist */}
@@ -480,12 +601,12 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                       onClick={handleSelectAllColumns}
                       className="text-[10px] font-bold text-primary hover:underline uppercase"
                     >
-                      {selectedColumns.length === columnOptions.length ? "Deselect All" : "Select All"}
+                      {selectedColumns.length === currentColumnOptions.length ? "Deselect All" : "Select All"}
                     </button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                    {columnOptions.map(col => {
+                    {currentColumnOptions.map(col => {
                       const isChecked = selectedColumns.includes(col.key);
                       return (
                         <button
@@ -514,11 +635,11 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
 
           {/* Action Bar Footer */}
           <div className="p-6 bg-zinc-50 dark:bg-black/20 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-            {stage > 0 ? (
+            {stage > (mode === "categories" ? 1 : 0) ? (
               <button
                 disabled={isExporting}
                 onClick={() => setStage(prev => (exportType === "media" ? 0 : (prev - 1) as Stage))}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold rounded-xl text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold rounded-xl text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
@@ -530,7 +651,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
             {stage === 0 ? (
               <button
                 onClick={() => setStage(1)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer"
               >
                 Continue
                 <ChevronRight className="w-4 h-4" />
@@ -539,7 +660,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
               <button
                 disabled={isExporting || mediaTypes.length === 0}
                 onClick={handleMediaExport}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all cursor-pointer"
               >
                 {isExporting ? (
                   <>
@@ -562,16 +683,16 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
               <button
                 disabled={!format}
                 onClick={() => setStage(2)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer"
               >
                 Configure Scope
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
               <button
-                disabled={isExporting || selectedColumns.length === 0}
+                disabled={isExporting || selectedColumns.length === 0 || (mode === "categories" && selectedLevels.length === 0)}
                 onClick={handleExport}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all cursor-pointer"
               >
                 {isExporting ? (
                   <>

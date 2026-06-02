@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Database, Search, ChevronLeft, ChevronRight, Loader2, Package, Tag, Layers, ExternalLink, Filter, Eye, Download, LayoutGrid, List, MoreHorizontal } from "lucide-react";
+import { Database, Search, ChevronLeft, ChevronRight, Loader2, Package, Tag, Layers, ExternalLink, Filter, Eye, Download, LayoutGrid, List, MoreHorizontal, Folder } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
 import { ProductDetailModal } from "@/components/matcher/ProductDetailModal";
@@ -19,7 +19,11 @@ interface Brand {
 
 interface Category {
   name: string;
+  slug: string;
   count?: number;
+  level?: number;
+  parent_slug?: string | null;
+  children?: Category[];
 }
 
 interface Product {
@@ -37,6 +41,181 @@ interface Product {
   brand?: Brand;
   category?: Category;
 }
+
+// Collapsible Categories Tree accordion view
+const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
+  const [expandedL1, setExpandedL1] = useState<Record<string, boolean>>({});
+  const [expandedL2, setExpandedL2] = useState<Record<string, boolean>>({});
+
+  const toggleL1 = (slug: string) => {
+    setExpandedL1(prev => ({ ...prev, [slug]: !prev[slug] }));
+  };
+
+  const toggleL2 = (slug: string) => {
+    setExpandedL2(prev => ({ ...prev, [slug]: !prev[slug] }));
+  };
+
+  if (!taxonomy || taxonomy.length === 0) {
+    return (
+      <div className="p-12 text-center text-zinc-500">
+        No taxonomy categories discovered in database.
+      </div>
+    );
+  }
+
+  return (
+    <div className="divide-y divide-zinc-100 dark:divide-zinc-800 bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
+      {taxonomy.map((l1) => {
+        const isL1Expanded = !!expandedL1[l1.slug];
+        const hasL2 = l1.children && l1.children.length > 0;
+        
+        return (
+          <div key={l1.slug} className="group">
+            {/* Level 1 Accordion Header */}
+            <button
+              onClick={() => toggleL1(l1.slug)}
+              className={cn(
+                "w-full flex items-center justify-between p-6 text-left transition-colors cursor-pointer",
+                isL1Expanded ? "bg-zinc-50 dark:bg-zinc-950/45 border-b border-zinc-100 dark:border-zinc-800/80" : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
+              )}
+            >
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  "p-3 rounded-2xl transition-all",
+                  isL1Expanded ? "bg-primary text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 group-hover:text-primary"
+                )}>
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-sm sm:text-base flex items-center gap-2">
+                    {l1.name}
+                    <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 uppercase tracking-widest text-[8px]">Level 1</span>
+                  </h3>
+                  <p className="text-xs text-zinc-400 font-medium mt-0.5">{l1.count} products direct & nested</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {hasL2 && l1.children && (
+                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold bg-zinc-100 dark:bg-zinc-800/50 px-3 py-1 rounded-xl">
+                    {l1.children.length} subcategories
+                  </span>
+                )}
+                <motion.div
+                  animate={{ rotate: isL1Expanded ? 90 : 0 }}
+                  className="p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </motion.div>
+              </div>
+            </button>
+
+            {/* Level 2 Accordion Panel */}
+            <AnimatePresence initial={false}>
+              {isL1Expanded && hasL2 && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="overflow-hidden bg-zinc-50/40 dark:bg-black/10"
+                >
+                  <div className="px-6 py-4 space-y-3 pl-12 sm:pl-16 border-b border-zinc-100 dark:border-zinc-800/50">
+                    {l1.children?.map((l2: any) => {
+                      const isL2Expanded = !!expandedL2[l2.slug];
+                      const hasL3 = l2.children && l2.children.length > 0;
+
+                      return (
+                        <div key={l2.slug} className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/60 rounded-2xl overflow-hidden shadow-sm">
+                          {/* Level 2 Accordion Header */}
+                          <button
+                            onClick={() => toggleL2(l2.slug)}
+                            className={cn(
+                              "w-full flex items-center justify-between p-4 text-left transition-colors cursor-pointer",
+                              isL2Expanded ? "bg-zinc-50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800/50" : "hover:bg-zinc-50/40 dark:hover:bg-zinc-800/20"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "p-2 rounded-xl",
+                                isL2Expanded ? "bg-zinc-100 dark:bg-zinc-800 text-primary" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                              )}>
+                                <Folder className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-zinc-850 dark:text-zinc-200 text-xs sm:text-sm flex items-center gap-1.5">
+                                  {l2.name}
+                                  <span className="text-[8px] font-extrabold px-1.5 py-0.2 bg-zinc-150 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Level 2</span>
+                                </h4>
+                                <p className="text-[10px] text-zinc-400 font-medium mt-0.5">{l2.count} products</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {hasL3 && (
+                                <span className="text-[9px] text-zinc-400 dark:text-zinc-550 font-bold bg-zinc-100 dark:bg-zinc-800/50 px-2.5 py-0.5 rounded-lg">
+                                  {l2.children.length} leaves
+                                </span>
+                              )}
+                              <motion.div
+                                animate={{ rotate: isL2Expanded ? 90 : 0 }}
+                                className="p-1 rounded-full bg-zinc-50 dark:bg-zinc-800/40 text-zinc-400"
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </motion.div>
+                            </div>
+                          </button>
+
+                          {/* Level 3 Collapsible Tree Leaves */}
+                          <AnimatePresence initial={false}>
+                            {isL2Expanded && hasL3 && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
+                                className="overflow-hidden bg-zinc-50/20 dark:bg-black/5"
+                              >
+                                <div className="p-4 pl-8 sm:pl-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {l2.children.map((l3: any) => (
+                                    <div
+                                      key={l3.slug}
+                                      className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/50 rounded-xl hover:border-primary/20 transition-all hover:shadow-sm"
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <div className="p-1.5 bg-zinc-150 dark:bg-zinc-800 text-zinc-400 rounded-lg flex-shrink-0">
+                                          <Tag className="w-3.5 h-3.5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <p className="font-bold text-zinc-700 dark:text-zinc-300 text-xs truncate flex items-center gap-1.5">
+                                            {l3.name}
+                                            <span className="text-[7px] font-extrabold px-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Level 3</span>
+                                          </p>
+                                        </div>
+                                      </div>
+                                      
+                                      <span className="text-[9px] font-bold text-zinc-400 bg-zinc-50 dark:bg-zinc-950 px-2 py-0.5 rounded border border-zinc-100/50 dark:border-zinc-850 flex-shrink-0">
+                                        {l3.count} items
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default function BrowsePage() {
   const [activeTab, setActiveTab] = useState<TabType>("products");
@@ -69,7 +248,7 @@ export default function BrowsePage() {
       } else if (activeTab === "brands") {
         url = `${API_URL}/db/brands`;
       } else if (activeTab === "categories") {
-        url = `${API_URL}/db/categories`;
+        url = `${API_URL}/db/categories/taxonomy`;
       }
 
       const res = await fetch(url);
@@ -141,7 +320,7 @@ export default function BrowsePage() {
                   setSearch("");
                 }}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all",
+                  "flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer",
                   activeTab === tab.id
                     ? "bg-white dark:bg-zinc-900 text-primary shadow-sm ring-1 ring-black/5"
                     : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -154,72 +333,74 @@ export default function BrowsePage() {
           </div>
         </div>
 
-        {activeTab === "products" && (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            <form onSubmit={handleSearch} className="relative w-full sm:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products, brands, SKUs..."
-                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
-              />
-            </form>
-            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm">
-              <Filter className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-              <select
-                value={imageStatusFilter}
-                onChange={(e) => {
-                  setImageStatusFilter(e.target.value);
-                  setPage(0);
-                }}
-                className="bg-transparent text-sm font-bold text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer border-none p-0 focus:ring-0"
-              >
-                <option value="all">All Images</option>
-                <option value="local">Local Images</option>
-                <option value="cdn">CDN Images</option>
-              </select>
-            </div>
-            
-            <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-              <button
-                type="button"
-                onClick={() => setViewMode("list")}
-                className={cn(
-                  "p-2 rounded-xl transition-all cursor-pointer",
-                  viewMode === "list"
-                    ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                )}
-                title="List View"
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "p-2 rounded-xl transition-all cursor-pointer",
-                  viewMode === "grid"
-                    ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                )}
-                title="Grid View"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <button
-              onClick={() => setIsExportOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer whitespace-nowrap"
-            >
-              <Download className="w-4 h-4" />
-              Export Catalog
-            </button>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+          {activeTab === "products" && (
+            <>
+              <form onSubmit={handleSearch} className="relative w-full sm:w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search products, brands, SKUs..."
+                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
+                />
+              </form>
+              <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm">
+                <Filter className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                <select
+                  value={imageStatusFilter}
+                  onChange={(e) => {
+                    setImageStatusFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  className="bg-transparent text-sm font-bold text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer border-none p-0 focus:ring-0"
+                >
+                  <option value="all">All Images</option>
+                  <option value="local">Local Images</option>
+                  <option value="cdn">CDN Images</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "p-2 rounded-xl transition-all cursor-pointer",
+                    viewMode === "list"
+                      ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  )}
+                  title="List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "p-2 rounded-xl transition-all cursor-pointer",
+                    viewMode === "grid"
+                      ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  )}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </div>
+            </>
+          )}
+          
+          <button
+            onClick={() => setIsExportOpen(true)}
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            {activeTab === "products" ? "Export Catalog" : activeTab === "brands" ? "Export Brands" : "Export Categories"}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
@@ -255,7 +436,7 @@ export default function BrowsePage() {
                     className="w-full text-left border-collapse"
                   >
                     <thead>
-                      <tr className="bg-zinc-50 dark:bg-black/50 border-b border-zinc-100 dark:border-zinc-800">
+                      <tr className="bg-zinc-50 dark:bg-black/50 border-b border-zinc-200 dark:border-zinc-800">
                         <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Product Info</th>
                         <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Categorization</th>
                         <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 whitespace-nowrap">Image Status</th>
@@ -324,7 +505,7 @@ export default function BrowsePage() {
                                   setSelectedProduct(p);
                                   setIsDetailOpen(true);
                                 }}
-                                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-primary transition-colors cursor-pointer"
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-primary transition-colors cursor-pointer font-sans border-none bg-transparent outline-none"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                                 View Details
@@ -358,7 +539,7 @@ export default function BrowsePage() {
                         className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-[310px]"
                       >
                         {/* Card Image Frame */}
-                        <div className="relative h-32 bg-zinc-50 dark:bg-zinc-950/40 border-b border-zinc-100 dark:border-zinc-800 p-3 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div className="relative h-32 bg-zinc-50 dark:bg-zinc-950/40 border-b border-zinc-150 dark:border-zinc-800 p-3 flex items-center justify-center overflow-hidden flex-shrink-0">
                           <img
                             src={p.is_local_image ? `${API_URL}${p.local_image_url}` : p.image}
                             alt={p.name_en}
@@ -403,7 +584,7 @@ export default function BrowsePage() {
 
                             {/* Title & SKU */}
                             <div className="space-y-0.5">
-                              <h3 className="font-bold text-xs text-zinc-900 dark:text-zinc-50 line-clamp-1 group-hover:text-primary transition-colors leading-tight" title={p.name_en}>
+                              <h3 className="font-bold text-xs text-zinc-900 dark:text-zinc-50 line-clamp-1 group-hover:text-primary transition-colors leading-tight cursor-pointer" title={p.name_en}>
                                 {p.name_en}
                               </h3>
                               <p className="text-[9px] text-zinc-400 font-medium truncate">
@@ -427,7 +608,7 @@ export default function BrowsePage() {
                               <button
                                 type="button"
                                 onClick={() => setActiveDropdownId(activeDropdownId === p.id ? null : p.id)}
-                                className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
+                                className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none outline-none"
                               >
                                 <MoreHorizontal className="w-3.5 h-3.5" />
                                 Actions
@@ -444,7 +625,7 @@ export default function BrowsePage() {
                                         setIsDetailOpen(true);
                                         setActiveDropdownId(null);
                                       }}
-                                      className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                                      className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border-none outline-none bg-transparent cursor-pointer"
                                     >
                                       <Eye className="w-3.5 h-3.5 text-zinc-400" />
                                       Details
@@ -503,23 +684,13 @@ export default function BrowsePage() {
 
               {activeTab === "categories" && (
                 <motion.div
-                  key="categories-grid"
+                  key="categories-tree-wrapper"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-zinc-100 dark:bg-zinc-800"
+                  className="p-6 bg-zinc-50/40 dark:bg-black/10"
                 >
-                  {categories.map((cat, idx) => (
-                    <div key={idx} className="bg-white dark:bg-zinc-900 p-6 flex flex-col items-center text-center space-y-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                      <div className="w-16 h-16 rounded-2xl bg-zinc-50 dark:bg-black border border-zinc-100 dark:border-zinc-800 flex items-center justify-center">
-                        <Layers className="w-8 h-8 text-zinc-300" />
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-zinc-900 dark:text-zinc-50">{cat.name}</h3>
-                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">{cat.count} Products</p>
-                      </div>
-                    </div>
-                  ))}
+                  <TaxonomyTreeView taxonomy={categories} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -527,7 +698,7 @@ export default function BrowsePage() {
         )}
 
         {activeTab === "products" && total > 0 && (
-          <div className="px-6 py-4 bg-zinc-50 dark:bg-black/50 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-4">
+          <div className="px-6 py-4 bg-zinc-50 dark:bg-black/50 border-t border-zinc-150 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-6 flex-wrap">
               <p className="text-xs text-zinc-500 font-medium">
                 Showing {total > 0 ? page * limit + 1 : 0} to {Math.min((page + 1) * limit, total || 0)} of {total?.toLocaleString() ?? 0}
@@ -555,7 +726,7 @@ export default function BrowsePage() {
                 <button
                   disabled={page === 0 || isLoading}
                   onClick={() => setPage(p => p - 1)}
-                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer"
+                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -563,7 +734,7 @@ export default function BrowsePage() {
                 <button
                   disabled={(page + 1) * limit >= total || isLoading}
                   onClick={() => setPage(p => p + 1)}
-                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer"
+                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -584,6 +755,7 @@ export default function BrowsePage() {
         onClose={() => setIsExportOpen(false)}
         activeSearch={search}
         totalProducts={total}
+        mode={activeTab === "products" ? "products" : activeTab === "brands" ? "brands" : "categories"}
       />
     </div>
   );

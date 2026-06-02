@@ -35,6 +35,7 @@ export default function MatcherDashboard() {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [selectedJobResults, setSelectedJobResults] = useState<any[]>([]);
   const [exportingJobId, setExportingJobId] = useState<string | null>(null);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const handleExportClick = async (jobId: string) => {
     setExportingJobId(jobId);
@@ -43,6 +44,7 @@ export default function MatcherDashboard() {
       if (response.ok) {
         const data = await response.json();
         setSelectedJobResults(data.results || []);
+        setActiveJobId(jobId);
         setIsExportDialogOpen(true);
       }
     } catch (err) {
@@ -347,8 +349,12 @@ export default function MatcherDashboard() {
       {/* Export Dialog */}
       <ExportDialog
         isOpen={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
-        results={selectedJobResults}
+        onClose={() => {
+          setIsExportDialogOpen(false);
+          setActiveJobId(null);
+        }}
+        jobId={activeJobId}
+        initialResults={selectedJobResults}
       />
     </div>
   );

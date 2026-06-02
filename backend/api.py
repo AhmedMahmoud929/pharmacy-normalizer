@@ -38,6 +38,7 @@ app.add_middleware(
 
 # Global index instance
 index: Optional[ProductIndex] = None
+raw_products: List[dict] = []
 
 
 from urllib.parse import urlparse
@@ -124,7 +125,7 @@ async def get_media_file(category: str, filename: str):
 
 @app.on_event("startup")
 async def startup_event():
-    global index
+    global index, raw_products
     from tools.matcher import RAW_DB_PATH
     
     db_to_load = DEFAULT_DB_PATH
@@ -141,6 +142,7 @@ async def startup_event():
         with open(db_to_load, "r", encoding="utf-8") as f:
             data = json.load(f)
         index = ProductIndex(data)
+        raw_products = data
         print(f"Database loaded successfully from {db_to_load}.")
     except Exception as e:
         print(f"FAILED to load database: {str(e)}")
@@ -723,6 +725,358 @@ async def export_media(req: MediaExportRequest):
         "Content-Type": "application/zip"
     }
     return StreamingResponse(zip_buffer, headers=headers)
+
+# =====================================================================
+# TAXONOMY DRILLDOWN & BRAND/CATEGORY ADVANCED METADATA EXPORTS
+# =====================================================================
+
+@app.get("/db/categories/taxonomy")
+async def get_categories_taxonomy():
+    global raw_products
+    if not raw_products:
+        db_to_load = DEFAULT_DB_PATH
+        if os.path.exists(db_to_load):
+            try:
+                with open(db_to_load, "r", encoding="utf-8") as f:
+                    raw_products = json.load(f)
+            except:
+                pass
+    if not raw_products:
+        raise HTTPException(status_code=503, detail="Database not loaded")
+    
+    tree = {}
+    for prod in raw_products:
+        if not isinstance(prod, dict):
+            continue
+            
+        l1 = prod.get("level_one_category")
+        l1_slug = None
+        if l1 and isinstance(l1, dict):
+            l1_slug = l1.get("slug")
+            if l1_slug:
+                if l1_slug not in tree:
+                    tree[l1_slug] = {
+                        "name": l1.get("title_en") or l1.get("title_ar") or l1_slug,
+                        "slug": l1_slug,
+                        "level": 1,
+                        "parent_slug": None,
+                        "count": 0,
+                        "children": {}
+                    }
+                tree[l1_slug]["count"] += 1
+
+        l2_list = prod.get("level_two_category") or []
+        if isinstance(l2_list, dict):
+            l2_list = [l2_list]
+        elif not isinstance(l2_list, list):
+            l2_list = []
+            
+        for l2 in l2_list:
+            if l2 and isinstance(l2, dict):
+                l2_slug = l2.get("slug")
+                if l1_slug and l2_slug:
+                    if l2_slug not in tree[l1_slug]["children"]:
+                        tree[l1_slug]["children"][l2_slug] = {
+                            "name": l2.get("title_en") or l2.get("title_ar") or l2_slug,
+                            "slug": l2_slug,
+                            "level": 2,
+                            "parent_slug": l1_slug,
+                            "count": 0,
+                            "children": {}
+                        }
+                    tree[l1_slug]["children"][l2_slug]["count"] += 1
+
+                l3_list = prod.get("level_three_category") or []
+                if isinstance(l3_list, dict):
+                    l3_list = [l3_list]
+                elif not isinstance(l3_list, list):
+                    l3_list = []
+                    
+                for l3 in l3_list:
+                    if l3 and isinstance(l3, dict):
+                        l3_slug = l3.get("slug")
+                        if l1_slug and l2_slug and l3_slug:
+                            if l3_slug not in tree[l1_slug]["children"][l2_slug]["children"]:
+                                tree[l1_slug]["children"][l2_slug]["children"][l3_slug] = {
+                                    "name": l3.get("title_en") or l3.get("title_ar") or l3_slug,
+                                    "slug": l3_slug,
+                                    "level": 3,
+                                    "parent_slug": l2_slug,
+                                    "count": 0
+                                }
+                            tree[l1_slug]["children"][l2_slug]["children"][l3_slug]["count"] += 1
+
+    formatted_tree = []
+    for l1_node in sorted(tree.values(), key=lambda x: x["count"], reverse=True):
+        l1_copy = l1_node.copy()
+        l2_nodes = []
+        for l2_node in sorted(l1_node["children"].values(), key=lambda x: x["count"], reverse=True):
+            l2_copy = l2_node.copy()
+            l3_nodes = sorted(l2_node["children"].values(), key=lambda x: x["count"], reverse=True)
+            l2_copy["children"] = l3_nodes
+            l2_nodes.append(l2_copy)
+        l1_copy["children"] = l2_nodes
+        formatted_tree.append(l1_copy)
+        
+    return formatted_tree
+
+@app.get("/db/export/brands")
+async def export_brands(
+    format: str = Query(...),
+    scope: str = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1),
+    columns: Optional[str] = Query(None)
+):
+    global raw_products
+    if not raw_products:
+        db_to_load = DEFAULT_DB_PATH
+        if os.path.exists(db_to_load):
+            try:
+                with open(db_to_load, "r", encoding="utf-8") as f:
+                    raw_products = json.load(f)
+            except:
+                pass
+    if not raw_products:
+        raise HTTPException(status_code=503, detail="Database not loaded")
+
+    brands_map = {}
+    for prod in raw_products:
+        if not isinstance(prod, dict):
+            continue
+        brand = prod.get("brands")
+        if brand and isinstance(brand, dict):
+            b_slug = brand.get("slug")
+            name = brand.get("title_en") or brand.get("title_ar")
+            if name:
+                name = name.strip()
+                if name not in brands_map:
+                    brands_map[name] = {
+                        "name": name,
+                        "slug": b_slug,
+                        "image": brand.get("images") or brand.get("image"),
+                        "count": 0
+                    }
+                brands_map[name]["count"] += 1
+
+    brands_list = [enrich_brand_image(b) for b in brands_map.values()]
+    brands_list.sort(key=lambda x: x["count"], reverse=True)
+
+    if scope == "slice":
+        export_data = brands_list[offset : offset + limit]
+    else:
+        export_data = brands_list
+
+    if columns:
+        col_list = [c.strip() for c in columns.split(",") if c.strip()]
+        filtered_data = []
+        for item in export_data:
+            filtered_item = {}
+            for col in col_list:
+                if col in item:
+                    filtered_item[col] = item[col]
+            filtered_data.append(filtered_item)
+        export_data = filtered_data
+
+    if format == "json":
+        def json_generator():
+            yield "[\n"
+            for idx, p in enumerate(export_data):
+                comma = ",\n" if idx < len(export_data) - 1 else "\n"
+                yield json.dumps(p, ensure_ascii=False) + comma
+            yield "]"
+        
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_brands_export.json"',
+            "Content-Type": "application/json"
+        }
+        return StreamingResponse(json_generator(), headers=headers)
+        
+    elif format == "txt":
+        def txt_generator():
+            headers = list(export_data[0].keys()) if export_data else []
+            yield "\t".join(headers) + "\n"
+            for p in export_data:
+                yield "\t".join(str(p.get(h, "")) for h in headers) + "\n"
+                
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_brands_export.txt"',
+            "Content-Type": "text/tab-separated-values; charset=utf-8"
+        }
+        return StreamingResponse(txt_generator(), headers=headers)
+        
+    elif format == "xlsx":
+        output = io.BytesIO()
+        df = pd.DataFrame(export_data)
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name="Brands Catalog")
+        output.seek(0)
+        
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_brands_export.xlsx"',
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+        return StreamingResponse(
+            io.BytesIO(output.read()), 
+            headers=headers
+        )
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
+
+@app.get("/db/export/categories")
+async def export_categories(
+    format: str = Query(...),
+    scope: str = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1),
+    levels: Optional[str] = Query(None),
+    columns: Optional[str] = Query(None)
+):
+    global raw_products
+    if not raw_products:
+        db_to_load = DEFAULT_DB_PATH
+        if os.path.exists(db_to_load):
+            try:
+                with open(db_to_load, "r", encoding="utf-8") as f:
+                    raw_products = json.load(f)
+            except:
+                pass
+    if not raw_products:
+        raise HTTPException(status_code=503, detail="Database not loaded")
+
+    categories_map = {}
+    allowed_levels = [1, 2, 3]
+    if levels:
+        try:
+            allowed_levels = [int(lvl.strip()) for lvl in levels.split(",") if lvl.strip()]
+        except ValueError:
+            pass
+
+    for prod in raw_products:
+        if not isinstance(prod, dict):
+            continue
+
+        l1 = prod.get("level_one_category")
+        l1_slug = None
+        if l1 and isinstance(l1, dict):
+            l1_slug = l1.get("slug")
+            if l1_slug and 1 in allowed_levels:
+                if l1_slug not in categories_map:
+                    categories_map[l1_slug] = {
+                        "name_en": l1.get("title_en", "").strip(),
+                        "name_ar": l1.get("title_ar", "").strip(),
+                        "slug": l1_slug,
+                        "level": 1,
+                        "parent_slug": "",
+                        "count": 0
+                    }
+                categories_map[l1_slug]["count"] += 1
+
+        l2_list = prod.get("level_two_category") or []
+        if isinstance(l2_list, dict):
+            l2_list = [l2_list]
+        elif not isinstance(l2_list, list):
+            l2_list = []
+            
+        for l2 in l2_list:
+            if l2 and isinstance(l2, dict):
+                l2_slug = l2.get("slug")
+                if l2_slug and 2 in allowed_levels:
+                    if l2_slug not in categories_map:
+                        categories_map[l2_slug] = {
+                            "name_en": l2.get("title_en", "").strip(),
+                            "name_ar": l2.get("title_ar", "").strip(),
+                            "slug": l2_slug,
+                            "level": 2,
+                            "parent_slug": l1_slug or "",
+                            "count": 0
+                        }
+                    categories_map[l2_slug]["count"] += 1
+
+                l3_list = prod.get("level_three_category") or []
+                if isinstance(l3_list, dict):
+                    l3_list = [l3_list]
+                elif not isinstance(l3_list, list):
+                    l3_list = []
+                    
+                for l3 in l3_list:
+                    if l3 and isinstance(l3, dict):
+                        l3_slug = l3.get("slug")
+                        if l3_slug and 3 in allowed_levels:
+                            if l3_slug not in categories_map:
+                                categories_map[l3_slug] = {
+                                    "name_en": l3.get("title_en", "").strip(),
+                                    "name_ar": l3.get("title_ar", "").strip(),
+                                    "slug": l3_slug,
+                                    "level": 3,
+                                    "parent_slug": l2_slug or l1_slug or "",
+                                    "count": 0
+                                }
+                            categories_map[l3_slug]["count"] += 1
+
+    categories_list = list(categories_map.values())
+    categories_list.sort(key=lambda x: (x["level"], -x["count"]))
+
+    if scope == "slice":
+        export_data = categories_list[offset : offset + limit]
+    else:
+        export_data = categories_list
+
+    if columns:
+        col_list = [c.strip() for c in columns.split(",") if c.strip()]
+        filtered_data = []
+        for item in export_data:
+            filtered_item = {}
+            for col in col_list:
+                if col in item:
+                    filtered_item[col] = item[col]
+            filtered_data.append(filtered_item)
+        export_data = filtered_data
+
+    if format == "json":
+        def json_generator():
+            yield "[\n"
+            for idx, p in enumerate(export_data):
+                comma = ",\n" if idx < len(export_data) - 1 else "\n"
+                yield json.dumps(p, ensure_ascii=False) + comma
+            yield "]"
+        
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_categories_export.json"',
+            "Content-Type": "application/json"
+        }
+        return StreamingResponse(json_generator(), headers=headers)
+        
+    elif format == "txt":
+        def txt_generator():
+            headers = list(export_data[0].keys()) if export_data else []
+            yield "\t".join(headers) + "\n"
+            for p in export_data:
+                yield "\t".join(str(p.get(h, "")) for h in headers) + "\n"
+                
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_categories_export.txt"',
+            "Content-Type": "text/tab-separated-values; charset=utf-8"
+        }
+        return StreamingResponse(txt_generator(), headers=headers)
+        
+    elif format == "xlsx":
+        output = io.BytesIO()
+        df = pd.DataFrame(export_data)
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name="Categories Taxonomy")
+        output.seek(0)
+        
+        headers = {
+            "Content-Disposition": 'attachment; filename="chefaa_categories_export.xlsx"',
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+        return StreamingResponse(
+            io.BytesIO(output.read()), 
+            headers=headers
+        )
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
 
 # =====================================================================
 # SHEFAA CRAWLER CORE BACKGROUND ORCHESTRATION & TELEMETRY STREAMING
