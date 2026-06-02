@@ -233,7 +233,7 @@ def _process_row(idx, raw_name, norm_name, top, match_threshold, review_threshol
                 "unmatched_query_tokens": m.get("unmatched_query_tokens", []),
                 "unmatched_db_tokens": m.get("unmatched_db_tokens", []),
                 "candidate_count": m.get("candidate_count", 0),
-                "product_data": prod,
+                "product_data": enrich_product_image_status(prod),
                 "variant_data": var
             })
             
@@ -348,7 +348,7 @@ async def match_sheet(
                             "unmatched_query_tokens": m.get("unmatched_query_tokens", []),
                             "unmatched_db_tokens": m.get("unmatched_db_tokens", []),
                             "candidate_count": m.get("candidate_count", 0),
-                            "product_data": prod,
+                            "product_data": enrich_product_image_status(prod),
                             "variant_data": var
                         })
                 
@@ -607,9 +607,13 @@ async def export_database(
     # 2. Filter columns if requested
     if columns:
         col_list = [c.strip() for c in columns.split(",") if c.strip()]
-        def filter_cols(p):
+        def filter_cols(p_item):
+            p = enrich_product_image_status(p_item)
             res = {}
             for col in col_list:
+                if col == "image_name" or col == "local_image_name":
+                    res[col] = p.get("local_image_name") or ""
+                    continue
                 if col in p:
                     val = p[col]
                     if isinstance(val, dict):
@@ -619,12 +623,15 @@ async def export_database(
             return res
         products = [filter_cols(p) for p in products]
     else:
-        def flatten_item(p):
+        def flatten_item(p_item):
+            p = enrich_product_image_status(p_item)
             item = p.copy()
             if isinstance(item.get("brand"), dict):
                 item["brand"] = item["brand"].get("name")
             if isinstance(item.get("category"), dict):
                 item["category"] = item["category"].get("name")
+            item["image_name"] = p.get("local_image_name") or ""
+            item["local_image_name"] = p.get("local_image_name") or ""
             return item
         products = [flatten_item(p) for p in products]
 

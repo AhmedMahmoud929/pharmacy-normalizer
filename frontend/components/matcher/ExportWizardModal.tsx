@@ -19,20 +19,22 @@ type ExportScope = "all" | "filtered" | "slice";
 interface ColumnOption {
   key: string;
   label: string;
+  defaultChecked?: boolean;
 }
 
 const columnOptions: ColumnOption[] = [
-  { key: "id", label: "Product ID" },
-  { key: "name_en", label: "English Name" },
-  { key: "name_ar", label: "Arabic Name" },
-  { key: "sku", label: "Reference SKU" },
-  { key: "brand", label: "Brand / Manufacturer" },
-  { key: "category", label: "Classification Category" },
-  { key: "price", label: "Catalog Price" },
-  { key: "in_stock", label: "In Stock Flag" },
-  { key: "stock", label: "Quantity Stock" },
-  { key: "share_link", label: "Storefront Web Link" },
-  { key: "image", label: "Asset Thumbnail URL" }
+  { key: "id", label: "Product ID", defaultChecked: true },
+  { key: "name_en", label: "English Name", defaultChecked: true },
+  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
+  { key: "sku", label: "Reference SKU", defaultChecked: true },
+  { key: "brand", label: "Brand / Manufacturer", defaultChecked: true },
+  { key: "category", label: "Classification Category", defaultChecked: true },
+  { key: "price", label: "Catalog Price", defaultChecked: true },
+  { key: "in_stock", label: "In Stock Flag", defaultChecked: true },
+  { key: "stock", label: "Quantity Stock", defaultChecked: true },
+  { key: "share_link", label: "Storefront Web Link", defaultChecked: true },
+  { key: "image", label: "Asset Thumbnail URL", defaultChecked: false },
+  { key: "image_name", label: "Image Name", defaultChecked: true }
 ];
 
 export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
@@ -51,7 +53,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   
   // Selected Columns Checklist
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    columnOptions.map(o => o.key)
+    columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key)
   );
 
   const [isExporting, setIsExporting] = useState(false);
@@ -115,7 +117,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
     setScope("all");
     setOffset(0);
     setLimit(1000);
-    setSelectedColumns(columnOptions.map(o => o.key));
+    setSelectedColumns(columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
     setExportComplete(false);
     setIsExporting(false);
     onClose();

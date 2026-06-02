@@ -44,7 +44,8 @@ const columnOptions: ColumnOption[] = [
   { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: true },
   { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: true },
   { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: true },
-  { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: true }
+  { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: false },
+  { key: "image_name", label: "Image Name", group: "product", defaultChecked: true }
 ];
 
 export const ExportDialog: React.FC<ExportDialogProps> = ({
@@ -193,6 +194,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               break;
             case "image":
               record["image"] = v.image || p.image || topMatch?.image || "";
+              break;
+            case "image_name":
+              record["image_name"] = p.image_name || p.local_image_name || topMatch?.local_image_name || "";
               break;
             default:
               break;
@@ -505,7 +509,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     </button>
                   </div>
 
-                  <div className="space-y-4 max-h-[32vh] overflow-y-auto pr-1">
+                  <div className="space-y-4 overflow-y-auto pr-1">
                     {/* Product Fields Group */}
                     <div className="space-y-2">
                       <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400/90 bg-zinc-55 dark:bg-zinc-800/50 px-2 py-0.5 rounded w-fit">
