@@ -120,15 +120,19 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
         ) : (
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10 shadow-sm">
-              <tr className="text-[10px] font-bold text-zinc-500 uppercase">
+              <tr className="text-xs font-bold text-zinc-500 uppercase">
                 <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("row_index")}>
                   <div className="flex items-center gap-1">
                     Row <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
                 <th className="p-4 border-b border-primary/50">Image</th>
-                <th className="p-4 border-b border-primary/50">Original Name</th>
-                <th className="p-4 border-b border-primary/50">Top Match</th>
+                <th className="p-4 border-b border-primary/50">Top Match
+                  <small className="border border-primary text-primary px-2 py-0.5 rounded-full bg-primary-dark/10 ms-2 relative bottom-0.25">Standard</small>
+                </th>
+                <th className="p-4 border-b border-primary/50">Original Name
+                  <small className="border border-primary text-primary px-2 py-0.5 rounded-full bg-primary-dark/10 ms-2 relative bottom-0.25">Pharmacy</small>
+                </th>
                 <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("score")}>
                   <div className="flex items-center gap-1">
                     Score <ArrowUpDown className="w-3 h-3" />
@@ -152,14 +156,10 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                 >
                   <td className="p-4 text-xs text-zinc-400">#{res.row_index + 1}</td>
                   <td className="p-4">
-                    <ProductImage 
-                      src={res.matches[0]?.image || res.matches[0]?.product_data?.image} 
-                      alt={res.matches[0]?.name_en} 
+                    <ProductImage
+                      src={res.matches[0]?.image || res.matches[0]?.product_data?.image}
+                      alt={res.matches[0]?.name_en}
                     />
-                  </td>
-                  <td className="p-4">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{res.original_name}</p>
-                    <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[150px]">{res.normalized_name}</p>
                   </td>
                   <td className="p-4">
                     <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
@@ -168,6 +168,10 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     <p className="text-[10px] text-zinc-500 font-medium">
                       SKU: {res.matches[0]?.sku || "N/A"}
                     </p>
+                  </td>
+                  <td className="p-4">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{res.original_name}</p>
+                    <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[150px]">{res.normalized_name}</p>
                   </td>
                   <td className="p-4">
                     <div className="flex flex-col">
