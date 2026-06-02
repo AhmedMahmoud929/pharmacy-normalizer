@@ -156,12 +156,9 @@ def normalize_sheet(
     if output is None:
         base_name = os.path.basename(file_path)
         base, ext = os.path.splitext(base_name)
-        # Use data/normalized directory if it exists
         norm_dir = os.path.join(project_root, "data", "normalized")
-        if os.path.exists(norm_dir):
-            output = os.path.join(norm_dir, f"{base}_normalized{ext}")
-        else:
-            output = f"{base}_normalized{ext}"
+        os.makedirs(norm_dir, exist_ok=True)
+        output = os.path.join(norm_dir, f"{base}_normalized{ext}")
 
     # Write the output
     df.to_excel(output, index=False, engine="openpyxl")
@@ -292,10 +289,8 @@ def normalize_json_file(
         base_name = os.path.basename(file_path)
         base, ext = os.path.splitext(base_name)
         norm_dir = os.path.join(project_root, "data", "normalized")
-        if os.path.exists(norm_dir):
-            output = os.path.join(norm_dir, f"{base}_normalized{ext}")
-        else:
-            output = f"{base}_normalized{ext}"
+        os.makedirs(norm_dir, exist_ok=True)
+        output = os.path.join(norm_dir, f"{base}_normalized{ext}")
 
     with open(output, "w", encoding="utf-8") as f:
         json.dump(normalized_data, f, ensure_ascii=False, indent=2)
