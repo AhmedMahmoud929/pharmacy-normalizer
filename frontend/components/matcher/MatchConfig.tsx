@@ -20,6 +20,8 @@ interface MatchConfigProps {
   setWorkers: (val: number) => void;
   isProcessing: boolean;
   onStart: () => void;
+  background: boolean;
+  setBackground: (val: boolean) => void;
 }
 
 export const MatchConfig: React.FC<MatchConfigProps> = ({
@@ -37,6 +39,8 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
   setWorkers,
   isProcessing,
   onStart,
+  background,
+  setBackground,
 }) => {
   if (!file) return null;
 
@@ -134,6 +138,28 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Background Toggle */}
+        <div className="flex items-center justify-between pt-4 border-t border-primary/10">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Run in Background</label>
+            <span className="text-[10px] text-zinc-400">Process overnight asynchronously on the server</span>
+          </div>
+          <button
+            onClick={() => setBackground(!background)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              background ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                background ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
         </div>
       </div>
 

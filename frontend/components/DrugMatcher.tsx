@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useMemo } from "react";
-import { Loader2, X, ChevronDown, Square, Download, Check } from "lucide-react";
+import React, { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { Loader2, X, ChevronDown, Square, Download, Check, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 // Sub-components
 import { UploadZone } from "./matcher/UploadZone";
@@ -61,6 +62,13 @@ export default function DrugMatcher() {
   const [progress, setProgress] = useState<ProgressState>({ current: 0, total: 0 });
   const [results, setResults] = useState<MatchResult[]>([]);
 
+  // Background & History states
+  const [background, setBackground] = useState(false);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyJobs, setHistoryJobs] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
   // Thresholds
   const [matchThreshold, setMatchThreshold] = useState(70);
   const [reviewThreshold, setReviewThreshold] = useState(40);
@@ -79,6 +87,26 @@ export default function DrugMatcher() {
   // Performance
   const [parallel, setParallel] = useState(true);
   const [workers, setWorkers] = useState(4);
+
+  const searchParams = useSearchParams();
+  const queryJobId = searchParams.get("job_id");
+
+  useEffect(() => {
+    if (queryJobId) {
+      const fetchAndSelectJob = async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/matcher/job/${queryJobId}`);
+          if (res.ok) {
+            const jobData = await res.json();
+            selectJob(jobData);
+          }
+        } catch (err) {
+          console.error("Failed to rehydrate job from URL query parameter:", err);
+        }
+      };
+      fetchAndSelectJob();
+    }
+  }, [queryJobId]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -110,12 +138,102 @@ export default function DrugMatcher() {
     reader.readAsBinaryString(selectedFile);
   }, []);
 
+  const fetchHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await fetch(`${API_URL}/api/matcher/jobs?limit=50`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistoryJobs(data.jobs || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch matching history:", err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  const selectJob = async (job: any) => {
+    setActiveJobId(job.job_id);
+    setShowHistory(false);
+    setFile(new File([], job.filename)); // Set a placeholder File so MatchConfig doesn't close
+    setSelectedColumn(job.column_used || "Unknown");
+    setMatchThreshold(Math.round((job.match_threshold || 0.6) * 100));
+    setReviewThreshold(Math.round((job.review_threshold || 0.4) * 100));
+
+    if (job.status === "completed") {
+      setIsProcessing(false);
+      setIsComplete(true);
+      setResults([]);
+      
+      // Fetch full results
+      try {
+        const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`);
+        if (response.ok) {
+          const data = await response.json();
+          setResults(data.results || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch job results:", err);
+      }
+    } else if (job.status === "running" || job.status === "pending") {
+      setIsProcessing(true);
+      setIsComplete(false);
+      setResults([]);
+      setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
+      
+      // Subscribe to real-time streaming progress SSE channel
+      const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
+      
+      eventSource.addEventListener("info", (e) => {
+        const data = JSON.parse(e.data);
+        setProgress(prev => ({ ...prev, total: data.total_rows }));
+      });
+
+      eventSource.addEventListener("progress", (e) => {
+        const data = JSON.parse(e.data);
+        setProgress({
+          current: data.processed_rows,
+          total: data.total_rows
+        });
+      });
+
+      eventSource.addEventListener("result", (e) => {
+        const payload = JSON.parse(e.data) as MatchResult;
+        setResults(prev => {
+          if (prev.some(r => r.row_index === payload.row_index)) return prev;
+          return [payload, ...prev];
+        });
+      });
+
+      eventSource.addEventListener("complete", (e) => {
+        setIsProcessing(false);
+        setIsComplete(true);
+        eventSource.close();
+        fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`)
+          .then(res => res.json())
+          .then(data => setResults(data.results || []));
+      });
+
+      eventSource.addEventListener("error", (e) => {
+        console.error("SSE stream error:", e);
+        setIsProcessing(false);
+        eventSource.close();
+      });
+    } else {
+      setIsProcessing(false);
+      setIsComplete(true);
+      alert(`Job has state: ${job.status}. Error: ${job.error_msg || "None"}`);
+    }
+  };
+
   const reset = () => {
     setFile(null);
     setResults([]);
     setIsComplete(false);
     setProgress({ current: 0, total: 0 });
     setCurrentPage(1);
+    setActiveJobId(null);
   };
 
   const stopMatching = () => {
@@ -132,6 +250,7 @@ export default function DrugMatcher() {
     setIsComplete(false);
     setResults([]);
     setProgress({ current: 0, total: 0 });
+    setActiveJobId(null);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -143,13 +262,27 @@ export default function DrugMatcher() {
     formData.append("review_threshold", (reviewThreshold / 100).toString());
     formData.append("parallel", parallel.toString());
     if (parallel) formData.append("workers", workers.toString());
+    formData.append("background", background.toString());
 
     try {
-      const response = await fetch(`${API_URL}/match/sheet`, {
+      const response = await fetch(`${API_URL}/api/matcher/run`, {
         method: "POST",
         body: formData,
         signal: controller.signal
       });
+
+      if (background) {
+        if (response.ok) {
+          const data = await response.json();
+          setActiveJobId(data.job_id);
+          setIsProcessing(false);
+          alert(`Matching started asynchronously in the background!\nJob ID: ${data.job_id}\nYou can safely navigate away and monitor progress in the 'History Logs'.`);
+          fetchHistory();
+        } else {
+          throw new Error("Failed to queue background match job");
+        }
+        return;
+      }
 
       if (!response.body) throw new Error("No response body");
 
@@ -169,9 +302,15 @@ export default function DrugMatcher() {
           if (line.startsWith("event: info")) {
             const data = JSON.parse(line.split("data: ")[1]);
             setProgress({ current: 0, total: data.total_rows });
+            if (data.job_id) {
+              setActiveJobId(data.job_id);
+            }
           } else if (line.startsWith("event: result")) {
             const payload = JSON.parse(line.split("data: ")[1]) as MatchResult;
-            setResults(prev => [payload, ...prev]);
+            setResults(prev => {
+              if (prev.some(r => r.row_index === payload.row_index)) return prev;
+              return [payload, ...prev];
+            });
             setProgress(prev => ({ ...prev, current: prev.current + 1 }));
           } else if (line.startsWith("event: complete")) {
             setIsProcessing(false);
@@ -185,11 +324,18 @@ export default function DrugMatcher() {
         alert("An error occurred during matching.");
       }
     } finally {
-      setIsProcessing(false);
+      if (!background) {
+        setIsProcessing(false);
+      }
     }
   };
 
-  const handleApprove = (rowIndex: number) => {
+  const handleApprove = async (rowIndex: number) => {
+    const resRow = results.find(r => r.row_index === rowIndex);
+    if (!resRow || resRow.matches.length === 0) return;
+    const topMatch = resRow.matches[0];
+
+    // Optimistic UI update
     setResults(prev => prev.map(res => {
       if (res.row_index === rowIndex && res.matches.length > 0) {
         const updatedMatches = [...res.matches];
@@ -198,9 +344,30 @@ export default function DrugMatcher() {
       }
       return res;
     }));
+
+    if (activeJobId) {
+      try {
+        await fetch(`${API_URL}/api/matcher/job/${activeJobId}/override`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            row_index: rowIndex,
+            matched_sku: topMatch.sku,
+            product_id: topMatch.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to sync override to server:", err);
+      }
+    }
   };
 
-  const handleReject = (rowIndex: number) => {
+  const handleReject = async (rowIndex: number) => {
+    const resRow = results.find(r => r.row_index === rowIndex);
+    if (!resRow || resRow.matches.length === 0) return;
+    const topMatch = resRow.matches[0];
+
+    // Optimistic UI update
     setResults(prev => prev.map(res => {
       if (res.row_index === rowIndex && res.matches.length > 0) {
         const updatedMatches = [...res.matches];
@@ -209,10 +376,27 @@ export default function DrugMatcher() {
       }
       return res;
     }));
+
+    if (activeJobId) {
+      try {
+        await fetch(`${API_URL}/api/matcher/job/${activeJobId}/override`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            row_index: rowIndex,
+            matched_sku: topMatch.sku,
+            product_id: topMatch.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to sync override to server:", err);
+      }
+    }
   };
 
-  const handleManualSelection = (product: any, variant: any) => {
+  const handleManualSelection = async (product: any, variant: any) => {
     if (!selectedRowForManual) return;
+    const rowIndex = selectedRowForManual.row_index;
 
     const newMatch: MatchCandidate = {
       id: product.id.toString(),
@@ -227,7 +411,7 @@ export default function DrugMatcher() {
     };
 
     setResults(prev => prev.map(res => {
-      if (res.row_index === selectedRowForManual.row_index) {
+      if (res.row_index === rowIndex) {
         return {
           ...res,
           matches: [newMatch, ...res.matches]
@@ -237,6 +421,22 @@ export default function DrugMatcher() {
     }));
 
     setSelectedRowForManual(null);
+
+    if (activeJobId) {
+      try {
+        await fetch(`${API_URL}/api/matcher/job/${activeJobId}/override`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            row_index: rowIndex,
+            matched_sku: variant.sku,
+            product_id: product.id.toString()
+          })
+        });
+      } catch (err) {
+        console.error("Failed to sync override to server:", err);
+      }
+    }
   };
 
   // --- Logic ---
@@ -315,6 +515,18 @@ export default function DrugMatcher() {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              setShowHistory(true);
+              fetchHistory();
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 text-zinc-600 dark:text-zinc-300 font-bold text-sm transition-all"
+            title="View History Logs"
+          >
+            <Clock className="w-4 h-4 text-primary" />
+            History Logs
+          </button>
+
           {isProcessing && (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
@@ -342,7 +554,7 @@ export default function DrugMatcher() {
                 <span>Export</span>
               </button>
 
-              {isComplete && (
+              {(isComplete || activeJobId) && (
                 <button
                   onClick={reset}
                   className="flex items-center gap-2 px-6 py-2 bg-primary text-white hover:bg-primary-dark rounded-full transition-all font-bold shadow-lg shadow-primary/20"
@@ -364,7 +576,7 @@ export default function DrugMatcher() {
       )}>
         {/* Left Column: Config & Upload */}
         <AnimatePresence>
-          {(!isProcessing && !isComplete) && (
+          {(!isProcessing && !isComplete && results.length === 0) && (
             <motion.div
               initial={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100, width: 0, marginRight: 0 }}
@@ -387,6 +599,8 @@ export default function DrugMatcher() {
                 setWorkers={setWorkers}
                 isProcessing={isProcessing}
                 onStart={startMatching}
+                background={background}
+                setBackground={setBackground}
               />
             </motion.div>
           )}
@@ -421,6 +635,107 @@ export default function DrugMatcher() {
           </div>
         )}
       </div>
+
+      {/* History Drawer */}
+      <AnimatePresence>
+        {showHistory && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowHistory(false)}
+              className="fixed inset-0 z-[80] bg-zinc-950/60 backdrop-blur-sm"
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 z-[90] w-full max-w-md bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-800 pb-4 mb-6">
+                <div>
+                  <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Match Job History</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Review past and ongoing sheets matches</p>
+                </div>
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="p-2 rounded-full hover:bg-zinc-150 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {loadingHistory ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+              ) : historyJobs.length === 0 ? (
+                <div className="text-center py-20 text-zinc-400 font-medium">
+                  No matching jobs found in history.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {historyJobs.map((job) => {
+                    const isRunning = job.status === "running" || job.status === "pending";
+                    const isSuccess = job.status === "completed";
+                    const isFailed = job.status === "failed";
+                    
+                    return (
+                      <button
+                        key={job.job_id}
+                        onClick={() => selectJob(job)}
+                        className="w-full p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 text-left hover:border-primary/50 hover:bg-primary/5 transition-all space-y-3 group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={cn(
+                            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                            isRunning && "bg-primary/10 text-primary border border-primary/20",
+                            isSuccess && "bg-success/10 text-success border border-success/20",
+                            isFailed && "bg-error/10 text-error border border-error/20"
+                          )}>
+                            {job.status}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 font-semibold">
+                            {new Date(job.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <div>
+                          <p className="font-bold text-sm text-zinc-800 dark:text-zinc-100 truncate group-hover:text-primary transition-colors">
+                            {job.filename}
+                          </p>
+                          <p className="text-[11px] text-zinc-400 mt-0.5">
+                            Mapped Column: <span className="font-semibold text-zinc-500">{job.column_used || "Auto"}</span>
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 text-[10px] text-zinc-500 font-semibold border-t border-zinc-100 dark:border-zinc-800/80 pt-2">
+                          <div>
+                            <p className="text-zinc-400 font-normal">Total Rows</p>
+                            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mt-0.5">{job.total_rows}</p>
+                          </div>
+                          <div>
+                            <p className="text-zinc-400 font-normal">Matched</p>
+                            <p className="text-sm font-bold text-success mt-0.5">{job.matched_count}</p>
+                          </div>
+                          <div>
+                            <p className="text-zinc-400 font-normal">Review</p>
+                            <p className="text-sm font-bold text-warning mt-0.5">{job.review_count}</p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Details Dialog */}
       <ComparisonDialog

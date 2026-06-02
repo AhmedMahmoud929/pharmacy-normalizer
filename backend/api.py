@@ -1539,6 +1539,370 @@ async def get_crawler_job_product_details(job_id: str, product_id: str):
     except Exception as read_err:
         raise HTTPException(status_code=500, detail=f"Failed to inspect item: {str(read_err)}")
 
+# ==========================================
+# DRUG MATCHER BACKGROUND & HISTORY ENDPOINTS
+# ==========================================
+
+from pydantic import BaseModel
+
+class OverrideRequest(BaseModel):
+    row_index: int
+    matched_sku: str
+    product_id: str
+    user_comment: Optional[str] = None
+
+@app.post("/api/matcher/run")
+async def run_matcher_job(
+    file: UploadFile = File(...),
+    column: Optional[str] = Form(None),
+    top: int = Form(5),
+    match_threshold: float = Form(0.60),
+    review_threshold: float = Form(0.40),
+    parallel: bool = Form(True),
+    workers: Optional[int] = Form(None),
+    background: bool = Form(False)
+):
+    from tools.matcher_db import create_job
+    from tools.matcher_runner import run_matcher_background, job_listeners
+
+    # 1. Read sheet file
+    content = await file.read()
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in [".xlsx", ".xls", ".csv"]:
+        raise HTTPException(status_code=400, detail=f"Unsupported file format: {file_ext}")
+        
+    try:
+        if file_ext in [".xlsx", ".xls"]:
+            df = pd.read_excel(io.BytesIO(content))
+        else:
+            df = pd.read_csv(io.BytesIO(content))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
+
+    # 2. Register job in SQLite database
+    job_id = str(uuid.uuid4())
+    job_info = create_job(
+        job_id=job_id,
+        filename=file.filename,
+        column_used=column or "",
+        match_threshold=match_threshold,
+        review_threshold=review_threshold,
+        total_rows=len(df)
+    )
+
+    # 3. Schedule the worker thread execution
+    task = asyncio.create_task(
+        run_matcher_background(
+            job_id=job_id,
+            file_bytes=content,
+            file_ext=file_ext,
+            column=column,
+            top=top,
+            match_threshold=match_threshold,
+            review_threshold=review_threshold,
+            parallel=parallel,
+            workers=workers
+        )
+    )
+
+    # If background, return job details immediately
+    if background:
+        return job_info
+
+    # Otherwise, stream progress from the job SSE queue in real-time
+    async def foreground_event_generator():
+        # Await startup slightly so queue registers
+        await asyncio.sleep(0.1)
+        queue = asyncio.Queue()
+        if job_id not in job_listeners:
+            job_listeners[job_id] = set()
+        job_listeners[job_id].add(queue)
+        
+        try:
+            while True:
+                event = await queue.get()
+                yield event
+                if "event: complete" in event or "event: error" in event:
+                    break
+        finally:
+            job_listeners[job_id].discard(queue)
+            if not job_listeners[job_id]:
+                job_listeners.pop(job_id, None)
+
+    return StreamingResponse(foreground_event_generator(), media_type="text/event-stream")
+
+@app.get("/api/matcher/jobs")
+async def list_matcher_jobs(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    status: Optional[str] = Query(None)
+):
+    from tools.matcher_db import get_jobs
+    return get_jobs(limit=limit, offset=offset, status=status)
+
+@app.get("/api/matcher/job/{job_id}")
+async def get_matcher_job_details(job_id: str):
+    from tools.matcher_db import get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+@app.get("/api/matcher/job/{job_id}/results")
+async def get_matcher_job_results(
+    job_id: str,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    status: Optional[str] = Query(None),
+    search: Optional[str] = Query(None)
+):
+    from tools.matcher_db import get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    results_path = job["results_path"]
+    if not results_path or not os.path.exists(results_path):
+        # Return empty list if processing is still pending
+        if job["status"] in ["pending", "running"]:
+            return {
+                "job_id": job_id,
+                "total": 0,
+                "limit": limit,
+                "offset": offset,
+                "results": []
+            }
+        raise HTTPException(status_code=404, detail="Job results file not found")
+        
+    try:
+        with open(results_path, "r", encoding="utf-8") as f:
+            all_results = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+        
+    filtered_results = []
+    for item in all_results:
+        if search:
+            q_lower = search.lower()
+            orig_match = q_lower in item.get("original_name", "").lower()
+            cand_match = any(q_lower in m.get("name_en", "").lower() for m in item.get("matches", []))
+            if not (orig_match or cand_match):
+                continue
+                
+        if status:
+            top_status = item["matches"][0]["status"] if item.get("matches") else "no_match"
+            if top_status != status:
+                continue
+                
+        filtered_results.append(item)
+        
+    paginated = filtered_results[offset : offset + limit]
+    
+    return {
+        "job_id": job_id,
+        "total": len(filtered_results),
+        "limit": limit,
+        "offset": offset,
+        "results": paginated
+    }
+
+@app.post("/api/matcher/job/{job_id}/override")
+async def override_matcher_match(job_id: str, req: OverrideRequest):
+    from tools.matcher_db import get_job, update_job_totals
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    results_path = job["results_path"]
+    if not results_path or not os.path.exists(results_path):
+        raise HTTPException(status_code=404, detail="Job results file not found")
+        
+    try:
+        with open(results_path, "r", encoding="utf-8") as f:
+            all_results = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+        
+    # Find matching row index
+    target_item = None
+    for item in all_results:
+        if item["row_index"] == req.row_index:
+            target_item = item
+            break
+            
+    if not target_item:
+        raise HTTPException(status_code=404, detail=f"Row index {req.row_index} not found in results")
+        
+    global index
+    product_data = None
+    variant_data = None
+    
+    if index:
+        for item_entry in index.data:
+            prod = item_entry["product"]
+            var = item_entry["variant"]
+            if var.get("sku") == req.matched_sku or prod.get("id") == req.product_id:
+                product_data = prod
+                variant_data = var
+                break
+                
+    if not product_data:
+        product_data = {"id": req.product_id, "name_en": "Manual Match Override"}
+        variant_data = {"sku": req.matched_sku, "price": 0.0}
+        
+    new_candidate = {
+        "score": 1.0,
+        "status": "matched",
+        "id": product_data.get("id"),
+        "sku": variant_data.get("sku"),
+        "name_en": product_data.get("name_en"),
+        "price": variant_data.get("price"),
+        "variant_id": variant_data.get("id"),
+        "image": variant_data.get("image") or product_data.get("image"),
+        "db_normalized": "",
+        "jaccard": 1.0,
+        "sequence": 1.0,
+        "matched_tokens": [],
+        "unmatched_query_tokens": [],
+        "unmatched_db_tokens": [],
+        "candidate_count": 1,
+        "product_data": enrich_product_image_status(product_data),
+        "variant_data": variant_data,
+        "comment": req.user_comment
+    }
+    
+    # Save target overridden details
+    target_item["matches"] = [new_candidate] + [m for m in target_item["matches"] if m.get("sku") != req.matched_sku]
+    
+    try:
+        with open(results_path, "w", encoding="utf-8") as f:
+            json.dump(all_results, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write results file: {str(e)}")
+        
+    matched_count = 0
+    review_count = 0
+    no_match_count = 0
+    
+    for item in all_results:
+        top_status = item["matches"][0]["status"] if item.get("matches") else "no_match"
+        if top_status == "matched":
+            matched_count += 1
+        elif top_status == "review":
+            review_count += 1
+        else:
+            no_match_count += 1
+            
+    update_job_totals(job_id, matched_count, review_count, no_match_count)
+    
+    # Recompile Excel sheet
+    try:
+        excel_records = []
+        for res in all_results:
+            top_match = res["matches"][0] if res["matches"] else None
+            status = top_match["status"] if top_match else "no_match"
+            score = top_match["score"] if top_match else 0.0
+            
+            p = top_match.get("product_data", {}) if top_match else {}
+            v = top_match.get("variant_data", {}) if top_match else {}
+            
+            record = {
+                "original_name": res["original_name"],
+                "normalized_name": res["normalized_name"],
+                "match_status": status,
+                "match_score": f"{score * 100:.1f}%",
+                "matched_product_id": p.get("id", top_match.get("id") if top_match else ""),
+                "matched_sku": top_match.get("sku") if top_match else "",
+                "matched_name_en": top_match.get("name_en") if top_match else "",
+                "catalog_price": v.get("price") or p.get("price") or 0.0,
+                "classification_category": p.get("category", {}).get("name") if isinstance(p.get("category"), dict) else p.get("category", ""),
+                "brand": p.get("brand", {}).get("name") if isinstance(p.get("brand"), dict) else p.get("brand", ""),
+                "in_stock": "Yes" if (v.get("stock", 0) > 0 or p.get("in_stock", True)) else "No",
+                "storefront_link": f"https://chefaa.com/product/{p.get('slug')}" if p.get("slug") else ""
+            }
+            
+            for k in range(3):
+                prefix = f"candidate_{k+1}_"
+                if k < len(res["matches"]):
+                    cand = res["matches"][k]
+                    record.update({
+                        f"{prefix}score": f"{cand['score'] * 100:.1f}%",
+                        f"{prefix}id": cand.get("id"),
+                        f"{prefix}name_en": cand.get("name_en")
+                    })
+                else:
+                    record.update({
+                        f"{prefix}score": "",
+                        f"{prefix}id": "",
+                        f"{prefix}name_en": ""
+                    })
+                    
+            excel_records.append(record)
+            
+        excel_out_path = os.path.join(os.path.dirname(results_path), "matched.xlsx")
+        df_out = pd.DataFrame(excel_records)
+        with pd.ExcelWriter(excel_out_path, engine='openpyxl') as writer:
+            df_out.to_excel(writer, index=False, sheet_name="Matched Catalog")
+    except Exception as ex_err:
+        print(f"Override sheet compiler error: {ex_err}")
+        
+    return {"status": "ok", "matched_count": matched_count, "review_count": review_count, "no_match_count": no_match_count}
+
+@app.get("/api/matcher/job/{job_id}/stream")
+async def stream_matcher_job_progress(job_id: str):
+    from tools.matcher_db import get_job
+    from tools.matcher_runner import job_listeners
+    
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    async def progress_event_generator():
+        queue = asyncio.Queue()
+        if job_id not in job_listeners:
+            job_listeners[job_id] = set()
+        job_listeners[job_id].add(queue)
+        
+        # Immediate state update pushes
+        if job["status"] == "completed":
+            yield f"event: complete\ndata: {json.dumps({'status': 'completed', 'output_path': job['output_path']})}\n\n"
+            job_listeners[job_id].discard(queue)
+            return
+        elif job["status"] == "failed":
+            yield f"event: error\ndata: {json.dumps({'status': 'failed', 'message': job['error_msg']})}\n\n"
+            job_listeners[job_id].discard(queue)
+            return
+            
+        try:
+            while True:
+                event = await queue.get()
+                yield event
+                if "event: complete" in event or "event: error" in event:
+                    break
+        finally:
+            job_listeners[job_id].discard(queue)
+            if not job_listeners[job_id]:
+                job_listeners.pop(job_id, None)
+                
+    return StreamingResponse(progress_event_generator(), media_type="text/event-stream")
+
+@app.get("/api/matcher/job/{job_id}/export")
+async def export_matcher_job_file(job_id: str):
+    from tools.matcher_db import get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    output_path = job["output_path"]
+    if not output_path or not os.path.exists(output_path):
+        raise HTTPException(status_code=404, detail="Excel sheet output not ready or not compiled yet.")
+        
+    return FileResponse(
+        output_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=f"matched_{job['filename']}"
+    )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
