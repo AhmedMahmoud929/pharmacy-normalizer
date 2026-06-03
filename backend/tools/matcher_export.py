@@ -62,34 +62,26 @@ def build_custom_columns(p: Optional[dict]) -> dict:
     images = image_url  # comma-separated list per spec (single element here)
 
     return {
-        # Core fields
-        "name[en]":           p.get("title_en") or "",
-        "name[eg]":           p.get("title_ar") or "",
-        "details[en]":        p.get("description_en") or p.get("meta_description_en") or "",
-        "details[eg]":        p.get("description_ar") or p.get("meta_description_ar") or "",
-        "category_id":        l1.get("slug") or "",
-        "sub_category_id":    l2.get("slug") or "",
-        "sub_sub_category_id": l3.get("slug") or "",
-        "brand_id":           brand.get("id") or "",
-        "unit":               p.get("unit") or "",
-        "thumbnail":          thumbnail,
-        "images":             images,
-        # Brand fields
-        "brand_name_en":      brand.get("title_en") or "",
-        "brand_name_ar":      brand.get("title_ar") or "",
-        "brand_slug":         brand.get("slug") or "",
-        "brand_logo_url":     brand.get("images") or brand.get("logo_url") or brand.get("image") or "",
-        # Category L1
-        "category_name_en":       l1.get("title_en") or "",
-        "category_name_ar":       l1.get("title_ar") or "",
-        "category_slug":          l1.get("slug") or "",
-        # Category L2
-        "sub_category_name_en":   l2.get("title_en") or "",
-        "sub_category_name_ar":   l2.get("title_ar") or "",
-        "sub_category_slug":      l2.get("slug") or "",
-        # Category L3
-        "sub_sub_category_name_en":  l3.get("title_en") or "",
-        "sub_sub_category_name_ar":  l3.get("title_ar") or "",
+        "name[en]":                  p.get("title_en") or p.get("name_en") or "",
+        "name[ar]":                  p.get("title_ar") or p.get("name_ar") or "",
+        "details[en]":               p.get("description_en") or p.get("meta_description_en") or "",
+        "details[ar]":               p.get("description_ar") or p.get("meta_description_ar") or "",
+        "price":                     p.get("price") or p.get("final_price") or 0.0,
+        "unit":                      p.get("unit") or "",
+        "thumbnail":                 thumbnail,
+        "images":                    images,
+        "brand_name[en]":            brand.get("title_en") or brand.get("name_en") or "",
+        "brand_name[ar]":            brand.get("title_ar") or brand.get("name_ar") or "",
+        "brand_slug":                brand.get("slug") or "",
+        "brand_logo":                brand.get("images") or brand.get("logo_url") or brand.get("image") or "",
+        "category_name[en]":         l1.get("title_en") or l1.get("name_en") or "",
+        "category_name[ar]":         l1.get("title_ar") or l1.get("name_ar") or "",
+        "category_slug":             l1.get("slug") or "",
+        "sub_category_name[en]":     l2.get("title_en") or l2.get("name_en") or "",
+        "sub_category_name[ar]":     l2.get("title_ar") or l2.get("name_ar") or "",
+        "sub_category_slug":         l2.get("slug") or "",
+        "sub_sub_category_name[en]": l3.get("title_en") or l3.get("name_en") or "",
+        "sub_sub_category_name[ar]": l3.get("title_ar") or l3.get("name_ar") or "",
         "sub_sub_category_slug":     l3.get("slug") or "",
     }
 
@@ -97,12 +89,12 @@ def build_custom_columns(p: Optional[dict]) -> dict:
 def _empty_columns() -> dict:
     """Return all custom columns as empty strings (for no_match rows)."""
     keys = [
-        "name[en]", "name[eg]", "details[en]", "details[eg]",
-        "category_id", "sub_category_id", "sub_sub_category_id",
-        "brand_id", "unit", "thumbnail", "images",
-        "brand_name_en", "brand_name_ar", "brand_slug", "brand_logo_url",
-        "category_name_en", "category_name_ar", "category_slug",
-        "sub_category_name_en", "sub_category_name_ar", "sub_category_slug",
-        "sub_sub_category_name_en", "sub_sub_category_name_ar", "sub_sub_category_slug",
+        "name[en]", "name[ar]", "details[en]", "details[ar]", "price", "unit",
+        "thumbnail", "images",
+        "brand_name[en]", "brand_name[ar]", "brand_slug", "brand_logo",
+        "category_name[en]", "category_name[ar]", "category_slug",
+        "sub_category_name[en]", "sub_category_name[ar]", "sub_category_slug",
+        "sub_sub_category_name[en]", "sub_sub_category_name[ar]", "sub_sub_category_slug",
     ]
     return {k: "" for k in keys}
+

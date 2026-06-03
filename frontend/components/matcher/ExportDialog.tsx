@@ -236,6 +236,97 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             case "image_name":
               record["image_name"] = p.image_name || p.local_image_name || topMatch?.local_image_name || "";
               break;
+
+            // ── Custom Export Fields (spec: matcher-custom-export.md) ──────────
+            case "custom_name_en":
+              record["name[en]"] = topMatch?.name_en || p["name_en"] || p["title_en"] || "";
+              break;
+            case "custom_name_ar":
+              record["name[ar]"] = p["name_ar"] || p["title_ar"] || "";
+              break;
+            case "custom_details_en":
+              record["details[en]"] = p["description_en"] || p["meta_description_en"] || "";
+              break;
+            case "custom_details_ar":
+              record["details[ar]"] = p["description_ar"] || p["meta_description_ar"] || "";
+              break;
+            case "custom_price":
+              record["price"] = v["price"] || p["price"] || p["final_price"] || 0;
+              break;
+            case "custom_unit":
+              record["unit"] = p["unit"] || "";
+              break;
+            case "custom_thumbnail":
+              record["thumbnail"] = p["image"] || v["image"] || topMatch?.image || "";
+              break;
+            case "custom_images":
+              record["images"] = p["image"] || v["image"] || topMatch?.image || "";
+              break;
+            case "custom_brand_name_en": {
+              const br2 = p["brands"] || p["brand"];
+              record["brand_name[en]"] = (typeof br2 === "object" && br2 !== null) ? (br2["name_en"] || br2["title_en"] || "") : (br2 || "");
+              break;
+            }
+            case "custom_brand_name_ar": {
+              const br3 = p["brands"] || p["brand"];
+              record["brand_name[ar]"] = (typeof br3 === "object" && br3 !== null) ? (br3["name_ar"] || br3["title_ar"] || "") : "";
+              break;
+            }
+            case "custom_brand_slug": {
+              const br4 = p["brands"] || p["brand"];
+              record["brand_slug"] = (typeof br4 === "object" && br4 !== null) ? (br4["slug"] || "") : "";
+              break;
+            }
+            case "custom_brand_logo": {
+              const br5 = p["brands"] || p["brand"];
+              record["brand_logo"] = (typeof br5 === "object" && br5 !== null) ? (br5["images"] || br5["logo_url"] || br5["image"] || "") : "";
+              break;
+            }
+            case "custom_category_name_en": {
+              const cat1 = p["category"] || p["level_one_category"];
+              record["category_name[en]"] = (typeof cat1 === "object" && cat1 !== null) ? (cat1["name_en"] || cat1["name"] || cat1["title_en"] || "") : (cat1 || "");
+              break;
+            }
+            case "custom_category_name_ar": {
+              const cat1a = p["category"] || p["level_one_category"];
+              record["category_name[ar]"] = (typeof cat1a === "object" && cat1a !== null) ? (cat1a["name_ar"] || cat1a["title_ar"] || "") : "";
+              break;
+            }
+            case "custom_category_slug": {
+              const cat1s = p["category"] || p["level_one_category"];
+              record["category_slug"] = (typeof cat1s === "object" && cat1s !== null) ? (cat1s["slug"] || "") : (cat1s || "");
+              break;
+            }
+            case "custom_sub_category_name_en": {
+              const l2n = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
+              record["sub_category_name[en]"] = l2n?.["name_en"] || l2n?.["title_en"] || "";
+              break;
+            }
+            case "custom_sub_category_name_ar": {
+              const l2na = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
+              record["sub_category_name[ar]"] = l2na?.["name_ar"] || l2na?.["title_ar"] || "";
+              break;
+            }
+            case "custom_sub_category_slug": {
+              const l2s = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
+              record["sub_category_slug"] = l2s?.["slug"] || "";
+              break;
+            }
+            case "custom_sub_sub_category_name_en": {
+              const l3n = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
+              record["sub_sub_category_name[en]"] = l3n?.["name_en"] || l3n?.["title_en"] || "";
+              break;
+            }
+            case "custom_sub_sub_category_name_ar": {
+              const l3na = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
+              record["sub_sub_category_name[ar]"] = l3na?.["name_ar"] || l3na?.["title_ar"] || "";
+              break;
+            }
+            case "custom_sub_sub_category_slug": {
+              const l3s = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
+              record["sub_sub_category_slug"] = l3s?.["slug"] || "";
+              break;
+            }
             default:
               break;
           }
@@ -381,7 +472,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setOffset(0);
     setLimit(fetchedResults.length || jobStats?.total || 100);
     setSelectedStatuses(["matched", "review", "no_match"]);
-    setSelectedColumns(columnOptions.map(o => o.key));
+    setSelectedColumns(columnOptions.filter(o => o.defaultChecked).map(o => o.key));
     setExportComplete(false);
     setIsExporting(false);
     setExportStatusText("");
@@ -438,11 +529,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   {/* Data Card */}
                   <button
                     onClick={() => setExportType("data")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      exportType === "data"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${exportType === "data"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${exportType === "data" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileSpreadsheet className="w-6 h-6 text-primary" />
@@ -458,11 +548,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   {/* Media Card */}
                   <button
                     onClick={() => setExportType("media")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      exportType === "media"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${exportType === "media"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${exportType === "media" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <Image className="w-6 h-6 text-success" />
@@ -500,17 +589,15 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                 : [...prev, typeOpt.key]
                             );
                           }}
-                          className={`p-4 rounded-2xl border text-left transition-all ${
-                            isSelected
-                              ? "border-primary bg-primary/5 text-primary shadow-sm"
-                              : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                          }`}
+                          className={`p-4 rounded-2xl border text-left transition-all ${isSelected
+                            ? "border-primary bg-primary/5 text-primary shadow-sm"
+                            : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             <p className="font-bold text-sm">{typeOpt.label}</p>
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                              isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
-                            }`}>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
                               {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                           </div>
@@ -546,9 +633,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                 : [...prev, statusOpt.key]
                             );
                           }}
-                          className={`p-3 rounded-xl border text-center transition-all ${
-                            isSelected ? statusOpt.selectedClass : statusOpt.unselectedClass
-                          }`}
+                          className={`p-3 rounded-xl border text-center transition-all ${isSelected ? statusOpt.selectedClass : statusOpt.unselectedClass
+                            }`}
                         >
                           <p className="text-xs font-bold uppercase tracking-wider">{statusOpt.label}</p>
                           <p className={`text-[9px] mt-0.5 ${isSelected ? "opacity-90 font-semibold" : "opacity-60"}`}>
@@ -569,11 +655,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     <button
                       disabled={totalFilteredCount === 0}
                       onClick={() => setScope("all")}
-                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                        scope === "all"
-                           ? "border-primary bg-primary/5 text-primary shadow-sm"
-                           : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "all"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Entire Match List</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">All {totalFilteredCount} matches</p>
@@ -582,11 +667,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     <button
                       disabled={totalFilteredCount === 0}
                       onClick={() => setScope("slice")}
-                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                        scope === "slice"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "slice"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Custom Range</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">Slice offset/limit</p>
@@ -840,6 +924,35 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
 
                   <div className="space-y-4 overflow-y-auto pr-1">
+                    {/* Custom Export Fields Group */}
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-violet-400/90 bg-violet-500/10 px-2 py-0.5 rounded w-fit">
+                        Custom Export Fields
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-violet-200/40 dark:border-violet-800/30">
+                        {columnOptions.filter(col => col.group === "custom").map(col => {
+                          const isChecked = selectedColumns.includes(col.key);
+                          return (
+                            <button
+                              key={col.key}
+                              onClick={() => handleToggleColumn(col.key)}
+                              className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                            >
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                ? "bg-violet-500 border-violet-500 text-white"
+                                : "border-zinc-300 dark:border-zinc-700"
+                                }`}>
+                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                              <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate font-mono text-[10px]">
+                                {col.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     {/* Product Fields Group */}
                     <div className="space-y-2">
                       <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400/90 bg-zinc-55 dark:bg-zinc-800/50 px-2 py-0.5 rounded w-fit">

@@ -49,33 +49,58 @@ export const categoryColumnOptions: ColumnOption[] = [
 export interface MatcherColumnOption {
   key: string;
   label: string;
-  group: "matcher" | "product";
+  group: "matcher" | "product" | "custom";
   defaultChecked?: boolean;
 }
+
+export type MatcherColumnGroup = "matcher" | "product" | "custom";
 
 export const matcherColumnOptions: MatcherColumnOption[] = [
   // Matcher Fields
   { key: "row_index", label: "Row Number", group: "matcher", defaultChecked: false },
   { key: "original_name", label: "Original Product Name", group: "matcher", defaultChecked: false },
   { key: "normalized_name", label: "Normalized Query", group: "matcher", defaultChecked: false },
-  { key: "match_status", label: "Match Status", group: "matcher", defaultChecked: true },
-  { key: "match_score", label: "Confidence Score", group: "matcher", defaultChecked: true },
+  { key: "match_status", label: "Match Status", group: "matcher", defaultChecked: false },
+  { key: "match_score", label: "Confidence Score", group: "matcher", defaultChecked: false },
   { key: "jaccard", label: "Jaccard Token Overlap", group: "matcher", defaultChecked: false },
   { key: "sequence", label: "Sequence Similarity", group: "matcher", defaultChecked: false },
   { key: "matched_tokens", label: "Aligned Tokens", group: "matcher", defaultChecked: false },
 
   // Product Fields
-  { key: "id", label: "Product ID", group: "product", defaultChecked: true },
-  { key: "name_en", label: "English Name", group: "product", defaultChecked: true },
-  { key: "name_ar", label: "Arabic Name", group: "product", defaultChecked: true },
-  { key: "sku", label: "Reference SKU", group: "product", defaultChecked: true },
-  { key: "brand", label: "Brand / Manufacturer", group: "product", defaultChecked: true },
-  { key: "category", label: "Classification Category", group: "product", defaultChecked: true },
-  { key: "price", label: "Catalog Price", group: "product", defaultChecked: true },
-  { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: true },
-  { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: true },
-  { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: true },
+  { key: "id", label: "Product ID", group: "product", defaultChecked: false },
+  { key: "name_en", label: "English Name", group: "product", defaultChecked: false },
+  { key: "name_ar", label: "Arabic Name", group: "product", defaultChecked: false },
+  { key: "sku", label: "Reference SKU", group: "product", defaultChecked: false },
+  { key: "brand", label: "Brand / Manufacturer", group: "product", defaultChecked: false },
+  { key: "category", label: "Classification Category", group: "product", defaultChecked: false },
+  { key: "price", label: "Catalog Price", group: "product", defaultChecked: false },
+  { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: false },
+  { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: false },
+  { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: false },
   { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: false },
-  { key: "image_name", label: "Image Name", group: "product", defaultChecked: true }
+  { key: "image_name", label: "Image Name", group: "product", defaultChecked: false },
+
+  // Custom Export Fields (spec: matcher-custom-export.md)
+  { key: "custom_name_en",                  label: "name[en]",                 group: "custom", defaultChecked: true },
+  { key: "custom_name_ar",                  label: "name[ar]",                 group: "custom", defaultChecked: true },
+  { key: "custom_details_en",               label: "details[en]",              group: "custom", defaultChecked: true },
+  { key: "custom_details_ar",               label: "details[ar]",              group: "custom", defaultChecked: true },
+  { key: "custom_price",                    label: "price",                    group: "custom", defaultChecked: true },
+  { key: "custom_unit",                     label: "unit",                     group: "custom", defaultChecked: true },
+  { key: "custom_thumbnail",                label: "thumbnail",                group: "custom", defaultChecked: true },
+  { key: "custom_images",                   label: "images",                   group: "custom", defaultChecked: true },
+  { key: "custom_brand_name_en",            label: "brand_name[en]",           group: "custom", defaultChecked: true },
+  { key: "custom_brand_name_ar",            label: "brand_name[ar]",           group: "custom", defaultChecked: true },
+  { key: "custom_brand_slug",               label: "brand_slug",               group: "custom", defaultChecked: true },
+  { key: "custom_brand_logo",               label: "brand_logo",               group: "custom", defaultChecked: true },
+  { key: "custom_category_name_en",         label: "category_name[en]",        group: "custom", defaultChecked: true },
+  { key: "custom_category_name_ar",         label: "category_name[ar]",        group: "custom", defaultChecked: true },
+  { key: "custom_category_slug",            label: "category_slug",            group: "custom", defaultChecked: true },
+  { key: "custom_sub_category_name_en",     label: "sub_category_name[en]",    group: "custom", defaultChecked: true },
+  { key: "custom_sub_category_name_ar",     label: "sub_category_name[ar]",    group: "custom", defaultChecked: true },
+  { key: "custom_sub_category_slug",        label: "sub_category_slug",        group: "custom", defaultChecked: true },
+  { key: "custom_sub_sub_category_name_en", label: "sub_sub_category_name[en]", group: "custom", defaultChecked: true },
+  { key: "custom_sub_sub_category_name_ar", label: "sub_sub_category_name[ar]", group: "custom", defaultChecked: true },
+  { key: "custom_sub_sub_category_slug",    label: "sub_sub_category_slug",    group: "custom", defaultChecked: true },
 ];
 

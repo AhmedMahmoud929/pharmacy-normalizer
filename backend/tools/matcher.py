@@ -204,8 +204,14 @@ class ProductIndex:
                     brand_obj = {
                         "id": brand_data.get("id"),
                         "name": brand_data.get("title_en") or brand_data.get("title_ar"),
+                        "name_en": brand_data.get("title_en") or brand_data.get("title_ar") or "",
+                        "name_ar": brand_data.get("title_ar") or brand_data.get("title_en") or "",
+                        "title_en": brand_data.get("title_en") or "",
+                        "title_ar": brand_data.get("title_ar") or "",
                         "slug": brand_data.get("slug"),
-                        "image": brand_data.get("images")
+                        "image": brand_data.get("images"),
+                        "images": brand_data.get("images"),
+                        "logo_url": brand_data.get("images")
                     }
                 
                 cat_data = product.get("level_one_category")
@@ -213,6 +219,10 @@ class ProductIndex:
                 if cat_data:
                     cat_obj = {
                         "name": cat_data.get("title_en") or cat_data.get("title_ar"),
+                        "name_en": cat_data.get("title_en") or "",
+                        "name_ar": cat_data.get("title_ar") or "",
+                        "title_en": cat_data.get("title_en") or "",
+                        "title_ar": cat_data.get("title_ar") or "",
                         "slug": cat_data.get("slug")
                     }
                 
@@ -222,14 +232,19 @@ class ProductIndex:
                     "name_ar": product.get("title_ar"),
                     "sku": product.get("slug") or str(product.get("id")),
                     "brand": brand_obj,
+                    "brands": brand_data,
                     "category": cat_obj,
+                    "level_one_category": cat_data,
                     "level_two_category": product.get("level_two_category"),
                     "level_three_category": product.get("level_three_category"),
                     "price": product.get("final_price") or product.get("price") or 0,
                     "in_stock": product.get("in_stock", True),
                     "stock": 10 if product.get("in_stock", True) else 0,
                     "share_link": product.get("full_url") or product.get("url") or "",
-                    "image": product.get("image") or ""
+                    "image": product.get("image") or "",
+                    "description_en": product.get("description_en") or product.get("meta_description_en") or "",
+                    "description_ar": product.get("description_ar") or product.get("meta_description_ar") or "",
+                    "unit": product.get("unit") or ""
                 }
                 
                 idx = len(self.entries)
