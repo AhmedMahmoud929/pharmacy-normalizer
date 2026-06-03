@@ -19,6 +19,8 @@ if project_root not in sys.path:
 if tools_dir not in sys.path:
     sys.path.append(tools_dir)
 
+from tools.matcher_export import build_custom_columns
+
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
 
@@ -410,22 +412,22 @@ async def run_matcher_background(
             status = top_match["status"] if top_match else "no_match"
             score = top_match["score"] if top_match else 0.0
             
-            p = top_match["product_data"] if top_match else {}
-            v = top_match["variant_data"] if top_match else {}
+            p = top_match.get("product_data") if top_match else {}
+            v = top_match.get("variant_data") if top_match else {}
             
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
                 "match_status": status,
                 "match_score": f"{score * 100:.1f}%",
-                "matched_product_id": p.get("id", top_match.get("id") if top_match else ""),
+                "matched_product_id": (p or {}).get("id") or (top_match.get("id") if top_match else ""),
                 "matched_sku": top_match.get("sku") if top_match else "",
                 "matched_name_en": top_match.get("name_en") if top_match else "",
-                "catalog_price": v.get("price") or p.get("price") or 0.0,
-                "classification_category": p.get("category", {}).get("name") if isinstance(p.get("category"), dict) else p.get("category", ""),
-                "brand": p.get("brand", {}).get("name") if isinstance(p.get("brand"), dict) else p.get("brand", ""),
-                "in_stock": "Yes" if (v.get("stock", 0) > 0 or p.get("in_stock", True)) else "No",
-                "storefront_link": f"https://chefaa.com/product/{p.get('slug')}" if p.get("slug") else ""
+                "catalog_price": (v or {}).get("price") or (p or {}).get("price") or 0.0,
+                "classification_category": (p or {}).get("category", {}).get("name") if isinstance((p or {}).get("category"), dict) else (p or {}).get("category", ""),
+                "brand": (p or {}).get("brand", {}).get("name") if isinstance((p or {}).get("brand"), dict) else (p or {}).get("brand", ""),
+                "in_stock": "Yes" if ((v or {}).get("stock", 0) > 0 or (p or {}).get("in_stock", True)) else "No",
+                "storefront_link": f"https://chefaa.com/product/{(p or {}).get('slug')}" if (p or {}).get("slug") else ""
             }
             
             # Map up to 3 candidates
@@ -444,6 +446,9 @@ async def run_matcher_background(
                         f"{prefix}id": "",
                         f"{prefix}name_en": ""
                     })
+
+            # Append custom export columns per spec (matcher-custom-export.md)
+            record.update(build_custom_columns(p or None))
                     
             excel_records.append(record)
 

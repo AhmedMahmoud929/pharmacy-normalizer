@@ -15,6 +15,7 @@ import uuid
 import re
 import zipfile
 import shutil
+from tools.matcher_export import build_custom_columns
 
 # Fix imports to allow importing from tools/ matcher and normalizer
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -2438,6 +2439,9 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                         f"{prefix}id": "",
                         f"{prefix}name_en": ""
                     })
+
+            # Append custom export columns per spec (matcher-custom-export.md)
+            record.update(build_custom_columns(p or None))
                     
             excel_records.append(record)
             
