@@ -348,6 +348,19 @@ export default function DrugMatcher() {
 
           fetchHistory();
 
+          // Fetch initial already-processed results so the table is not empty at startup
+          fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=10000`)
+            .then(res => {
+              if (res.ok) return res.json();
+              throw new Error("Failed to fetch initial results");
+            })
+            .then(resData => {
+              setResults(resData.results || []);
+            })
+            .catch(err => {
+              console.error("Error fetching initial results for background job:", err);
+            });
+
           // Connect to SSE stream to monitor live progress of background job!
           const eventSource = new EventSource(`${API_URL}/api/matcher/job/${data.job_id}/stream`);
 

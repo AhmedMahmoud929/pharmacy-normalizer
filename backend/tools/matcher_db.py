@@ -299,3 +299,30 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
         "offset": offset,
         "jobs": jobs
     }
+
+def delete_job(job_id: str):
+    """Delete a mapping job session from SQLite and remove its workspace files from disk."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Query results_path and output_path to clean up files
+    cursor.execute("SELECT results_path, output_path FROM matcher_jobs WHERE job_id = ?", (job_id,))
+    row = cursor.fetchone()
+    
+    if row:
+        results_path, output_path = row
+        # Clean up files inside the job's directory
+        path_to_clean = results_path or output_path
+        if path_to_clean:
+            job_dir = os.path.dirname(path_to_clean)
+            if os.path.exists(job_dir):
+                import shutil
+                try:
+                    shutil.rmtree(job_dir)
+                except Exception as e:
+                    print(f"Failed to remove job folder {job_dir}: {e}")
+                    
+    cursor.execute("DELETE FROM matcher_jobs WHERE job_id = ?", (job_id,))
+    conn.commit()
+    conn.close()

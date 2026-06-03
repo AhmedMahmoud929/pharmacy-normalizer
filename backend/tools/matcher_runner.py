@@ -301,8 +301,10 @@ async def run_matcher_background(
                         # Save incremental results.json so API users can view ongoing match chunks
                         try:
                             results_json_path = os.path.join(jobs_dir, "results.json")
-                            with open(results_json_path, "w", encoding="utf-8") as f:
+                            temp_json_path = results_json_path + ".tmp"
+                            with open(temp_json_path, "w", encoding="utf-8") as f:
                                 json.dump(results_list, f, indent=2, ensure_ascii=False)
+                            os.replace(temp_json_path, results_json_path)
                         except Exception as write_err:
                             print(f"Failed to write incremental results for job {job_id}: {write_err}")
                         
@@ -367,8 +369,10 @@ async def run_matcher_background(
                     # Save incremental results.json so API users can view ongoing match chunks
                     try:
                         results_json_path = os.path.join(jobs_dir, "results.json")
-                        with open(results_json_path, "w", encoding="utf-8") as f:
+                        temp_json_path = results_json_path + ".tmp"
+                        with open(temp_json_path, "w", encoding="utf-8") as f:
                             json.dump(results_list, f, indent=2, ensure_ascii=False)
+                        os.replace(temp_json_path, results_json_path)
                     except Exception as write_err:
                         print(f"Failed to write incremental results for job {job_id}: {write_err}")
                     
@@ -394,8 +398,10 @@ async def run_matcher_background(
 
         # 7. Write raw results.json file
         results_json_path = os.path.join(jobs_dir, "results.json")
-        with open(results_json_path, "w", encoding="utf-8") as f:
+        temp_json_path = results_json_path + ".tmp"
+        with open(temp_json_path, "w", encoding="utf-8") as f:
             json.dump(results_list, f, indent=2, ensure_ascii=False)
+        os.replace(temp_json_path, results_json_path)
 
         # 8. Compile finalized xlsx sheet output
         excel_records = []

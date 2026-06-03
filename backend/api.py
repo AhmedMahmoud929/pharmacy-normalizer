@@ -2270,6 +2270,14 @@ async def get_matcher_job_results(
         with open(results_path, "r", encoding="utf-8") as f:
             all_results = json.load(f)
     except Exception as e:
+        if job["status"] in ["pending", "running"]:
+            return {
+                "job_id": job_id,
+                "total": 0,
+                "limit": limit,
+                "offset": offset,
+                "results": []
+            }
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
         
     filtered_results = []
@@ -2367,8 +2375,10 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
     target_item["matches"] = [new_candidate] + [m for m in target_item["matches"] if m.get("sku") != req.matched_sku]
     
     try:
-        with open(results_path, "w", encoding="utf-8") as f:
+        temp_path = results_path + ".tmp"
+        with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(all_results, f, indent=2, ensure_ascii=False)
+        os.replace(temp_path, results_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to write results file: {str(e)}")
         
@@ -2494,6 +2504,30 @@ async def export_matcher_job_file(job_id: str):
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename=f"matched_{job['filename']}"
     )
+
+class DeleteJobRequest(BaseModel):
+    password: str
+
+@app.delete("/api/matcher/job/{job_id}")
+async def delete_matcher_job(job_id: str, req: DeleteJobRequest):
+    from tools.matcher_db import get_job, delete_job
+    
+    provided_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    fixed_hash = "d9e773a8d1da5850712f4c6dc4e0507eb23f5e36715b1320332065054e354fcc"
+    
+    if provided_hash != fixed_hash:
+        raise HTTPException(status_code=401, detail="Incorrect password. Unauthorized deletion.")
+        
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    try:
+        delete_job(job_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete job: {str(e)}")
+        
+    return {"status": "success", "message": "Job and its associated data deleted successfully."}
 
 if __name__ == "__main__":
     import uvicorn

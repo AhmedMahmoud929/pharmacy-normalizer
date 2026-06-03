@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Clock, Plus, FileSpreadsheet, Download, Loader2,
-  CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp
+  CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp, Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportDialog } from "@/components/matcher/ExportDialog";
+import { DeleteCampaignModal } from "@/components/matcher/DeleteCampaignModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -36,6 +37,9 @@ export default function MatcherDashboard() {
   const [selectedJobResults, setSelectedJobResults] = useState<any[]>([]);
   const [exportingJobId, setExportingJobId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<{ id: string; filename: string } | null>(null);
 
   const handleExportClick = async (jobId: string) => {
     setExportingJobId(jobId);
@@ -335,6 +339,18 @@ export default function MatcherDashboard() {
                               )}
                             </button>
                           )}
+
+                          {/* Delete Campaign */}
+                          <button
+                            onClick={() => {
+                              setJobToDelete({ id: job.job_id, filename: job.filename });
+                              setIsDeleteOpen(true);
+                            }}
+                            className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-error hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
+                            title="Delete Campaign"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -355,6 +371,18 @@ export default function MatcherDashboard() {
         }}
         jobId={activeJobId}
         initialResults={selectedJobResults}
+      />
+
+      {/* Delete Campaign Modal */}
+      <DeleteCampaignModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setJobToDelete(null);
+        }}
+        jobId={jobToDelete?.id || null}
+        filename={jobToDelete?.filename || ""}
+        onDeleted={fetchJobs}
       />
     </div>
   );
