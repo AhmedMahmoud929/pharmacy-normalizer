@@ -361,7 +361,7 @@ async def match_sheet(
         
         yield "event: complete\ndata: {\"status\": \"finished\"}\n\n"
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
     
 @app.get("/normalize")
 async def normalize_text(q: str):
@@ -1911,7 +1911,7 @@ async def stream_crawler_job_telemetry(job_id: str):
                 if not job_listeners[job_id]:
                     del job_listeners[job_id]
                     
-    return StreamingResponse(sse_event_generator(), media_type="text/event-stream")
+    return StreamingResponse(sse_event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 def flatten_product(prod: dict) -> dict:
     flat = {}
@@ -2200,7 +2200,7 @@ async def run_matcher_job(
             if not job_listeners[job_id]:
                 job_listeners.pop(job_id, None)
 
-    return StreamingResponse(foreground_event_generator(), media_type="text/event-stream")
+    return StreamingResponse(foreground_event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 @app.get("/api/matcher/jobs")
 async def list_matcher_jobs(
@@ -2486,7 +2486,7 @@ async def stream_matcher_job_progress(job_id: str):
             if not job_listeners[job_id]:
                 job_listeners.pop(job_id, None)
                 
-    return StreamingResponse(progress_event_generator(), media_type="text/event-stream")
+    return StreamingResponse(progress_event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 @app.get("/api/matcher/job/{job_id}/export")
 async def export_matcher_job_file(job_id: str):
