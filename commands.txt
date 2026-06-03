@@ -13,3 +13,6 @@ sudo systemctl status fastapi
 === LOGS ===
 sudo journalctl -u fastapi -n 150
 pm2 logs pharmatch-frontend --lines 100
+
+=== RECOVER FAILED JOB ===
+python backend/tools/recover_job.py d6657643-212b-4e95-aa92-d9190bf44d87
