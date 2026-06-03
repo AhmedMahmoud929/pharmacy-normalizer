@@ -225,8 +225,7 @@ export default function BrowsePage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(50);
-  const [imageStatusFilter, setImageStatusFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -243,8 +242,7 @@ export default function BrowsePage() {
     try {
       let url = "";
       if (activeTab === "products") {
-        const filterParam = imageStatusFilter !== "all" ? `&image_status=${imageStatusFilter}` : "";
-        url = `${API_URL}/db/products?limit=${limit}&offset=${page * limit}${search ? `&search=${encodeURIComponent(search)}` : ""}${filterParam}`;
+        url = `${API_URL}/db/products?limit=${limit}&offset=${page * limit}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       } else if (activeTab === "brands") {
         url = `${API_URL}/db/brands`;
       } else if (activeTab === "categories") {
@@ -274,7 +272,7 @@ export default function BrowsePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, page, limit, imageStatusFilter, search]);
+  }, [activeTab, page, limit, search]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -346,21 +344,6 @@ export default function BrowsePage() {
                   className="w-full pl-11 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
                 />
               </form>
-              <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm">
-                <Filter className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                <select
-                  value={imageStatusFilter}
-                  onChange={(e) => {
-                    setImageStatusFilter(e.target.value);
-                    setPage(0);
-                  }}
-                  className="bg-transparent text-sm font-bold text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer border-none p-0 focus:ring-0"
-                >
-                  <option value="all">All Images</option>
-                  <option value="local">Local Images</option>
-                  <option value="cdn">CDN Images</option>
-                </select>
-              </div>
               
               <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                 <button
@@ -427,7 +410,38 @@ export default function BrowsePage() {
           <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
               {activeTab === "products" && (
-                viewMode === "list" ? (
+                products.length === 0 ? (
+                  <motion.div
+                    key="no-products"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex flex-col items-center justify-center py-20 px-6 text-center space-y-4"
+                  >
+                    <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 rounded-full flex items-center justify-center">
+                      <Search className="w-8 h-8 opacity-60" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">No products found</h3>
+                      <p className="text-sm text-zinc-500 max-w-sm">
+                        {search 
+                          ? `We couldn't find any products matching "${search}". Try checking for spelling errors or using more general terms.` 
+                          : "There are no products available in the database catalog."}
+                      </p>
+                    </div>
+                    {search && (
+                      <button
+                        onClick={() => {
+                          setSearch("");
+                          setPage(0);
+                        }}
+                        className="px-5 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-350 text-xs font-bold rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all cursor-pointer border-none outline-none"
+                      >
+                        Clear Search
+                      </button>
+                    )}
+                  </motion.div>
+                ) : viewMode === "list" ? (
                   <motion.table
                     key="products-table"
                     initial={{ opacity: 0 }}
