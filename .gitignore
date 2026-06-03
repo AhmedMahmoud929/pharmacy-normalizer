@@ -30,6 +30,7 @@ backend/data/sheets_output/
 backend/data/extracted/
 backend/data/extracted_data/
 backend/data/media/
+backend/data/matcher/
 backend/data/input/
 backend/data/normalized/
 backend/data/archeive/
