@@ -22,6 +22,10 @@ interface MatchConfigProps {
   onStart: () => void;
   background: boolean;
   setBackground: (val: boolean) => void;
+  useUploadedPrice: boolean;
+  setUseUploadedPrice: (val: boolean) => void;
+  priceColumn: string;
+  setPriceColumn: (col: string) => void;
 }
 
 export const MatchConfig: React.FC<MatchConfigProps> = ({
@@ -41,6 +45,10 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
   onStart,
   background,
   setBackground,
+  useUploadedPrice,
+  setUseUploadedPrice,
+  priceColumn,
+  setPriceColumn,
 }) => {
   if (!file) return null;
 
@@ -63,6 +71,53 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Uploaded Price Override */}
+      <div className="pt-4 border-t border-primary/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Use Uploaded Prices</label>
+            <span className="text-[10px] text-zinc-400">Override default catalog price with sheet data</span>
+          </div>
+          <button
+            onClick={() => setUseUploadedPrice(!useUploadedPrice)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              useUploadedPrice ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                useUploadedPrice ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+        </div>
+        <AnimatePresence>
+          {useUploadedPrice && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="text-xs font-medium text-neutral-gray block">Select Price Column</label>
+              <select
+                value={priceColumn}
+                onChange={(e) => setPriceColumn(e.target.value)}
+                className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none text-sm"
+              >
+                {columns.map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="space-y-6">

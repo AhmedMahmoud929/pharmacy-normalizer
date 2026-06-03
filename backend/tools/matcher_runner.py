@@ -125,7 +125,7 @@ def load_reference_db() -> List[Dict[str, Any]]:
             
     return products
 
-def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float) -> dict:
+def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None) -> dict:
     """Core row matching computation executed inside ThreadPool workers."""
     matches = index_inst.search(norm_name, top_k=top)
     
@@ -133,6 +133,7 @@ def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Pro
         "row_index": idx,
         "original_name": raw_name,
         "normalized_name": norm_name,
+        "uploaded_price": uploaded_price,
         "matches": []
     }
     
@@ -174,7 +175,9 @@ async def run_matcher_background(
     match_threshold: float,
     review_threshold: float,
     parallel: bool = True,
-    workers: Optional[int] = None
+    workers: Optional[int] = None,
+    use_uploaded_price: bool = False,
+    price_column: Optional[str] = None
 ):
     """Asynchronous worker task managing sheet matching execution and state persistence."""
     try:
@@ -233,7 +236,23 @@ async def run_matcher_background(
         for idx, row in df.iterrows():
             raw_name = str(row[name_col]) if pd.notna(row[name_col]) else ""
             norm_name = normalize(raw_name)
-            queries.append((idx, raw_name, norm_name))
+            
+            uploaded_price = None
+            if use_uploaded_price and price_column and price_column in df.columns:
+                val = row[price_column]
+                if pd.notna(val):
+                    try:
+                        val_str = str(val).strip()
+                        # Extract digits and decimal dots
+                        match = re.search(r"[-+]?\d*\.\d+|\d+", val_str)
+                        if match:
+                            uploaded_price = float(match.group())
+                        else:
+                            uploaded_price = float(val_str)
+                    except:
+                        uploaded_price = val
+                        
+            queries.append((idx, raw_name, norm_name, uploaded_price))
 
         results_list = []
         matched_count = 0
@@ -262,9 +281,10 @@ async def run_matcher_background(
                         index_inst, 
                         top, 
                         match_threshold, 
-                        review_threshold
+                        review_threshold,
+                        uploaded_price
                     )
-                    for idx, raw_name, norm_name in queries
+                    for idx, raw_name, norm_name, uploaded_price in queries
                 ]
                 
                 # Consume as completed
@@ -329,7 +349,7 @@ async def run_matcher_background(
                         await asyncio.sleep(0.01)
         else:
             # Sequential execution loop
-            for idx, raw_name, norm_name in queries:
+            for idx, raw_name, norm_name, uploaded_price in queries:
                 result_payload = _process_single_row(
                     idx, 
                     raw_name, 
@@ -337,7 +357,8 @@ async def run_matcher_background(
                     index_inst, 
                     top, 
                     match_threshold, 
-                    review_threshold
+                    review_threshold,
+                    uploaded_price
                 )
                 results_list.append(result_payload)
                 
@@ -415,6 +436,11 @@ async def run_matcher_background(
             p = top_match.get("product_data") if top_match else {}
             v = top_match.get("variant_data") if top_match else {}
             
+            uploaded_price = res.get("uploaded_price")
+            catalog_price_val = (v or {}).get("price") or (p or {}).get("price") or 0.0
+            if uploaded_price is not None:
+                catalog_price_val = uploaded_price
+
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
@@ -423,7 +449,7 @@ async def run_matcher_background(
                 "matched_product_id": (p or {}).get("id") or (top_match.get("id") if top_match else ""),
                 "matched_sku": top_match.get("sku") if top_match else "",
                 "matched_name_en": top_match.get("name_en") if top_match else "",
-                "catalog_price": (v or {}).get("price") or (p or {}).get("price") or 0.0,
+                "catalog_price": catalog_price_val,
                 "classification_category": (p or {}).get("category", {}).get("name") if isinstance((p or {}).get("category"), dict) else (p or {}).get("category", ""),
                 "brand": (p or {}).get("brand", {}).get("name") if isinstance((p or {}).get("brand"), dict) else (p or {}).get("brand", ""),
                 "in_stock": "Yes" if ((v or {}).get("stock", 0) > 0 or (p or {}).get("in_stock", True)) else "No",
@@ -448,7 +474,7 @@ async def run_matcher_background(
                     })
 
             # Append custom export columns per spec (matcher-custom-export.md)
-            record.update(build_custom_columns(p or None))
+            record.update(build_custom_columns(p or None, override_price=uploaded_price))
                     
             excel_records.append(record)
 

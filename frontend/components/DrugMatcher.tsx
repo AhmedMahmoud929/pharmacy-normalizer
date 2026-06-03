@@ -69,6 +69,8 @@ export default function DrugMatcher() {
   // Background & History states
   const [background, setBackground] = useState(true);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [useUploadedPrice, setUseUploadedPrice] = useState(false);
+  const [priceColumn, setPriceColumn] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -141,6 +143,13 @@ export default function DrugMatcher() {
         );
         if (found) setSelectedColumn(found);
         else setSelectedColumn(headers[0]);
+
+        const priceCandidates = ["price", "سعر", "الافتراضي", "cost", "final_price", "s3r", "price_eg", "default_price"];
+        const foundPrice = headers.find(h =>
+          priceCandidates.some(c => h.toLowerCase().includes(c.toLowerCase()))
+        );
+        if (foundPrice) setPriceColumn(foundPrice);
+        else setPriceColumn(headers[0] || "");
       }
     };
     reader.readAsBinaryString(selectedFile);
@@ -171,6 +180,8 @@ export default function DrugMatcher() {
     setSelectedColumn(job.column_used || "Unknown");
     setMatchThreshold(Math.round((job.match_threshold || 0.6) * 100));
     setReviewThreshold(Math.round((job.review_threshold || 0.4) * 100));
+    setUseUploadedPrice(!!job.use_uploaded_price);
+    setPriceColumn(job.price_column || "");
 
     if (job.status === "completed") {
       setIsProcessing(false);
@@ -322,6 +333,8 @@ export default function DrugMatcher() {
     formData.append("parallel", parallel.toString());
     if (parallel) formData.append("workers", workers.toString());
     formData.append("background", background.toString());
+    formData.append("use_uploaded_price", useUploadedPrice.toString());
+    formData.append("price_column", useUploadedPrice ? priceColumn : "");
 
     try {
       const response = await fetch(`${API_URL}/api/matcher/run`, {
@@ -737,6 +750,10 @@ export default function DrugMatcher() {
                       onStart={startMatching}
                       background={background}
                       setBackground={setBackground}
+                      useUploadedPrice={useUploadedPrice}
+                      setUseUploadedPrice={setUseUploadedPrice}
+                      priceColumn={priceColumn}
+                      setPriceColumn={setPriceColumn}
                     />
                   </div>
 

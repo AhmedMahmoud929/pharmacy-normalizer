@@ -233,7 +233,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               record["category"] = p.category?.name || p.category || "";
               break;
             case "price":
-              record["price"] = v.price || p.price || 0;
+              record["price"] = res.uploaded_price !== undefined && res.uploaded_price !== null ? res.uploaded_price : (v.price || p.price || 0);
               break;
             case "in_stock":
               const hasStock = v.stock > 0 || p.stock > 0 || (p.in_stock !== false);
@@ -267,7 +267,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               record["details[ar]"] = p["description_ar"] || p["meta_description_ar"] || "";
               break;
             case "custom_price":
-              record["price"] = v["price"] || p["price"] || p["final_price"] || 0;
+              record["price"] = res.uploaded_price !== undefined && res.uploaded_price !== null ? res.uploaded_price : (v["price"] || p["price"] || p["final_price"] || 0);
               break;
             case "custom_unit":
               record["unit"] = p["unit"] || "";

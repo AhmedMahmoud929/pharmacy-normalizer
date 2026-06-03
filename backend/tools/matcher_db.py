@@ -42,6 +42,19 @@ def init_db():
         )
     """)
     conn.commit()
+    
+    # Ensure columns exist (handling legacy schema upgrades cleanly)
+    for col_name, col_type in [
+        ("use_uploaded_price", "INTEGER DEFAULT 0"),
+        ("price_column", "TEXT")
+    ]:
+        try:
+            cursor.execute(f"ALTER TABLE matcher_jobs ADD COLUMN {col_name} {col_type}")
+            conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
+            
     conn.close()
 
 def create_job(
@@ -50,7 +63,9 @@ def create_job(
     column_used: str,
     match_threshold: float,
     review_threshold: float,
-    total_rows: int = 0
+    total_rows: int = 0,
+    use_uploaded_price: bool = False,
+    price_column: Optional[str] = None
 ) -> Dict[str, Any]:
     """Register a new drug matcher job in the SQLite history database."""
     init_db()
@@ -63,8 +78,8 @@ def create_job(
     cursor.execute(
         """
         INSERT INTO matcher_jobs 
-        (job_id, status, pid, filename, total_rows, processed_rows, matched_count, review_count, no_match_count, column_used, match_threshold, review_threshold, output_path, results_path, error_msg, created_at, started_at, finished_at, duration)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (job_id, status, pid, filename, total_rows, processed_rows, matched_count, review_count, no_match_count, column_used, match_threshold, review_threshold, output_path, results_path, error_msg, created_at, started_at, finished_at, duration, use_uploaded_price, price_column)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             job_id,
@@ -85,7 +100,9 @@ def create_job(
             now,
             None,
             None,
-            None
+            None,
+            1 if use_uploaded_price else 0,
+            price_column
         )
     )
     
@@ -103,7 +120,9 @@ def create_job(
         "column_used": column_used,
         "match_threshold": match_threshold,
         "review_threshold": review_threshold,
-        "created_at": now
+        "created_at": now,
+        "use_uploaded_price": use_uploaded_price,
+        "price_column": price_column
     }
 
 def update_job_pid(job_id: str, pid: int):
@@ -205,7 +224,8 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
         SELECT job_id, status, pid, filename, total_rows, processed_rows, 
                matched_count, review_count, no_match_count, column_used, 
                match_threshold, review_threshold, output_path, results_path, 
-               error_msg, created_at, started_at, finished_at, duration 
+               error_msg, created_at, started_at, finished_at, duration,
+               use_uploaded_price, price_column
         FROM matcher_jobs WHERE job_id = ?
         """,
         (job_id,)
@@ -235,7 +255,9 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
         "created_at": row[15],
         "started_at": row[16],
         "finished_at": row[17],
-        "duration": row[18]
+        "duration": row[18],
+        "use_uploaded_price": bool(row[19]),
+        "price_column": row[20]
     }
 
 def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> Dict[str, Any]:
@@ -248,7 +270,8 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
         SELECT job_id, status, pid, filename, total_rows, processed_rows, 
                matched_count, review_count, no_match_count, column_used, 
                match_threshold, review_threshold, output_path, results_path, 
-               error_msg, created_at, started_at, finished_at, duration 
+               error_msg, created_at, started_at, finished_at, duration,
+               use_uploaded_price, price_column
         FROM matcher_jobs
     """
     count_query = "SELECT COUNT(*) FROM matcher_jobs"
@@ -290,7 +313,9 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
             "created_at": row[15],
             "started_at": row[16],
             "finished_at": row[17],
-            "duration": row[18]
+            "duration": row[18],
+            "use_uploaded_price": bool(row[19]),
+            "price_column": row[20]
         })
         
     return {

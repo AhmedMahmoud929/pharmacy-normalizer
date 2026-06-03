@@ -2132,7 +2132,9 @@ async def run_matcher_job(
     review_threshold: float = Form(0.40),
     parallel: bool = Form(True),
     workers: Optional[int] = Form(None),
-    background: bool = Form(False)
+    background: bool = Form(False),
+    use_uploaded_price: bool = Form(False),
+    price_column: Optional[str] = Form(None)
 ):
     from tools.matcher_db import create_job
     from tools.matcher_runner import run_matcher_background, job_listeners
@@ -2159,7 +2161,9 @@ async def run_matcher_job(
         column_used=column or "",
         match_threshold=match_threshold,
         review_threshold=review_threshold,
-        total_rows=len(df)
+        total_rows=len(df),
+        use_uploaded_price=use_uploaded_price,
+        price_column=price_column
     )
 
     # 3. Schedule the worker thread execution
@@ -2173,7 +2177,9 @@ async def run_matcher_job(
             match_threshold=match_threshold,
             review_threshold=review_threshold,
             parallel=parallel,
-            workers=workers
+            workers=workers,
+            use_uploaded_price=use_uploaded_price,
+            price_column=price_column
         )
     )
 
@@ -2409,6 +2415,11 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
             p = top_match.get("product_data", {}) if top_match else {}
             v = top_match.get("variant_data", {}) if top_match else {}
             
+            uploaded_price = res.get("uploaded_price")
+            catalog_price_val = v.get("price") or p.get("price") or 0.0
+            if uploaded_price is not None:
+                catalog_price_val = uploaded_price
+
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
@@ -2417,7 +2428,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                 "matched_product_id": p.get("id", top_match.get("id") if top_match else ""),
                 "matched_sku": top_match.get("sku") if top_match else "",
                 "matched_name_en": top_match.get("name_en") if top_match else "",
-                "catalog_price": v.get("price") or p.get("price") or 0.0,
+                "catalog_price": catalog_price_val,
                 "classification_category": p.get("category", {}).get("name") if isinstance(p.get("category"), dict) else p.get("category", ""),
                 "brand": p.get("brand", {}).get("name") if isinstance(p.get("brand"), dict) else p.get("brand", ""),
                 "in_stock": "Yes" if (v.get("stock", 0) > 0 or p.get("in_stock", True)) else "No",
@@ -2441,7 +2452,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                     })
 
             # Append custom export columns per spec (matcher-custom-export.md)
-            record.update(build_custom_columns(p or None))
+            record.update(build_custom_columns(p or None, override_price=uploaded_price))
                     
             excel_records.append(record)
             

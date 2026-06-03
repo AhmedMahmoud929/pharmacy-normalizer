@@ -61,15 +61,18 @@ def _extract_image_name(val: Union[str, List[str], None]) -> str:
     return str(val)
 
 
-def build_custom_columns(p: Optional[dict]) -> dict:
+def build_custom_columns(p: Optional[dict], override_price: Optional[float] = None) -> dict:
     """
     Given a product_data dict (from a matched result), return an ordered dict
     of the custom export columns defined in the spec.
 
-    If p is None or empty (no_match rows), all values are "".
+    If p is None or empty (no_match rows), all values are "", except price if override_price is provided.
     """
     if not p or not isinstance(p, dict):
-        return _empty_columns()
+        cols = _empty_columns()
+        if override_price is not None:
+            cols["price"] = override_price
+        return cols
 
     l1 = _get_l1(p)
     l2 = _get_l2(p)
@@ -83,12 +86,14 @@ def build_custom_columns(p: Optional[dict]) -> dict:
     brand_logo_raw = brand.get("images") or brand.get("logo_url") or brand.get("image") or ""
     brand_logo = _extract_image_name(brand_logo_raw)
 
+    price_val = override_price if override_price is not None else (p.get("price") or p.get("final_price") or 0.0)
+
     return {
         "name[en]":                  p.get("title_en") or p.get("name_en") or "",
         "name[ar]":                  p.get("title_ar") or p.get("name_ar") or "",
         "details[en]":               p.get("description_en") or p.get("meta_description_en") or "",
         "details[ar]":               p.get("description_ar") or p.get("meta_description_ar") or "",
-        "price":                     p.get("price") or p.get("final_price") or 0.0,
+        "price":                     price_val,
         "unit":                      p.get("unit") or "",
         "thumbnail":                 thumbnail,
         "images":                    images,
