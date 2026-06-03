@@ -7,6 +7,22 @@ import * as XLSX from "xlsx";
 import { API_URL } from "@/lib/utils";
 import { MatcherColumnOption as ColumnOption, matcherColumnOptions as columnOptions } from "@/constants/columns";
 
+const extractImageName = (val: any): string => {
+  if (!val) return "";
+  if (Array.isArray(val)) {
+    return val.map(x => extractImageName(x)).filter(Boolean).join(", ");
+  }
+  if (typeof val === "string") {
+    if (val.includes(",")) {
+      return val.split(",").map(p => extractImageName(p.trim())).filter(Boolean).join(", ");
+    }
+    const cleanVal = val.split("?")[0];
+    const parts = cleanVal.split(/[\/\\]/);
+    return parts[parts.length - 1] || "";
+  }
+  return String(val);
+};
+
 interface ExportDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -257,10 +273,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               record["unit"] = p["unit"] || "";
               break;
             case "custom_thumbnail":
-              record["thumbnail"] = p["image"] || v["image"] || topMatch?.image || "";
+              record["thumbnail"] = extractImageName(p["image"] || v["image"] || topMatch?.image || "");
               break;
             case "custom_images":
-              record["images"] = p["image"] || v["image"] || topMatch?.image || "";
+              record["images"] = extractImageName(p["image"] || v["image"] || topMatch?.image || "");
               break;
             case "custom_brand_name_en": {
               const br2 = p["brands"] || p["brand"];
@@ -279,7 +295,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             }
             case "custom_brand_logo": {
               const br5 = p["brands"] || p["brand"];
-              record["brand_logo"] = (typeof br5 === "object" && br5 !== null) ? (br5["images"] || br5["logo_url"] || br5["image"] || "") : "";
+              record["brand_logo"] = extractImageName((typeof br5 === "object" && br5 !== null) ? (br5["images"] || br5["logo_url"] || br5["image"] || "") : "");
               break;
             }
             case "custom_category_name_en": {
