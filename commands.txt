@@ -1,1 +1,10 @@
+=== NORMALIZER ===
 python tools/normalize.py --english-only --file data/extracted/chefaa_products_eg.json
+
+=== DEPLOYMENT ===
+sudo cp /var/www/pharmatcher.bya3online.com/deployment/fastapi.service /etc/systemd/system/fastapi.service
+
+=== RESTART THE API ===
+sudo systemctl daemon-reload
+sudo systemctl restart fastapi
+sudo systemctl status fastapi
