@@ -437,11 +437,14 @@ def enrich_brand_image(brand: dict) -> dict:
     if not image_url:
         b["is_local_image"] = False
         b["local_image_url"] = None
+        b["image_name"] = ""
         return b
     
     normalized = normalize_cdn_url(image_url)
     corrected = fix_dotless_url(normalized)
     filename = sanitize_filename(corrected)
+    
+    b["image_name"] = filename
     
     brand_media_dir = os.path.join(project_root, "data", "media", "brands")
     file_path = os.path.join(brand_media_dir, filename)

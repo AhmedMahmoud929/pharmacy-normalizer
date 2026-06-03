@@ -5,6 +5,7 @@ import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, File
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { API_URL } from "@/lib/utils";
+import { MatcherColumnOption as ColumnOption, matcherColumnOptions as columnOptions } from "@/constants/columns";
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -22,39 +23,6 @@ interface ExportDialogProps {
 type Stage = 0 | 1 | 2;
 type ExportFormat = "xlsx" | "json" | "txt";
 type ExportScope = "all" | "slice";
-
-interface ColumnOption {
-  key: string;
-  label: string;
-  group: "matcher" | "product";
-  defaultChecked?: boolean;
-}
-
-const columnOptions: ColumnOption[] = [
-  // Matcher Fields
-  { key: "row_index", label: "Row Number", group: "matcher", defaultChecked: false },
-  { key: "original_name", label: "Original Product Name", group: "matcher", defaultChecked: false },
-  { key: "normalized_name", label: "Normalized Query", group: "matcher", defaultChecked: false },
-  { key: "match_status", label: "Match Status", group: "matcher", defaultChecked: true },
-  { key: "match_score", label: "Confidence Score", group: "matcher", defaultChecked: true },
-  { key: "jaccard", label: "Jaccard Token Overlap", group: "matcher", defaultChecked: false },
-  { key: "sequence", label: "Sequence Similarity", group: "matcher", defaultChecked: false },
-  { key: "matched_tokens", label: "Aligned Tokens", group: "matcher", defaultChecked: false },
-
-  // Product Fields
-  { key: "id", label: "Product ID", group: "product", defaultChecked: true },
-  { key: "name_en", label: "English Name", group: "product", defaultChecked: true },
-  { key: "name_ar", label: "Arabic Name", group: "product", defaultChecked: true },
-  { key: "sku", label: "Reference SKU", group: "product", defaultChecked: true },
-  { key: "brand", label: "Brand / Manufacturer", group: "product", defaultChecked: true },
-  { key: "category", label: "Classification Category", group: "product", defaultChecked: true },
-  { key: "price", label: "Catalog Price", group: "product", defaultChecked: true },
-  { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: true },
-  { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: true },
-  { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: true },
-  { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: false },
-  { key: "image_name", label: "Image Name", group: "product", defaultChecked: true }
-];
 
 export const ExportDialog: React.FC<ExportDialogProps> = ({
   isOpen,

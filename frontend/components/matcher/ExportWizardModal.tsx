@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
+import { ColumnOption, columnOptions, brandColumnOptions, categoryColumnOptions } from "@/constants/columns";
 
 interface ExportWizardModalProps {
   isOpen: boolean;
@@ -16,52 +17,6 @@ interface ExportWizardModalProps {
 type Stage = 0 | 1 | 2;
 type ExportFormat = "xlsx" | "json" | "txt";
 type ExportScope = "all" | "filtered" | "slice";
-
-interface ColumnOption {
-  key: string;
-  label: string;
-  defaultChecked?: boolean;
-}
-
-const columnOptions: ColumnOption[] = [
-  { key: "id", label: "Product ID", defaultChecked: true },
-  { key: "name_en", label: "English Name", defaultChecked: true },
-  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
-  { key: "sku", label: "Reference SKU", defaultChecked: true },
-  { key: "brand", label: "Brand / Manufacturer", defaultChecked: true },
-  { key: "brand_id", label: "Brand ID", defaultChecked: true },
-  { key: "category", label: "Classification Category", defaultChecked: true },
-  { key: "category_id", label: "Category ID", defaultChecked: true },
-  { key: "sub_category_id", label: "Sub Category ID", defaultChecked: true },
-  { key: "sub_sub_category_id", label: "Sub Sub Category ID", defaultChecked: true },
-  { key: "price", label: "Catalog Price", defaultChecked: true },
-  { key: "in_stock", label: "In Stock Flag", defaultChecked: true },
-  { key: "stock", label: "Quantity Stock", defaultChecked: true },
-  { key: "share_link", label: "Storefront Web Link", defaultChecked: true },
-  { key: "image", label: "Asset Thumbnail URL", defaultChecked: false },
-  { key: "image_name", label: "Image Name", defaultChecked: true }
-];
-
-const brandColumnOptions: ColumnOption[] = [
-  { key: "id", label: "Brand ID", defaultChecked: true },
-  { key: "name_en", label: "English Name", defaultChecked: true },
-  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
-  { key: "slug", label: "Brand Slug", defaultChecked: true },
-  { key: "image", label: "Logo Asset URL", defaultChecked: false },
-  { key: "count", label: "Product Count", defaultChecked: true },
-  { key: "is_local_image", label: "Local Image Flag", defaultChecked: false },
-  { key: "local_image_url", label: "Local Image Path", defaultChecked: true }
-];
-
-const categoryColumnOptions: ColumnOption[] = [
-  { key: "id", label: "Category ID", defaultChecked: true },
-  { key: "name_en", label: "English Name", defaultChecked: true },
-  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
-  { key: "slug", label: "Category Slug", defaultChecked: true },
-  { key: "level", label: "Taxonomy Level", defaultChecked: true },
-  { key: "parent_slug", label: "Parent Category Slug", defaultChecked: true },
-  { key: "count", label: "Product Count", defaultChecked: true }
-];
 
 export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   isOpen,
@@ -101,13 +56,13 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
       if (mode === "categories") {
         setStage(1); // Categories skip Stage 0
         setExportType("data");
-        setSelectedColumns(categoryColumnOptions.map(o => o.key));
+        setSelectedColumns(categoryColumnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
         setSelectedLevels([1, 2, 3]);
       } else if (mode === "brands") {
         setStage(0);
         setExportType("data");
         setMediaTypes(["brands"]);
-        setSelectedColumns(brandColumnOptions.map(o => o.key));
+        setSelectedColumns(brandColumnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
       } else {
         setStage(0);
         setExportType("data");
