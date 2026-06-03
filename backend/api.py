@@ -574,6 +574,147 @@ async def list_db_products(
         "offset": offset,
         "products": paged
     }
+brand_slug_to_code = {}
+category_slug_to_code = {}
+
+def ensure_index_codes():
+    global brand_slug_to_code, category_slug_to_code, raw_products
+    if brand_slug_to_code and category_slug_to_code:
+        return
+    if not raw_products:
+        from tools.matcher import RAW_DB_PATH
+        db_to_load = DEFAULT_DB_PATH
+        if not os.path.exists(db_to_load) and os.path.exists(RAW_DB_PATH):
+            db_to_load = RAW_DB_PATH
+        if os.path.exists(db_to_load):
+            try:
+                with open(db_to_load, "r", encoding="utf-8") as f:
+                    raw_products = json.load(f)
+            except:
+                pass
+    if not raw_products:
+        return
+
+    # Build brands list and assign codes
+    brands_map = {}
+    for prod in raw_products:
+        if not isinstance(prod, dict):
+            continue
+        brand = prod.get("brands") or prod.get("brand")
+        if brand and isinstance(brand, dict):
+            b_slug = brand.get("slug")
+            name = brand.get("title_en") or brand.get("title_ar") or brand.get("name")
+            if name:
+                name = name.strip()
+                if name not in brands_map:
+                    brands_map[name] = {
+                        "slug": b_slug,
+                        "count": 0
+                    }
+                brands_map[name]["count"] += 1
+    
+    brands_sorted = list(brands_map.values())
+    brands_sorted.sort(key=lambda x: (-x["count"], x["slug"] or ""))
+    
+    brand_slug_to_code = {}
+    for idx, b in enumerate(brands_sorted):
+        code = idx + 1
+        if b["slug"]:
+            brand_slug_to_code[b["slug"]] = code
+
+    # Build categories list and assign codes
+    categories_map = {}
+    for prod in raw_products:
+        if not isinstance(prod, dict):
+            continue
+        
+        l1 = prod.get("level_one_category") or prod.get("category")
+        if l1 and isinstance(l1, dict):
+            l1_slug = l1.get("slug")
+            if l1_slug:
+                if l1_slug not in categories_map:
+                    categories_map[l1_slug] = {"slug": l1_slug, "level": 1, "count": 0}
+                categories_map[l1_slug]["count"] += 1
+                
+        l2_list = prod.get("level_two_category") or []
+        if isinstance(l2_list, dict):
+            l2_list = [l2_list]
+        for l2 in l2_list:
+            if l2 and isinstance(l2, dict):
+                l2_slug = l2.get("slug")
+                if l2_slug:
+                    if l2_slug not in categories_map:
+                        categories_map[l2_slug] = {"slug": l2_slug, "level": 2, "count": 0}
+                    categories_map[l2_slug]["count"] += 1
+                    
+        l3_list = prod.get("level_three_category") or []
+        if isinstance(l3_list, dict):
+            l3_list = [l3_list]
+        for l3 in l3_list:
+            if l3 and isinstance(l3, dict):
+                l3_slug = l3.get("slug")
+                if l3_slug:
+                    if l3_slug not in categories_map:
+                        categories_map[l3_slug] = {"slug": l3_slug, "level": 3, "count": 0}
+                    categories_map[l3_slug]["count"] += 1
+                    
+    categories_sorted = list(categories_map.values())
+    categories_sorted.sort(key=lambda x: (x["level"], -x["count"], x["slug"] or ""))
+    
+    category_slug_to_code = {}
+    for idx, c in enumerate(categories_sorted):
+        code = idx + 1
+        if c["slug"]:
+            category_slug_to_code[c["slug"]] = code
+
+def get_brand_index_code(p):
+    ensure_index_codes()
+    brand = p.get("brand") or p.get("brands")
+    if isinstance(brand, dict):
+        slug = brand.get("slug")
+        if slug:
+            return brand_slug_to_code.get(slug, "")
+    return ""
+
+def get_category_index_code(p):
+    ensure_index_codes()
+    cat = p.get("category") or p.get("level_one_category")
+    if isinstance(cat, dict):
+        slug = cat.get("slug")
+        if slug:
+            return category_slug_to_code.get(slug, "")
+    return ""
+
+def get_sub_category_index_code(p):
+    ensure_index_codes()
+    cat2 = p.get("level_two_category") or []
+    if isinstance(cat2, dict):
+        slug = cat2.get("slug")
+        if slug:
+            return category_slug_to_code.get(slug, "")
+    if isinstance(cat2, list) and len(cat2) > 0:
+        first = cat2[0]
+        if isinstance(first, dict):
+            slug = first.get("slug")
+            if slug:
+                return category_slug_to_code.get(slug, "")
+    return ""
+
+def get_sub_sub_category_index_code(p):
+    ensure_index_codes()
+    cat3 = p.get("level_three_category") or []
+    if isinstance(cat3, dict):
+        slug = cat3.get("slug")
+        if slug:
+            return category_slug_to_code.get(slug, "")
+    if isinstance(cat3, list) and len(cat3) > 0:
+        first = cat3[0]
+        if isinstance(first, dict):
+            slug = first.get("slug")
+            if slug:
+                return category_slug_to_code.get(slug, "")
+    return ""
+
 def get_brand_id(p):
     brand = p.get("brand") or p.get("brands")
     if isinstance(brand, dict):
@@ -656,6 +797,18 @@ async def export_database(
                 if col == "category_id":
                     res[col] = get_category_id(p)
                     continue
+                if col == "brand_index_code":
+                    res[col] = get_brand_index_code(p)
+                    continue
+                if col == "category_index_code":
+                    res[col] = get_category_index_code(p)
+                    continue
+                if col == "sub_category_index_code":
+                    res[col] = get_sub_category_index_code(p)
+                    continue
+                if col == "sub_sub_category_index_code":
+                    res[col] = get_sub_sub_category_index_code(p)
+                    continue
                 if col == "sub_category_id":
                     res[col] = get_sub_category_id(p)
                     continue
@@ -678,10 +831,12 @@ async def export_database(
                 item["brand"] = item["brand"].get("name")
             if isinstance(item.get("category"), dict):
                 item["category"] = item["category"].get("name")
-            item["brand_id"] = get_brand_id(p)
-            item["category_id"] = get_category_id(p)
+            item["brand_index_code"] = get_brand_index_code(p)
+            item["category_index_code"] = get_category_index_code(p)
             item["sub_category_id"] = get_sub_category_id(p)
             item["sub_sub_category_id"] = get_sub_sub_category_id(p)
+            item["sub_category_index_code"] = get_sub_category_index_code(p)
+            item["sub_sub_category_index_code"] = get_sub_sub_category_index_code(p)
             item["image_name"] = p.get("local_image_name") or ""
             item["local_image_name"] = p.get("local_image_name") or ""
             return item
@@ -890,6 +1045,7 @@ async def export_brands(
     if not raw_products:
         raise HTTPException(status_code=503, detail="Database not loaded")
 
+    ensure_index_codes()
     brands_map = {}
     for prod in raw_products:
         if not isinstance(prod, dict):
@@ -902,6 +1058,7 @@ async def export_brands(
                 name = name.strip()
                 if name not in brands_map:
                     brands_map[name] = {
+                        "index_code": brand_slug_to_code.get(b_slug, ""),
                         "id": brand.get("id"),
                         "name_en": brand.get("title_en", "").strip() if brand.get("title_en") else "",
                         "name_ar": brand.get("title_ar", "").strip() if brand.get("title_ar") else "",
@@ -997,6 +1154,7 @@ async def export_categories(
     if not raw_products:
         raise HTTPException(status_code=503, detail="Database not loaded")
 
+    ensure_index_codes()
     categories_map = {}
     allowed_levels = [1, 2, 3]
     if levels:
@@ -1016,6 +1174,7 @@ async def export_categories(
             if l1_slug and 1 in allowed_levels:
                 if l1_slug not in categories_map:
                     categories_map[l1_slug] = {
+                        "index_code": category_slug_to_code.get(l1_slug, ""),
                         "id": l1_slug,
                         "name_en": l1.get("title_en", "").strip(),
                         "name_ar": l1.get("title_ar", "").strip(),
@@ -1038,6 +1197,7 @@ async def export_categories(
                 if l2_slug and 2 in allowed_levels:
                     if l2_slug not in categories_map:
                         categories_map[l2_slug] = {
+                            "index_code": category_slug_to_code.get(l2_slug, ""),
                             "id": l2_slug,
                             "name_en": l2.get("title_en", "").strip(),
                             "name_ar": l2.get("title_ar", "").strip(),
@@ -1060,6 +1220,7 @@ async def export_categories(
                         if l3_slug and 3 in allowed_levels:
                             if l3_slug not in categories_map:
                                 categories_map[l3_slug] = {
+                                    "index_code": category_slug_to_code.get(l3_slug, ""),
                                     "id": l3_slug,
                                     "name_en": l3.get("title_en", "").strip(),
                                     "name_ar": l3.get("title_ar", "").strip(),

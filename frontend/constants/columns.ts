@@ -10,11 +10,11 @@ export const columnOptions: ColumnOption[] = [
   { key: "name_ar", label: "Arabic Name", defaultChecked: true },
   { key: "sku", label: "Reference SKU", defaultChecked: true },
   { key: "brand", label: "Brand / Manufacturer", defaultChecked: true },
-  { key: "brand_id", label: "Brand ID", defaultChecked: true },
+  { key: "brand_index_code", label: "Brand Index Code", defaultChecked: true },
   { key: "category", label: "Classification Category", defaultChecked: true },
-  { key: "category_id", label: "Category ID", defaultChecked: true },
-  { key: "sub_category_id", label: "Sub Category ID", defaultChecked: true },
-  { key: "sub_sub_category_id", label: "Sub Sub Category ID", defaultChecked: true },
+  { key: "category_index_code", label: "Category Index Code", defaultChecked: true },
+  { key: "sub_category_index_code", label: "Sub Category Index Code", defaultChecked: true },
+  { key: "sub_sub_category_index_code", label: "Sub Sub Category Index Code", defaultChecked: true },
   { key: "price", label: "Catalog Price", defaultChecked: true },
   { key: "in_stock", label: "In Stock Flag", defaultChecked: true },
   { key: "stock", label: "Quantity Stock", defaultChecked: true },
@@ -24,6 +24,7 @@ export const columnOptions: ColumnOption[] = [
 ];
 
 export const brandColumnOptions: ColumnOption[] = [
+  { key: "index_code", label: "Index Code", defaultChecked: true },
   { key: "id", label: "Brand ID", defaultChecked: true },
   { key: "name_en", label: "English Name", defaultChecked: true },
   { key: "name_ar", label: "Arabic Name", defaultChecked: true },
@@ -35,6 +36,7 @@ export const brandColumnOptions: ColumnOption[] = [
 ];
 
 export const categoryColumnOptions: ColumnOption[] = [
+  { key: "index_code", label: "Index Code", defaultChecked: true },
   { key: "id", label: "Category ID", defaultChecked: true },
   { key: "name_en", label: "English Name", defaultChecked: true },
   { key: "name_ar", label: "Arabic Name", defaultChecked: true },
