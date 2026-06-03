@@ -644,13 +644,38 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
             )}
 
             {stage === 0 ? (
-              <button
-                onClick={() => setStage(1)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer"
-              >
-                Continue
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              exportType === "media" && mode === "brands" ? (
+                <button
+                  disabled={isExporting}
+                  onClick={handleMediaExport}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all cursor-pointer"
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Zipping Media...
+                    </>
+                  ) : exportComplete ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      ZIP Triggered!
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Generate & Download Media
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setStage(1)}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )
             ) : exportType === "media" ? (
               <button
                 disabled={isExporting || mediaTypes.length === 0}
