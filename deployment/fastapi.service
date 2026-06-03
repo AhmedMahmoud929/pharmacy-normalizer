@@ -7,7 +7,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/var/www/pharmatcher.bya3online.com/backend
 Environment="PATH=/var/www/pharmatcher.bya3online.com/backend/venv/bin"
-ExecStart=/var/www/pharmatcher.bya3online.com/backend/venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000 --workers 4
+ExecStart=/var/www/pharmatcher.bya3online.com/backend/venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000 --workers 1
 
 Restart=always
 RestartSec=5
