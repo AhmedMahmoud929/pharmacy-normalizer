@@ -8,3 +8,8 @@ sudo cp /var/www/pharmatcher.bya3online.com/deployment/fastapi.service /etc/syst
 sudo systemctl daemon-reload
 sudo systemctl restart fastapi
 sudo systemctl status fastapi
+
+
+=== LOGS ===
+sudo journalctl -u fastapi -n 150
+pm2 logs pharmatch-frontend --lines 100

@@ -17,6 +17,15 @@ import zipfile
 import shutil
 from tools.matcher_export import build_custom_columns
 
+# Excel formatting helpers
+ILLEGAL_CHARACTERS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
+
+def clean_df_for_excel(df: pd.DataFrame) -> pd.DataFrame:
+    """Removes Excel-illegal control characters from all string columns in the DataFrame."""
+    clean_fn = lambda x: ILLEGAL_CHARACTERS_RE.sub('', x) if isinstance(x, str) else x
+    return df.map(clean_fn) if hasattr(df, 'map') else df.applymap(clean_fn)
+
+
 # Fix imports to allow importing from tools/ matcher and normalizer
 project_root = os.path.dirname(os.path.abspath(__file__))
 workspace_root = os.path.dirname(project_root)
@@ -874,6 +883,7 @@ async def export_database(
     elif format == "xlsx":
         output = io.BytesIO()
         df = pd.DataFrame(products)
+        df = clean_df_for_excel(df)
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Chefaa Products")
         output.seek(0)
@@ -1119,6 +1129,7 @@ async def export_brands(
     elif format == "xlsx":
         output = io.BytesIO()
         df = pd.DataFrame(export_data)
+        df = clean_df_for_excel(df)
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Brands Catalog")
         output.seek(0)
@@ -1281,6 +1292,7 @@ async def export_categories(
     elif format == "xlsx":
         output = io.BytesIO()
         df = pd.DataFrame(export_data)
+        df = clean_df_for_excel(df)
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Categories Taxonomy")
         output.seek(0)
@@ -1995,6 +2007,7 @@ async def download_crawler_data(job_id: str, format: str = Query("json")):
             else:
                 df = pd.json_normalize(raw_data)
                 
+            df = clean_df_for_excel(df)
             excel_io = io.BytesIO()
             with pd.ExcelWriter(excel_io, engine="openpyxl") as writer:
                 df.to_excel(writer, index=False, sheet_name="Scraped Products")
@@ -2458,6 +2471,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
             
         excel_out_path = os.path.join(os.path.dirname(results_path), "matched.xlsx")
         df_out = pd.DataFrame(excel_records)
+        df_out = clean_df_for_excel(df_out)
         with pd.ExcelWriter(excel_out_path, engine='openpyxl') as writer:
             df_out.to_excel(writer, index=False, sheet_name="Matched Catalog")
     except Exception as ex_err:

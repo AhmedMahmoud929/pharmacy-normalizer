@@ -19,6 +19,16 @@ from typing import List, Dict, Any, Optional, Tuple
 # Suppress openpyxl warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
+# Excel formatting helpers
+ILLEGAL_CHARACTERS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
+
+def clean_df_for_excel(df):
+    """Removes Excel-illegal control characters from all string columns in the DataFrame."""
+    import pandas as pd
+    clean_fn = lambda x: ILLEGAL_CHARACTERS_RE.sub('', x) if isinstance(x, str) else x
+    return df.map(clean_fn) if hasattr(df, 'map') else df.applymap(clean_fn)
+
+
 # Ensure UTF-8 output on Windows
 if sys.platform == "win32":
     import io
@@ -391,6 +401,7 @@ def run_sheet(file_path: str, index: ProductIndex, args):
 
     # 4. Serialize to chosen format
     if fmt == "xlsx":
+        final_df = clean_df_for_excel(final_df)
         final_df.to_excel(output_path, index=False)
     elif fmt == "json":
         final_df.to_json(output_path, orient="records", indent=2, force_ascii=False)

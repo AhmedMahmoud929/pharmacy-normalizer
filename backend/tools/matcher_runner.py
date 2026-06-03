@@ -24,6 +24,15 @@ from tools.matcher_export import build_custom_columns
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
 
+# Excel formatting helpers
+ILLEGAL_CHARACTERS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
+
+def clean_df_for_excel(df: pd.DataFrame) -> pd.DataFrame:
+    """Removes Excel-illegal control characters from all string columns in the DataFrame."""
+    clean_fn = lambda x: ILLEGAL_CHARACTERS_RE.sub('', x) if isinstance(x, str) else x
+    return df.map(clean_fn) if hasattr(df, 'map') else df.applymap(clean_fn)
+
+
 # Local image status enrichment helpers
 def normalize_cdn_url(url: str) -> str:
     if not url:
@@ -480,6 +489,7 @@ async def run_matcher_background(
 
         excel_out_path = os.path.join(jobs_dir, "matched.xlsx")
         df_out = pd.DataFrame(excel_records)
+        df_out = clean_df_for_excel(df_out)
         with pd.ExcelWriter(excel_out_path, engine='openpyxl') as writer:
             df_out.to_excel(writer, index=False, sheet_name="Matched Catalog")
 
