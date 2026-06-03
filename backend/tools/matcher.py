@@ -202,6 +202,7 @@ class ProductIndex:
                 brand_obj = None
                 if brand_data:
                     brand_obj = {
+                        "id": brand_data.get("id"),
                         "name": brand_data.get("title_en") or brand_data.get("title_ar"),
                         "slug": brand_data.get("slug"),
                         "image": brand_data.get("images")
@@ -222,6 +223,8 @@ class ProductIndex:
                     "sku": product.get("slug") or str(product.get("id")),
                     "brand": brand_obj,
                     "category": cat_obj,
+                    "level_two_category": product.get("level_two_category"),
+                    "level_three_category": product.get("level_three_category"),
                     "price": product.get("final_price") or product.get("price") or 0,
                     "in_stock": product.get("in_stock", True),
                     "stock": 10 if product.get("in_stock", True) else 0,

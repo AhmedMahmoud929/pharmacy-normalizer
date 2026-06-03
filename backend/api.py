@@ -571,6 +571,37 @@ async def list_db_products(
         "offset": offset,
         "products": paged
     }
+def get_brand_id(p):
+    brand = p.get("brand") or p.get("brands")
+    if isinstance(brand, dict):
+        return brand.get("id") or ""
+    return ""
+
+def get_category_id(p):
+    cat = p.get("category") or p.get("level_one_category")
+    if isinstance(cat, dict):
+        return cat.get("slug") or ""
+    return ""
+
+def get_sub_category_id(p):
+    cat2 = p.get("level_two_category") or []
+    if isinstance(cat2, dict):
+        return cat2.get("slug") or ""
+    if isinstance(cat2, list) and len(cat2) > 0:
+        first = cat2[0]
+        if isinstance(first, dict):
+            return first.get("slug") or ""
+    return ""
+
+def get_sub_sub_category_id(p):
+    cat3 = p.get("level_three_category") or []
+    if isinstance(cat3, dict):
+        return cat3.get("slug") or ""
+    if isinstance(cat3, list) and len(cat3) > 0:
+        first = cat3[0]
+        if isinstance(first, dict):
+            return first.get("slug") or ""
+    return ""
 
 
 @app.get("/db/export")
@@ -616,6 +647,18 @@ async def export_database(
                 if col == "image_name" or col == "local_image_name":
                     res[col] = p.get("local_image_name") or ""
                     continue
+                if col == "brand_id":
+                    res[col] = get_brand_id(p)
+                    continue
+                if col == "category_id":
+                    res[col] = get_category_id(p)
+                    continue
+                if col == "sub_category_id":
+                    res[col] = get_sub_category_id(p)
+                    continue
+                if col == "sub_sub_category_id":
+                    res[col] = get_sub_sub_category_id(p)
+                    continue
                 if col in p:
                     val = p[col]
                     if isinstance(val, dict):
@@ -632,6 +675,10 @@ async def export_database(
                 item["brand"] = item["brand"].get("name")
             if isinstance(item.get("category"), dict):
                 item["category"] = item["category"].get("name")
+            item["brand_id"] = get_brand_id(p)
+            item["category_id"] = get_category_id(p)
+            item["sub_category_id"] = get_sub_category_id(p)
+            item["sub_sub_category_id"] = get_sub_sub_category_id(p)
             item["image_name"] = p.get("local_image_name") or ""
             item["local_image_name"] = p.get("local_image_name") or ""
             return item
@@ -852,6 +899,9 @@ async def export_brands(
                 name = name.strip()
                 if name not in brands_map:
                     brands_map[name] = {
+                        "id": brand.get("id"),
+                        "name_en": brand.get("title_en", "").strip() if brand.get("title_en") else "",
+                        "name_ar": brand.get("title_ar", "").strip() if brand.get("title_ar") else "",
                         "name": name,
                         "slug": b_slug,
                         "image": brand.get("images") or brand.get("image"),
@@ -963,6 +1013,7 @@ async def export_categories(
             if l1_slug and 1 in allowed_levels:
                 if l1_slug not in categories_map:
                     categories_map[l1_slug] = {
+                        "id": l1_slug,
                         "name_en": l1.get("title_en", "").strip(),
                         "name_ar": l1.get("title_ar", "").strip(),
                         "slug": l1_slug,
@@ -984,6 +1035,7 @@ async def export_categories(
                 if l2_slug and 2 in allowed_levels:
                     if l2_slug not in categories_map:
                         categories_map[l2_slug] = {
+                            "id": l2_slug,
                             "name_en": l2.get("title_en", "").strip(),
                             "name_ar": l2.get("title_ar", "").strip(),
                             "slug": l2_slug,
@@ -1005,6 +1057,7 @@ async def export_categories(
                         if l3_slug and 3 in allowed_levels:
                             if l3_slug not in categories_map:
                                 categories_map[l3_slug] = {
+                                    "id": l3_slug,
                                     "name_en": l3.get("title_en", "").strip(),
                                     "name_ar": l3.get("title_ar", "").strip(),
                                     "slug": l3_slug,

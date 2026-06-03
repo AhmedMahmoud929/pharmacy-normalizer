@@ -29,7 +29,11 @@ const columnOptions: ColumnOption[] = [
   { key: "name_ar", label: "Arabic Name", defaultChecked: true },
   { key: "sku", label: "Reference SKU", defaultChecked: true },
   { key: "brand", label: "Brand / Manufacturer", defaultChecked: true },
+  { key: "brand_id", label: "Brand ID", defaultChecked: true },
   { key: "category", label: "Classification Category", defaultChecked: true },
+  { key: "category_id", label: "Category ID", defaultChecked: true },
+  { key: "sub_category_id", label: "Sub Category ID", defaultChecked: true },
+  { key: "sub_sub_category_id", label: "Sub Sub Category ID", defaultChecked: true },
   { key: "price", label: "Catalog Price", defaultChecked: true },
   { key: "in_stock", label: "In Stock Flag", defaultChecked: true },
   { key: "stock", label: "Quantity Stock", defaultChecked: true },
@@ -39,15 +43,18 @@ const columnOptions: ColumnOption[] = [
 ];
 
 const brandColumnOptions: ColumnOption[] = [
-  { key: "name", label: "Brand Name", defaultChecked: true },
+  { key: "id", label: "Brand ID", defaultChecked: true },
+  { key: "name_en", label: "English Name", defaultChecked: true },
+  { key: "name_ar", label: "Arabic Name", defaultChecked: true },
   { key: "slug", label: "Brand Slug", defaultChecked: true },
-  { key: "image", label: "Logo Asset URL", defaultChecked: true },
+  { key: "image", label: "Logo Asset URL", defaultChecked: false },
   { key: "count", label: "Product Count", defaultChecked: true },
-  { key: "is_local_image", label: "Local Image Flag", defaultChecked: true },
+  { key: "is_local_image", label: "Local Image Flag", defaultChecked: false },
   { key: "local_image_url", label: "Local Image Path", defaultChecked: true }
 ];
 
 const categoryColumnOptions: ColumnOption[] = [
+  { key: "id", label: "Category ID", defaultChecked: true },
   { key: "name_en", label: "English Name", defaultChecked: true },
   { key: "name_ar", label: "Arabic Name", defaultChecked: true },
   { key: "slug", label: "Category Slug", defaultChecked: true },
@@ -68,14 +75,14 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
   const [mediaTypes, setMediaTypes] = useState<string[]>(["products", "brands"]);
   const [format, setFormat] = useState<ExportFormat | null>(null);
   const [scope, setScope] = useState<ExportScope>("all");
-  
+
   // Slicing Range State
   const [offset, setOffset] = useState<number>(0);
   const [limit, setLimit] = useState<number>(1000);
-  
+
   // Selected Columns Checklist
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  
+
   // Selected Levels Checklist (only for categories export)
   const [selectedLevels, setSelectedLevels] = useState<number[]>([1, 2, 3]);
 
@@ -90,7 +97,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
       setScope("all");
       setOffset(0);
       setLimit(1000);
-      
+
       if (mode === "categories") {
         setStage(1); // Categories skip Stage 0
         setExportType("data");
@@ -112,10 +119,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
 
   if (!isOpen) return null;
 
-  const currentColumnOptions = 
-    mode === "brands" ? brandColumnOptions : 
-    mode === "categories" ? categoryColumnOptions : 
-    columnOptions;
+  const currentColumnOptions =
+    mode === "brands" ? brandColumnOptions :
+      mode === "categories" ? categoryColumnOptions :
+        columnOptions;
 
   const handleToggleColumn = (key: string) => {
     setSelectedColumns(prev =>
@@ -165,7 +172,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
           url += `&offset=${offset}&limit=${limit}`;
         }
       }
-      
+
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `chefaa_${mode}_export.${format}`);
@@ -250,7 +257,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
 
   const getModalSubtitle = () => {
     if (stage === 0) {
-      return mode === "brands" 
+      return mode === "brands"
         ? "Choose between exporting brand spreadsheet data or brand logo assets"
         : "Choose between exporting spreadsheet data or downloading local media assets";
     }
@@ -309,11 +316,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   {/* Data Card */}
                   <button
                     onClick={() => setExportType("data")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      exportType === "data"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${exportType === "data"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${exportType === "data" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileSpreadsheet className="w-6 h-6 text-primary" />
@@ -333,11 +339,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   {/* Media Card */}
                   <button
                     onClick={() => setExportType("media")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      exportType === "media"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${exportType === "media"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${exportType === "media" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <Image className="w-6 h-6 text-success" />
@@ -376,17 +381,15 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                                 : [...prev, typeOpt.key]
                             );
                           }}
-                          className={`p-4 rounded-2xl border text-left transition-all ${
-                            isSelected
-                              ? "border-primary bg-primary/5 text-primary shadow-sm"
-                              : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                          }`}
+                          className={`p-4 rounded-2xl border text-left transition-all ${isSelected
+                            ? "border-primary bg-primary/5 text-primary shadow-sm"
+                            : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             <p className="font-bold text-sm">{typeOpt.label}</p>
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                              isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
-                            }`}>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
                               {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                           </div>
@@ -411,11 +414,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   {/* Excel Card */}
                   <button
                     onClick={() => setFormat("xlsx")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "xlsx"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "xlsx"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "xlsx" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileSpreadsheet className="w-6 h-6 text-success" />
@@ -431,11 +433,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   {/* JSON Card */}
                   <button
                     onClick={() => setFormat("json")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "json"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "json"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "json" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileJson className="w-6 h-6 text-warning" />
@@ -451,11 +452,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                   {/* Tab Delimited Plain Text */}
                   <button
                     onClick={() => setFormat("txt")}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${
-                      format === "txt"
-                        ? "border-primary bg-primary/5 text-primary shadow-sm"
-                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${format === "txt"
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <div className={`p-3 rounded-xl ${format === "txt" ? "bg-primary/10" : "bg-zinc-100 dark:bg-zinc-800"}`}>
                       <FileText className="w-6 h-6 text-zinc-500" />
@@ -482,11 +482,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     {/* All Option */}
                     <button
                       onClick={() => setScope("all")}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        scope === "all"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all ${scope === "all"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Entire Dataset</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">
@@ -498,11 +497,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     <button
                       disabled={!activeSearch || mode !== "products"}
                       onClick={() => setScope("filtered")}
-                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                        scope === "filtered"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${scope === "filtered"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Active Filters</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">
@@ -513,11 +511,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     {/* Slice Option */}
                     <button
                       onClick={() => setScope("slice")}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        scope === "slice"
-                          ? "border-primary bg-primary/5 text-primary shadow-sm"
-                          : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all ${scope === "slice"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-400"
+                        }`}
                     >
                       <p className="text-xs font-bold">Custom Range</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">Slice offset/limit</p>
@@ -574,11 +571,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                             onClick={() => handleToggleLevel(lvl)}
                             className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                           >
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                              isChecked
-                                ? "bg-primary border-primary text-white"
-                                : "border-zinc-300 dark:border-zinc-700"
-                            }`}>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                              ? "bg-primary border-primary text-white"
+                              : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
                               {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                             <span className="text-zinc-700 dark:text-zinc-300 font-bold">
@@ -614,11 +610,10 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                           onClick={() => handleToggleColumn(col.key)}
                           className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                         >
-                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                            isChecked
-                              ? "bg-primary border-primary text-white"
-                              : "border-zinc-300 dark:border-zinc-700"
-                          }`}>
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                            ? "bg-primary border-primary text-white"
+                            : "border-zinc-300 dark:border-zinc-700"
+                            }`}>
                             {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                           </div>
                           <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
