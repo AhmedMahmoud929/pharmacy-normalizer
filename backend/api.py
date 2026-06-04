@@ -2147,7 +2147,10 @@ async def run_matcher_job(
     workers: Optional[int] = Form(None),
     background: bool = Form(False),
     use_uploaded_price: bool = Form(False),
-    price_column: Optional[str] = Form(None)
+    price_column: Optional[str] = Form(None),
+    use_uploaded_stock: bool = Form(False),
+    stock_column: Optional[str] = Form(None),
+    default_stock: int = Form(10)
 ):
     from tools.matcher_db import create_job
     from tools.matcher_runner import run_matcher_background, job_listeners
@@ -2176,7 +2179,10 @@ async def run_matcher_job(
         review_threshold=review_threshold,
         total_rows=len(df),
         use_uploaded_price=use_uploaded_price,
-        price_column=price_column
+        price_column=price_column,
+        use_uploaded_stock=use_uploaded_stock,
+        stock_column=stock_column,
+        default_stock=default_stock
     )
 
     # 3. Schedule the worker thread execution
@@ -2192,7 +2198,10 @@ async def run_matcher_job(
             parallel=parallel,
             workers=workers,
             use_uploaded_price=use_uploaded_price,
-            price_column=price_column
+            price_column=price_column,
+            use_uploaded_stock=use_uploaded_stock,
+            stock_column=stock_column,
+            default_stock=default_stock
         )
     )
 
@@ -2433,6 +2442,11 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
             if uploaded_price is not None:
                 catalog_price_val = uploaded_price
 
+            uploaded_stock = res.get("uploaded_stock")
+            default_stock_val = job.get("default_stock") if job.get("default_stock") is not None else 10
+            if uploaded_stock is None:
+                uploaded_stock = default_stock_val
+
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
@@ -2465,7 +2479,12 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                     })
 
             # Append custom export columns per spec (matcher-custom-export.md)
-            record.update(build_custom_columns(p or None, override_price=uploaded_price))
+            record.update(build_custom_columns(
+                p or None, 
+                override_price=uploaded_price, 
+                override_stock=uploaded_stock, 
+                default_stock=default_stock_val
+            ))
                     
             excel_records.append(record)
             

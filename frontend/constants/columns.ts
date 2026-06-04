@@ -102,5 +102,6 @@ export const matcherColumnOptions: MatcherColumnOption[] = [
   { key: "custom_sub_sub_category_name_en", label: "sub_sub_category_name[en]", group: "custom", defaultChecked: true },
   { key: "custom_sub_sub_category_name_ar", label: "sub_sub_category_name[ar]", group: "custom", defaultChecked: true },
   { key: "custom_sub_sub_category_slug",    label: "sub_sub_category_slug",    group: "custom", defaultChecked: true },
+  { key: "custom_current_stock",            label: "current_stock",            group: "custom", defaultChecked: true }
 ];
 

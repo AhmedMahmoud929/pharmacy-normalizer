@@ -61,17 +61,18 @@ def _extract_image_name(val: Union[str, List[str], None]) -> str:
     return str(val)
 
 
-def build_custom_columns(p: Optional[dict], override_price: Optional[float] = None) -> dict:
+def build_custom_columns(p: Optional[dict], override_price: Optional[float] = None, override_stock: Optional[int] = None, default_stock: int = 10) -> dict:
     """
     Given a product_data dict (from a matched result), return an ordered dict
     of the custom export columns defined in the spec.
 
-    If p is None or empty (no_match rows), all values are "", except price if override_price is provided.
+    If p is None or empty (no_match rows), all values are "", except price/stock if provided.
     """
     if not p or not isinstance(p, dict):
         cols = _empty_columns()
         if override_price is not None:
             cols["price"] = override_price
+        cols["current_stock"] = override_stock if override_stock is not None else default_stock
         return cols
 
     l1 = _get_l1(p)
@@ -110,6 +111,7 @@ def build_custom_columns(p: Optional[dict], override_price: Optional[float] = No
         "sub_sub_category_name[en]": l3.get("title_en") or l3.get("name_en") or "",
         "sub_sub_category_name[ar]": l3.get("title_ar") or l3.get("name_ar") or "",
         "sub_sub_category_slug":     l3.get("slug") or "",
+        "current_stock":             override_stock if override_stock is not None else default_stock,
     }
 
 
@@ -122,6 +124,7 @@ def _empty_columns() -> dict:
         "category_name[en]", "category_name[ar]", "category_slug",
         "sub_category_name[en]", "sub_category_name[ar]", "sub_category_slug",
         "sub_sub_category_name[en]", "sub_sub_category_name[ar]", "sub_sub_category_slug",
+        "current_stock",
     ]
     return {k: "" for k in keys}
 

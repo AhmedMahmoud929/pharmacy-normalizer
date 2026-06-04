@@ -134,7 +134,7 @@ def load_reference_db() -> List[Dict[str, Any]]:
             
     return products
 
-def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None) -> dict:
+def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None) -> dict:
     """Core row matching computation executed inside ThreadPool workers."""
     matches = index_inst.search(norm_name, top_k=top)
     
@@ -143,6 +143,7 @@ def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Pro
         "original_name": raw_name,
         "normalized_name": norm_name,
         "uploaded_price": uploaded_price,
+        "uploaded_stock": uploaded_stock,
         "matches": []
     }
     
@@ -186,7 +187,10 @@ async def run_matcher_background(
     parallel: bool = True,
     workers: Optional[int] = None,
     use_uploaded_price: bool = False,
-    price_column: Optional[str] = None
+    price_column: Optional[str] = None,
+    use_uploaded_stock: bool = False,
+    stock_column: Optional[str] = None,
+    default_stock: int = 10
 ):
     """Asynchronous worker task managing sheet matching execution and state persistence."""
     try:
@@ -260,8 +264,27 @@ async def run_matcher_background(
                             uploaded_price = float(val_str)
                     except:
                         uploaded_price = val
+
+            uploaded_stock = None
+            if use_uploaded_stock and stock_column and stock_column in df.columns:
+                val = row[stock_column]
+                if pd.notna(val):
+                    try:
+                        val_str = str(val).strip()
+                        # Extract first contiguous group of digits
+                        match = re.search(r"\d+", val_str)
+                        if match:
+                            uploaded_stock = int(match.group())
+                        else:
+                            uploaded_stock = int(val_str)
+                    except:
+                        uploaded_stock = default_stock
+                else:
+                    uploaded_stock = default_stock
+            else:
+                uploaded_stock = default_stock
                         
-            queries.append((idx, raw_name, norm_name, uploaded_price))
+            queries.append((idx, raw_name, norm_name, uploaded_price, uploaded_stock))
 
         results_list = []
         matched_count = 0
@@ -291,9 +314,10 @@ async def run_matcher_background(
                         top, 
                         match_threshold, 
                         review_threshold,
-                        uploaded_price
+                        uploaded_price,
+                        uploaded_stock
                     )
-                    for idx, raw_name, norm_name, uploaded_price in queries
+                    for idx, raw_name, norm_name, uploaded_price, uploaded_stock in queries
                 ]
                 
                 # Consume as completed
@@ -358,7 +382,7 @@ async def run_matcher_background(
                         await asyncio.sleep(0.01)
         else:
             # Sequential execution loop
-            for idx, raw_name, norm_name, uploaded_price in queries:
+            for idx, raw_name, norm_name, uploaded_price, uploaded_stock in queries:
                 result_payload = _process_single_row(
                     idx, 
                     raw_name, 
@@ -367,7 +391,8 @@ async def run_matcher_background(
                     top, 
                     match_threshold, 
                     review_threshold,
-                    uploaded_price
+                    uploaded_price,
+                    uploaded_stock
                 )
                 results_list.append(result_payload)
                 
@@ -450,6 +475,10 @@ async def run_matcher_background(
             if uploaded_price is not None:
                 catalog_price_val = uploaded_price
 
+            uploaded_stock = res.get("uploaded_stock")
+            if uploaded_stock is None:
+                uploaded_stock = default_stock
+
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
@@ -483,7 +512,12 @@ async def run_matcher_background(
                     })
 
             # Append custom export columns per spec (matcher-custom-export.md)
-            record.update(build_custom_columns(p or None, override_price=uploaded_price))
+            record.update(build_custom_columns(
+                p or None, 
+                override_price=uploaded_price, 
+                override_stock=uploaded_stock, 
+                default_stock=default_stock
+            ))
                     
             excel_records.append(record)
 

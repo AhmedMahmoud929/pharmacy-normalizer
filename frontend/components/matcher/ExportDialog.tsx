@@ -343,6 +343,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               record["sub_sub_category_slug"] = l3s?.["slug"] || "";
               break;
             }
+            case "custom_current_stock": {
+              record["current_stock"] = res.uploaded_stock !== undefined && res.uploaded_stock !== null ? res.uploaded_stock : 10;
+              break;
+            }
             default:
               break;
           }

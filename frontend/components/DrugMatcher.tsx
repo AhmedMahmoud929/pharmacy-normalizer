@@ -71,6 +71,9 @@ export default function DrugMatcher() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [useUploadedPrice, setUseUploadedPrice] = useState(false);
   const [priceColumn, setPriceColumn] = useState("");
+  const [useUploadedStock, setUseUploadedStock] = useState(false);
+  const [stockColumn, setStockColumn] = useState("");
+  const [defaultStock, setDefaultStock] = useState(10);
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -150,6 +153,13 @@ export default function DrugMatcher() {
         );
         if (foundPrice) setPriceColumn(foundPrice);
         else setPriceColumn(headers[0] || "");
+
+        const stockCandidates = ["stock", "qty", "quantity", "الكمية", "الرصيد", "current_stock", "avail", "inventory"];
+        const foundStock = headers.find(h =>
+          stockCandidates.some(c => h.toLowerCase().includes(c.toLowerCase()))
+        );
+        if (foundStock) setStockColumn(foundStock);
+        else setStockColumn(headers[0] || "");
       }
     };
     reader.readAsBinaryString(selectedFile);
@@ -182,6 +192,9 @@ export default function DrugMatcher() {
     setReviewThreshold(Math.round((job.review_threshold || 0.4) * 100));
     setUseUploadedPrice(!!job.use_uploaded_price);
     setPriceColumn(job.price_column || "");
+    setUseUploadedStock(!!job.use_uploaded_stock);
+    setStockColumn(job.stock_column || "");
+    setDefaultStock(job.default_stock !== undefined ? job.default_stock : 10);
 
     if (job.status === "completed") {
       setIsProcessing(false);
@@ -335,6 +348,9 @@ export default function DrugMatcher() {
     formData.append("background", background.toString());
     formData.append("use_uploaded_price", useUploadedPrice.toString());
     formData.append("price_column", useUploadedPrice ? priceColumn : "");
+    formData.append("use_uploaded_stock", useUploadedStock.toString());
+    formData.append("stock_column", useUploadedStock ? stockColumn : "");
+    formData.append("default_stock", defaultStock.toString());
 
     try {
       const response = await fetch(`${API_URL}/api/matcher/run`, {
@@ -754,6 +770,12 @@ export default function DrugMatcher() {
                       setUseUploadedPrice={setUseUploadedPrice}
                       priceColumn={priceColumn}
                       setPriceColumn={setPriceColumn}
+                      useUploadedStock={useUploadedStock}
+                      setUseUploadedStock={setUseUploadedStock}
+                      stockColumn={stockColumn}
+                      setStockColumn={setStockColumn}
+                      defaultStock={defaultStock}
+                      setDefaultStock={setDefaultStock}
                     />
                   </div>
 

@@ -26,6 +26,12 @@ interface MatchConfigProps {
   setUseUploadedPrice: (val: boolean) => void;
   priceColumn: string;
   setPriceColumn: (col: string) => void;
+  useUploadedStock: boolean;
+  setUseUploadedStock: (val: boolean) => void;
+  stockColumn: string;
+  setStockColumn: (col: string) => void;
+  defaultStock: number;
+  setDefaultStock: (val: number) => void;
 }
 
 export const MatchConfig: React.FC<MatchConfigProps> = ({
@@ -49,6 +55,12 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
   setUseUploadedPrice,
   priceColumn,
   setPriceColumn,
+  useUploadedStock,
+  setUseUploadedStock,
+  stockColumn,
+  setStockColumn,
+  defaultStock,
+  setDefaultStock,
 }) => {
   if (!file) return null;
 
@@ -118,6 +130,64 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Uploaded Stock Override */}
+      <div className="pt-4 border-t border-primary/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Use Uploaded Stock</label>
+            <span className="text-[10px] text-zinc-400">Override catalog stock with sheet data</span>
+          </div>
+          <button
+            onClick={() => setUseUploadedStock(!useUploadedStock)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              useUploadedStock ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                useUploadedStock ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+        </div>
+        <AnimatePresence>
+          {useUploadedStock && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="text-xs font-medium text-neutral-gray block">Select Stock Column</label>
+              <select
+                value={stockColumn}
+                onChange={(e) => setStockColumn(e.target.value)}
+                className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none text-sm"
+              >
+                {columns.map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-neutral-gray block">Default Stock</label>
+          <input
+            type="number"
+            min="0"
+            value={defaultStock}
+            onChange={(e) => setDefaultStock(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+          />
+        </div>
       </div>
 
       <div className="space-y-6">

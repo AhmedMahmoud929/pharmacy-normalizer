@@ -35,13 +35,16 @@ def recover(job_id: str):
     print("Compiling finalized records...")
     excel_records = []
     
-    # Query database for job info to check price configuration
+    # Query database for job info to check price and stock configurations
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT use_uploaded_price, price_column FROM matcher_jobs WHERE job_id = ?", (job_id,))
+    cursor.execute("SELECT use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock FROM matcher_jobs WHERE job_id = ?", (job_id,))
     row = cursor.fetchone()
     use_uploaded_price = bool(row[0]) if row else False
     price_column = row[1] if row else None
+    use_uploaded_stock = bool(row[2]) if row else False
+    stock_column = row[3] if row else None
+    default_stock = row[4] if row else 10
     conn.close()
 
     for res in results_list:
@@ -56,6 +59,10 @@ def recover(job_id: str):
         catalog_price_val = (v or {}).get("price") or (p or {}).get("price") or 0.0
         if uploaded_price is not None:
             catalog_price_val = uploaded_price
+
+        uploaded_stock = res.get("uploaded_stock")
+        if uploaded_stock is None:
+            uploaded_stock = default_stock
 
         record = {
             "original_name": res["original_name"],
@@ -90,7 +97,12 @@ def recover(job_id: str):
                 })
 
         # Append custom export columns per spec (matcher-custom-export.md)
-        record.update(build_custom_columns(p or None, override_price=uploaded_price))
+        record.update(build_custom_columns(
+            p or None, 
+            override_price=uploaded_price,
+            override_stock=uploaded_stock,
+            default_stock=default_stock
+        ))
                 
         excel_records.append(record)
 
