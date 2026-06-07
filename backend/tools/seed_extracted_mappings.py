@@ -36,7 +36,9 @@ def clean_english_word(word):
     return word.strip().lower()
 
 def is_valid_arabic(word):
-    return bool(re.match(r"^[\u0621-\u064A]+$", word))
+    # Enforce minimum 3 characters to prevent single/two-letter noise (e.g. اي, زد, ال)
+    return bool(re.match(r"^[\u0621-\u064A]{3,}$", word))
+
 
 def is_valid_english(word):
     # Reject pure numbers or extremely short words

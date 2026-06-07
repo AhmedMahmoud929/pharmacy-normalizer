@@ -79,7 +79,7 @@ export default function DrugMatcher() {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Thresholds
-  const [matchThreshold, setMatchThreshold] = useState(70);
+  const [matchThreshold, setMatchThreshold] = useState(50);
   const [reviewThreshold, setReviewThreshold] = useState(40);
 
   // UI State

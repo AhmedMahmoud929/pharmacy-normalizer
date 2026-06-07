@@ -106,9 +106,16 @@ SKIP_PATTERNS = [
 
 def get_token_similarity(t1: str, t2: str) -> float:
     if t1 == t2: return 1.0
-    if t1.startswith(t2) or t2.startswith(t1):
-        if abs(len(t1) - len(t2)) <= 2: return 0.9
+    # Enforce exact matching for digit-containing tokens (e.g. prevent '1' matching '120')
+    if any(c.isdigit() for c in t1) or any(c.isdigit() for c in t2):
+        return 0.0
+    # Only allow prefix matching if both tokens are at least 3 characters long (prevents 'box' matching 'b')
+    if len(t1) >= 3 and len(t2) >= 3:
+        if t1.startswith(t2) or t2.startswith(t1):
+            if abs(len(t1) - len(t2)) <= 2: return 0.9
     return difflib.SequenceMatcher(None, t1, t2).ratio()
+
+
 
 def score_match_detailed(q_norm: str, c_norm: str, w_j: float = 0.7, w_s: float = 0.3) -> dict:
     if not isinstance(c_norm, str) or not c_norm:
@@ -164,18 +171,31 @@ def score_match_detailed(q_norm: str, c_norm: str, w_j: float = 0.7, w_s: float 
     query_coverage = len(matched_c_indices) / len(q_tokens) if q_tokens else 0
     if query_coverage >= 0.8: final_score *= 1.10
 
-    q_nums = set(re.findall(r'\d+', q_norm))
-    c_nums = set(re.findall(r'\d+', c_norm))
+    q_nums = set(re.findall(r'\b\d+\b', q_norm))
+    c_nums = set(re.findall(r'\b\d+\b', c_norm))
     
     if q_nums and c_nums:
-        q_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l)', q_norm))
-        c_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l)', c_norm))
+        q_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l|g|kg)', q_norm))
+        c_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l|g|kg)', c_norm))
         if q_doses and c_doses:
-            if not q_doses.intersection(c_doses): final_score *= (0.90 if is_brand_exact else 0.70)
-        elif not q_nums.intersection(c_nums): final_score *= (0.95 if is_brand_exact else 0.90)
+            if not q_doses.intersection(c_doses):
+                final_score *= 0.60
+        elif not q_nums.intersection(c_nums):
+            final_score *= 0.65
 
-    if q_tokens and q_tokens[0] not in matched_tokens:
-        if any(c.isalpha() for c in q_tokens[0]): final_score *= 0.50
+
+    # Brand mismatch penalty: if the first token of the query (if alphabetic) is unmatched,
+    # OR the first token of the database record (if alphabetic) is unmatched, penalize by 50%.
+    brand_penalty = False
+    if q_tokens:
+        if q_tokens[0] not in matched_tokens and any(c.isalpha() for c in q_tokens[0]):
+            brand_penalty = True
+    if c_tokens and not brand_penalty:
+        if c_tokens[0] not in matched_tokens and any(c.isalpha() for c in c_tokens[0]):
+            brand_penalty = True
+            
+    if brand_penalty:
+        final_score *= 0.50
 
     return {"score": min(final_score, 1.0), "jaccard": round(jaccard_weighted, 4), "sequence": round(seq_match, 4),
             "matched_tokens": matched_tokens, "unmatched_query_tokens": unmatched_query_tokens, "unmatched_db_tokens": unmatched_db_tokens}
