@@ -128,6 +128,7 @@ ABBREVIATION_MAP: dict[str, str] = {
     "free": "free",
     "plus": "plus",
     "extra": "extra",
+    "123": "1 2 3",
 }
 
 FORM_SYNONYM_MAP: dict[str, str] = {

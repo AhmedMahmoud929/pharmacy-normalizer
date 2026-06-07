@@ -209,8 +209,16 @@ def score_match_detailed(q_norm: str, c_norm: str, w_j: float = 0.7, w_s: float 
         if q_tokens[0] not in matched_tokens and any(c.isalpha() for c in q_tokens[0]):
             brand_penalty = True
     if c_tokens and not brand_penalty:
-        if c_tokens[0] not in matched_tokens and any(c.isalpha() for c in c_tokens[0]):
-            brand_penalty = True
+        if 0 not in matched_c_indices and any(c.isalpha() for c in c_tokens[0]):
+            # Bypass penalty if the query brand (q_tokens[0]) matched a candidate brand token at index > 0
+            is_alternative_brand_matched = False
+            if q_tokens and q_tokens[0] in matched_tokens:
+                for idx in matched_c_indices:
+                    if idx > 0 and c_tokens[idx] not in LOW_WEIGHT_TOKENS and not any(char.isdigit() for char in c_tokens[idx]):
+                        is_alternative_brand_matched = True
+                        break
+            if not is_alternative_brand_matched:
+                brand_penalty = True
             
     if brand_penalty:
         final_score *= 0.50

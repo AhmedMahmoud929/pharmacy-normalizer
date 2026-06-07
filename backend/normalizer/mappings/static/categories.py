@@ -43,7 +43,7 @@ FORM_TOKENS = {
     "beginners", "ergonomic", "economic", "hard", "complete",
     "activated", "cotton_candy", "blade", "shaving", "chrome",
     "edge", "ear", "diaper", "daily", "thick", "thin", "long",
-    "cold", "wet", "baby", "maxi", "junior", "lips", "face",
+    "wet", "baby", "maxi", "junior", "lips", "face",
     "body", "hands", "feet", "nails",
     "natural", "skin", "normal", "dry", "sensitive", "teeth",
     "antiperspirant", "sweat", "refreshing",
