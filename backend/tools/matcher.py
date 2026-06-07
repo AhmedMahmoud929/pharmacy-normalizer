@@ -91,7 +91,23 @@ LOW_WEIGHT_TOKENS = {
     "topical", "flavor", "mouthwash", "toothpaste", "advance", "stage", 
     "prefilled", "fridge", "dry", "powder", "oral", "coated", "film", "sugar",
     "delayed", "release", "prolonged", "infantile", "action", "double", "paint",
-    "wet", "wipes", "liquid"
+    "wet", "wipes", "liquid",
+    # Dosage forms — low weight so syrup vs suspension doesn't tank the score
+    "syrup", "suspension", "solution", "injectable", "cream", "gel", "ointment",
+    "drops", "spray", "sachet", "lotion", "suppository", "supp", "eff",
+    # Units — low weight so 5ml vs 100ml pack-description tokens don't dominate
+    "mg", "mcg", "ml", "gm", "iu", "kg",
+    # English stop words common in Chefaa DB titles
+    "for", "and", "with", "the", "of", "to", "a", "an",
+    # Common medical/descriptive filler words in Chefaa product titles
+    # These inflate unmatched_db_tokens when the query doesn't include them
+    "antispasmodic", "abdominal", "pain", "discomfort", "cramps", "relief",
+    "thrombosis", "prevent", "dizziness", "circulatory", "disorders",
+    "allergies", "antibiotic", "infusion", "analgesic", "antipyretic",
+    "antihistamine", "antiinflammatory", "antibacterial", "antifungal",
+    "antiviral", "treatment", "therapy", "formula", "professional", "medical",
+    "acute", "chronic", "forte", "sr", "xr", "er", "lp", "od", "ds", "comp",
+    "ha", "ec", "fl", "iv", "im", "sc",
 }
 
 SKIP_PATTERNS = [
@@ -168,8 +184,10 @@ def score_match_detailed(q_norm: str, c_norm: str, w_j: float = 0.7, w_s: float 
     if q_tokens and c_tokens:
         if q_tokens[0] in c_tokens: is_brand_exact = True
 
-    query_coverage = len(matched_c_indices) / len(q_tokens) if q_tokens else 0
-    if query_coverage >= 0.8: final_score *= 1.10
+    # Use weighted coverage (brand=3x, numbers=2x, low-weight=0.2x) for the bonus
+    # so that matching the brand + strength triggers the bonus even if a form token (syrup/susp) differs
+    weighted_coverage = weighted_intersection / total_q_weight if total_q_weight > 0 else 0
+    if weighted_coverage >= 0.8: final_score *= 1.10
 
     q_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', q_norm))
     c_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', c_norm))
@@ -311,31 +329,66 @@ class ProductIndex:
                     self.token_map[token].append(idx)
 
     def search(self, query_norm: str, top_k: int = 5, w_j: float = 0.7, w_s: float = 0.3) -> List[Dict[str, Any]]:
-        query_tokens = set(query_norm.split())
-        matching_tokens = [t for t in query_tokens if t in self.token_map]
-        if not matching_tokens and len(query_tokens) > 0:
-            if any(p in query_norm.lower() for p in SKIP_PATTERNS): return []
+        query_tokens_list = query_norm.split()
+        query_tokens = set(query_tokens_list)
+
+        if not query_tokens:
+            return []
+        if any(p in query_norm.lower() for p in SKIP_PATTERNS):
             return []
 
-        candidates_idx = set()
+        # Identify the query's brand token: first meaningful alpha token not in low-weight/unit set
+        brand_token = next(
+            (t for t in query_tokens_list
+             if any(c.isalpha() for c in t) and t not in LOW_WEIGHT_TOKENS),
+            None
+        )
+
+        # ── Bucket 1: candidates that contain the brand token ──────────────
+        # These are ALWAYS scored so the right product is never missed due to
+        # generic tokens (syrup, ml, 100) pulling irrelevant products to the top.
+        brand_idx: set = set()
+        if brand_token and brand_token in self.token_map:
+            brand_idx.update(self.token_map[brand_token])
+
+        # ── Bucket 2: remaining candidates from all other query tokens ──────
+        other_idx: set = set()
         for t in query_tokens:
-            if t in self.token_map: candidates_idx.update(self.token_map[t])
-        
-        candidates = [self.entries[i] for i in candidates_idx] if candidates_idx else self.entries
-        fast_results = []
-        for cand in candidates:
-            cand_tokens = cand["tokens"]
-            inter = query_tokens.intersection(cand_tokens)
-            union = query_tokens.union(cand_tokens)
-            jaccard = len(inter) / len(union) if union else 0
-            fast_results.append((jaccard, cand))
-        
-        fast_results.sort(key=lambda x: x[0], reverse=True)
+            if t in self.token_map:
+                other_idx.update(self.token_map[t])
+        other_idx -= brand_idx  # avoid double-scoring
+
+        total_candidates = len(brand_idx) + len(other_idx)
+
+        if total_candidates == 0:
+            return []
+
+        SCORE_BUDGET = 200
         results = []
-        for jaccard_fast, cand in fast_results[:200]:
+
+        # Score all brand candidates first (capped at SCORE_BUDGET)
+        for i in list(brand_idx)[:SCORE_BUDGET]:
+            cand = self.entries[i]
             details = score_match_detailed(query_norm, cand["normalized"], w_j, w_s)
-            results.append({**details, "db_normalized": cand["normalized"], "candidate_count": len(candidates), "entry": cand})
-            
+            results.append({**details, "db_normalized": cand["normalized"],
+                            "candidate_count": total_candidates, "entry": cand})
+
+        # Fill remaining budget with best non-brand candidates by fast Jaccard
+        remaining = SCORE_BUDGET - len(results)
+        if remaining > 0 and other_idx:
+            fast_others = []
+            for i in other_idx:
+                cand = self.entries[i]
+                inter = query_tokens.intersection(cand["tokens"])
+                union = query_tokens.union(cand["tokens"])
+                fast_others.append((len(inter) / len(union) if union else 0, i))
+            fast_others.sort(key=lambda x: x[0], reverse=True)
+            for _, i in fast_others[:remaining]:
+                cand = self.entries[i]
+                details = score_match_detailed(query_norm, cand["normalized"], w_j, w_s)
+                results.append({**details, "db_normalized": cand["normalized"],
+                                "candidate_count": total_candidates, "entry": cand})
+
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:top_k]
 
