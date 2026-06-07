@@ -22,4 +22,6 @@ cd /var/www/pharmatcher.bya3online.com
 git pull
 python3 /var/www/pharmatcher.bya3online.com/backend/tools/seed_extracted_mappings.py
 python3 /var/www/pharmatcher.bya3online.com/backend/tools/export_mappings.py
+python3 /var/www/pharmatcher.bya3online.com/backend/tools/import_mappings.py
 sudo systemctl restart fastapi
+

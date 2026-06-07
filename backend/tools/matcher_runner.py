@@ -24,6 +24,43 @@ from tools.matcher_export import build_custom_columns
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
 
+_global_index = None
+
+def get_db_path() -> str:
+    db_to_load = DEFAULT_DB_PATH
+    from tools.matcher import RAW_DB_PATH
+    if not os.path.exists(DEFAULT_DB_PATH) and os.path.exists(RAW_DB_PATH):
+        db_to_load = RAW_DB_PATH
+    return db_to_load
+
+def _init_process_worker(db_path: str):
+    global _global_index
+    from tools.matcher import ProductIndex
+    try:
+        with open(db_path, "r", encoding="utf-8") as f:
+            products_data = json.load(f)
+    except Exception:
+        # Fallback to streaming line-by-line
+        products_data = []
+        current_obj_str = []
+        in_object = False
+        with open(db_path, "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                if stripped == "{":
+                    in_object = True
+                    current_obj_str = ["{"]
+                elif stripped in ("},", "}"):
+                    current_obj_str.append("}")
+                    in_object = False
+                    try:
+                        products_data.append(json.loads("".join(current_obj_str)))
+                    except Exception:
+                        pass
+                elif in_object:
+                    current_obj_str.append(line)
+    _global_index = ProductIndex(products_data)
+
 # Excel formatting helpers
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
 
@@ -135,9 +172,13 @@ def load_reference_db() -> List[Dict[str, Any]]:
                     current_obj_str.append(line)
         return products
 
-def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None) -> dict:
-    """Core row matching computation executed inside ThreadPool workers."""
-    matches = index_inst.search(norm_name, top_k=top)
+def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Optional[ProductIndex], top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None) -> dict:
+    """Core row matching computation executed inside ThreadPool or ProcessPool workers."""
+    active_index = index_inst or _global_index
+    if active_index is None:
+        raise ValueError("No active product index found in worker process.")
+        
+    matches = active_index.search(norm_name, top_k=top)
     
     result_payload = {
         "row_index": idx,
@@ -304,8 +345,13 @@ async def run_matcher_background(
         if parallel:
             workers_count = workers or min(os.cpu_count() or 1, 4)
             loop = asyncio.get_running_loop()
+            db_path = get_db_path()
             
-            with concurrent.futures.ThreadPoolExecutor(max_workers=workers_count) as executor:
+            with concurrent.futures.ProcessPoolExecutor(
+                max_workers=workers_count,
+                initializer=_init_process_worker,
+                initargs=(db_path,)
+            ) as executor:
                 tasks = [
                     loop.run_in_executor(
                         executor, 
@@ -313,7 +359,7 @@ async def run_matcher_background(
                         idx, 
                         raw_name, 
                         norm_name, 
-                        index_inst, 
+                        None, # Pass None so that we don't attempt to pickle the complex ProductIndex object
                         top, 
                         match_threshold, 
                         review_threshold,
