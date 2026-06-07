@@ -110,29 +110,30 @@ def load_reference_db() -> List[Dict[str, Any]]:
     if not os.path.exists(DEFAULT_DB_PATH) and os.path.exists(RAW_DB_PATH):
         db_to_load = RAW_DB_PATH
         
-    with open(db_to_load, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-        
-    if content.startswith("["):
-        content = content[1:]
-    if content.endswith("]"):
-        content = content[:-1]
-        
-    raw_objects = content.split("\n  },")
-    products = []
-    
-    for obj_str in raw_objects:
-        obj_str = obj_str.strip()
-        if not obj_str:
-            continue
-        if not obj_str.endswith("}"):
-            obj_str += "}"
-        try:
-            products.append(json.loads(obj_str))
-        except:
-            pass
-            
-    return products
+    try:
+        with open(db_to_load, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (MemoryError, Exception):
+        # Fall back to streaming line-by-line
+        products = []
+        current_obj_str = []
+        in_object = False
+        with open(db_to_load, "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                if stripped == "{":
+                    in_object = True
+                    current_obj_str = ["{"]
+                elif stripped in ("},", "}"):
+                    current_obj_str.append("}")
+                    in_object = False
+                    try:
+                        products.append(json.loads("".join(current_obj_str)))
+                    except Exception:
+                        pass
+                elif in_object:
+                    current_obj_str.append(line)
+        return products
 
 def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: ProductIndex, top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None) -> dict:
     """Core row matching computation executed inside ThreadPool workers."""
@@ -190,7 +191,8 @@ async def run_matcher_background(
     price_column: Optional[str] = None,
     use_uploaded_stock: bool = False,
     stock_column: Optional[str] = None,
-    default_stock: int = 10
+    default_stock: int = 10,
+    index_inst: Optional[ProductIndex] = None
 ):
     """Asynchronous worker task managing sheet matching execution and state persistence."""
     try:
@@ -235,12 +237,13 @@ async def run_matcher_background(
             return
 
         # 4. Load Reference Catalog Index
-        try:
-            products_data = load_reference_db()
-            index_inst = ProductIndex(products_data)
-        except Exception as db_err:
-            finalize_job(job_id, "failed", error_msg=f"Failed loading product catalog index: {str(db_err)}")
-            return
+        if index_inst is None:
+            try:
+                products_data = load_reference_db()
+                index_inst = ProductIndex(products_data)
+            except Exception as db_err:
+                finalize_job(job_id, "failed", error_msg=f"Failed loading product catalog index: {str(db_err)}")
+                return
 
         total_rows = len(df)
         

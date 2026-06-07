@@ -20,7 +20,6 @@ ARABIC_NUMBER_WORDS: dict[str, str] = {
     "ايت": "8",
     "ناين": "9",
     "تن": "10",
-    "زيرو": "0",
 
     # Native Arabic numerals
     "واحد": "1",

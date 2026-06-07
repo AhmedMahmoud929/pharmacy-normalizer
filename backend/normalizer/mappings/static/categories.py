@@ -59,7 +59,7 @@ FORM_TOKENS = {
     "oil", "paris", "women", "for_women", "men", "for_men", "free",
     "beauty", "me", "go", "bio", "ultra", "number", "set",
     "mask", "addict", "on", "pert", "body", "semi", "dox", "to_repair",
-    "scented", "di_lino", "avril", "keratin", "butter", "mash", "head",
+    "scented", "di_lino", "avril", "keratin", "butter", "head",
     "shoulders", "protection", "professional", "colored", "oil_replacement",
     "blonde", "detangling", "herbal", "essences", "code", "piece",
     "permanent", "mist", "temporary", "rich", "soft", "long", "chestnut",

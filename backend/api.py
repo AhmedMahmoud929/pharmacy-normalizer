@@ -2201,7 +2201,8 @@ async def run_matcher_job(
             price_column=price_column,
             use_uploaded_stock=use_uploaded_stock,
             stock_column=stock_column,
-            default_stock=default_stock
+            default_stock=default_stock,
+            index_inst=index
         )
     )
 

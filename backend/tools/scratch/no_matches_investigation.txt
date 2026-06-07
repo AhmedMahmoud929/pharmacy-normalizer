@@ -1,0 +1,1325 @@
+Row 2: 'كامى صابون فنتاج اسود 125 جم'
+  - Candidate: Camay | SP Vintage | 120gm | كامي | صابونة فينتيدج | 120جم (Similarity: 70.2%)
+  - Candidate: Fa | Soap Silk & Magnolia | 125gm | فا | صابون كريم وزيت حرير وماغنوليا | 125جم (Similarity: 69.0%)
+  - Candidate: Lifebuoy | Soap Cool Fresh | 125gm | لايفبوى | صابون انتعاش البرودة | 125جم (Similarity: 66.7%)
+
+Row 4: 'جليد سبراى معطر جو نسيم الصباح 400 مل زيادة 33%'
+  - Candidate: Glade | Morning Fresh Aloe Air Freshener | 300ml | جليد | بخاخ نسيم الصباح | 300مل (Similarity: 61.5%)
+  - Candidate: Glade | Air Freshener with Lavender Scent | 460ml | جليد | سبراي معطر جو برائحة اللافندر | 460مل (Similarity: 59.3%)
+  - Candidate: Glade | Air Freshener Spray Rose | 300ml | جليد | سبراي معطر جو برائحة الورد | 300مل (Similarity: 59.1%)
+
+Row 5: 'ريد اقراص علبة 60 قرص'
+  - Candidate: Raid | Mosquito Repellent Mats | 60 Mats | ريد | اقراص لطرد الناموس | 60 قرص (Similarity: 66.7%)
+  - Candidate: Mepaco Yeast | 60 Tabs | ميباكو خميرة | 60 قرص (Similarity: 59.5%)
+  - Candidate: Onced 5mg | 10 Tabs | اونسيد 5مجم | 10 اقراص (Similarity: 57.1%)
+
+Row 6: 'ريد صراصير بانج 400 مل بشفاطه'
+  - Candidate: Tresemme | Shampoo Repair | 400 ml | تريسمي شامبو ريبير | 400 مل (Similarity: 50.0%)
+  - Candidate: Tresemme | Conditioner Botanix | 400 ml | تريزيمي | بلسم بوتانيكس | 400 مل (Similarity: 45.9%)
+  - Candidate: Starky | Shampoo Lavender | 400ml | ستاركي | شامبو باللافندر | 400مل (Similarity: 45.9%)
+
+Row 7: 'ريد صراصير بانج 300 مل'
+  - Candidate: Riad | Red Insecticide Crawling | 300ml | ريد | مبيد حشري أحمر زاحف | 300مل (Similarity: 54.5%)
+  - Candidate: Uriage | Thermal Water | 300ml | يورياج | ماء حراري | 300مل (Similarity: 54.2%)
+  - Candidate: Gk Hair Leave In Cream -130ml | جي كي كريم ليف ان - 130 مل (Similarity: 54.2%)
+
+Row 9: 'باليت اسود 0-1'
+  - Candidate: Palette | Hair Dye Natural Colors Black 0-1 | باليت | صبغة شعر الوان طبيعية اسود 0-1 (Similarity: 58.6%)
+  - Candidate: Palette | Intensive Color Creme 1-0 Black | 50ml | صبغة باليت انتينسيف كولور كريم اسود الماس (0-1) | 50 مل (Similarity: 51.6%)
+  - Candidate: Ardell | Soft Touch Black 163 | ارديل | سوفت تاتش اسود 163 (Similarity: 50.0%)
+
+Row 19: 'دابر فاتيكا كريم شعر ملمع احمر 210 مل'
+  - Candidate: Dabur Vatika | Hair Almond Oil | 90ml | دابر فاتيكا | زيت شعر باللوز | 90مل (Similarity: 70.3%)
+  - Candidate: Vatika | Hair Cream Olive | 190ml | فاتيكا | كريم الشعر بالزيتون | 190مل (Similarity: 68.6%)
+  - Candidate: Dabur Vatika | Hair Almond Oil | 45ml | دابر فاتيكا | زيت شعر باللوز | 45مل (Similarity: 67.6%)
+
+Row 23: 'ماسك نبيولايزر كبار'
+  - Candidate: Peel Off Mask | ماسك بيل اوف (Similarity: 51.6%)
+  - Candidate: Peel Off Mask | ماسك بيل اوف (Similarity: 51.6%)
+  - Candidate: Peel Off Mask | ماسك بيل اوف (Similarity: 51.6%)
+
+Row 27: 'جونسون كريم مرطب عادى ازرق 100 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 69.7%)
+  - Candidate: Bepanthen | Cream Moisturizing | 30gm | بيبانثين كريم مرطب للوجه bepanthen cream | ٣٠ جم (Similarity: 66.7%)
+  - Candidate: Johnson's | Extra Moisturizing Bath | 500ml | جونسون | غسول لترطيب فائق للبشرة الاطفال | 500مل (Similarity: 64.3%)
+
+Row 28: 'جونسون كريم مرطب عادى ازرق 50 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 67.7%)
+  - Candidate: Bepanthen | Cream Moisturizing | 30gm | بيبانثين كريم مرطب للوجه bepanthen cream | ٣٠ جم (Similarity: 67.5%)
+  - Candidate: Johnson's | Extra Moisturizing Bath | 500ml | جونسون | غسول لترطيب فائق للبشرة الاطفال | 500مل (Similarity: 65.1%)
+
+Row 29: 'جونسون كريم مرطب جلسرين ابيض*بنفسجى 50 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 64.9%)
+  - Candidate: Care & More | Soft Cream With Glycerin Deep Moisturizing | 75ml | كير أند مور كريم مرطب للبشرة الجافة بالجلسرين | 75مل (Similarity: 61.9%)
+  - Candidate: Johnson's | Extra Moisturizing Bath | 500ml | جونسون | غسول لترطيب فائق للبشرة الاطفال | 500مل (Similarity: 61.1%)
+
+Row 30: 'جونسون كريم مرطب عسل اصفر 100 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 73.8%)
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 66.7%)
+  - Candidate: Bepanthen | Cream Moisturizing | 30gm | بيبانثين كريم مرطب للوجه bepanthen cream | ٣٠ جم (Similarity: 65.8%)
+
+Row 31: 'جونسون كريم مرطب صبار وخيار اخضر 100 جم'
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 75.0%)
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 69.4%)
+  - Candidate: Johnson's | Moisturizing Oil with Aloe Vera and Vitamin E | 192ml | جونسون | زيت مرطب بالصبار وفيتامين اى | 192مل (Similarity: 64.3%)
+
+Row 32: 'جونسون كريم مرطب عسل اصفر 170 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 76.9%)
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 69.1%)
+  - Candidate: Bepanthen | Cream Moisturizing | 30gm | بيبانثين كريم مرطب للوجه bepanthen cream | ٣٠ جم (Similarity: 65.8%)
+
+Row 33: 'جونسون كريم مرطب صبار وخيار اخضر 170 جم'
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 77.3%)
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 72.2%)
+  - Candidate: Johnson's | Moisturizing Oil with Aloe Vera and Vitamin E | 192ml | جونسون | زيت مرطب بالصبار وفيتامين اى | 192مل (Similarity: 64.3%)
+
+Row 34: 'جونسون كريم مرطب جلسرين ابيض*بنفسجى  170 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 68.4%)
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 61.5%)
+  - Candidate: Care & More | Soft Cream With Glycerin Deep Moisturizing | 75ml | كير أند مور كريم مرطب للبشرة الجافة بالجلسرين | 75مل (Similarity: 61.4%)
+
+Row 35: 'جونسون كريم مرطب عادى ازرق 170 جم'
+  - Candidate: Johnson's | Body Care Regular Cream | 170gm | جونسون | كريم مرطب للبشرة | 170جم (Similarity: 72.7%)
+  - Candidate: Bepanthen | Cream Moisturizing | 30gm | بيبانثين كريم مرطب للوجه bepanthen cream | ٣٠ جم (Similarity: 66.7%)
+  - Candidate: Johnson Baby | Moisturizing Cream With Aloe and Cucumber | 170gm | جونسون بيبي | كريم مرطب مع الصبار والخيار | 170جم (Similarity: 65.9%)
+
+Row 38: 'باليت بنى غامق 0-3'
+  - Candidate: Palette | Intensive Color Creme 3-0 Dark Brown | 50ml | باليت | كريم صبغة الشعر انتنسيف كولور 3-0 بنى غامق | 50مل (Similarity: 58.3%)
+  - Candidate: Bigen | Permanent Powder Hair Dye 57 Dark Brown | بايجن | صبغة شعر بودرة دائمة 57 بني غامق (Similarity: 53.7%)
+  - Candidate: Garnier | Dark blond | 6 | غارنييه | اشقر غامق | 6 (Similarity: 52.4%)
+
+Row 41: 'الهجان برفان 25 مل'
+  - Candidate: Zak | Perfume Bold | 175ml | سبراي زاك zak برفان بولد | 175 مل (Similarity: 60.5%)
+  - Candidate: FOGG | Impresso Perfume | 50ml | فوج | عطر إمبريسيو | 50مل (Similarity: 55.3%)
+  - Candidate: FOGG | Oriental Perfume | 50ml | فوج | عطر أورينتال | 50مل (Similarity: 55.3%)
+
+Row 42: 'دابر فاتيكا كريم شعر ليمون اصفر 210 مل'
+  - Candidate: Vatika | Hair Cream Olive | 190ml | فاتيكا | كريم الشعر بالزيتون | 190مل (Similarity: 70.3%)
+  - Candidate: Dabur Vatika | Hair Olive Oil | 45ml | دابر فاتيكا | زيت شعر بالزيتون | 45مل (Similarity: 69.3%)
+  - Candidate: Dabur Vatika | Hair Almond Oil | 90ml | دابر فاتيكا | زيت شعر باللوز | 90مل (Similarity: 68.5%)
+
+Row 50: 'بوتاتو سكاتة بمشبك بالقطعة'
+  - Candidate: Bubbles | Beveled Soother with Chain | بابلز | سكاتة مشطوفة بالسلسلة (Similarity: 58.2%)
+  - Candidate: Bubbles | Pacifier Chain | بابلز | سكاتة بالسلسلة (Similarity: 54.2%)
+  - Candidate: Bubbles | Beveled Soother with Chain Green | بابلز | سكاتة مشطوفة بالسلسلة لون اخضر (Similarity: 50.0%)
+
+Row 51: 'مقص صينى كبير'
+  - Candidate: Roofa | Safety Scissor - Pink | روفا | مقص اطفال - بينك (Similarity: 42.1%)
+  - Candidate: Dabur Amla | Cream Purple | دابر أملا | كريم كبير موف (Similarity: 42.1%)
+  - Candidate: Smart Baby | Nail Scissors Blue | 1 Pcs | سمارت بيبي | مقص اظافر للاطفال ازرق | 1 قطعة (Similarity: 40.9%)
+
+Row 56: 'ازورا سبراى حريمى 150 مل'
+  - Candidate: Akanza Spray | 15ml | اكانزا سبراى للتأخير وعلاج سرعة القذف | 15مل (Similarity: 69.8%)
+  - Candidate: Malizia | Silver Spray | 150ml | ماليزيا | ماء تواليت سبراى سيلفر | 150مل (Similarity: 69.2%)
+  - Candidate: Marquis | Spray | 175ml | ماركيز | اسبراي | 175مل (Similarity: 66.7%)
+
+Row 67: 'لاكتويل صبغة 53'
+  - Candidate: Lactuel | Classic Hair Dye 11 Black | لاكتويل | صبغة شعر كلاسيكية 11 أسود (Similarity: 52.0%)
+  - Candidate: Lactuel | Classic Hair Dye 17 Chestnut | لاكتويل | صبغة شعر كلاسيكية 17 كستنائي (Similarity: 50.9%)
+  - Candidate: lactuel | Classic Hair Dye 16 Chestnut | لاكتويل | صبغة شعر كلاسيكية كستنائي 16 (Similarity: 50.9%)
+
+Row 87: 'ريد جهاز الناموس السائل عرض 32بدل 38'
+  - Candidate: Raid | Liquid Mosquito Repellent Refill Eucalyptus scent | 41ml | ريد | مناسب ل البعوض سائل | 41مل (Similarity: 50.0%)
+  - Candidate: Raid | Mosquito Killer Liquid | 30Nights | ريد | سائل قاتل الناموس | 30ليله (Similarity: 50.0%)
+  - Candidate: Raid | Mosquitoes Liquid Killer With Holder | ريد | سائل قاتل الناموس مع الجهاز (Similarity: 49.3%)
+
+Row 90: 'دابر فاتيكا حمام كريم اكياس ترطيب عميق'
+  - Candidate: Dabur Vatika | Naturals Deep Conditioning Hot Oil Treatment | 250gm | دابر فاتيكا | حمام زيت ناتشرلز للترطيب العميق | 250جم (Similarity: 63.7%)
+  - Candidate: Dabur Vatika | Conditioning Hair Cream For Hair Fall Control | 250gm | دابر فاتيكا | حمام كريم للتحكم في تساقط الشعر | 250جم (Similarity: 63.7%)
+  - Candidate: Dabur Vatika | Conditioning Hammam Cream with Mink Oil | 250gm | دابر فاتيكا | حمام كريم مرطب للشعر بزيت المنيك | 250جم (Similarity: 63.0%)
+
+Row 102: 'مانيكير شى صغير'
+  - Candidate: Mash Sun 95 | Small | 60ml | ماش صن 95 | صغير | 60ملى (Similarity: 46.2%)
+  - Candidate: Bubbles | Natural Loofah Small | بابلز | لوفه طبيعية صغير (Similarity: 41.0%)
+
+Row 103: 'اسيتون بخاخ بيور'
+  - Candidate: Ectonex | Adult | Nasal Spray | اكتونكس | بخاخ لانسداد الأنف والزكام | للكبار (Similarity: 55.3%)
+  - Candidate: Pure | Facial Toner Rose Water Spray | 70ml | بيور | تونر سبراي بماء الورد | 70مل (Similarity: 54.8%)
+  - Candidate: Pure | Rose Water Spray | 70ml | بيور سبراي بماء الورد | 70مل (Similarity: 53.1%)
+
+Row 118: 'فيتايامى 30  كبسول'
+  - Candidate: Vitazinc Soft Gelatin | 30 Caps | فيتازنك | 30 كبسولة (Similarity: 70.3%)
+  - Candidate: Formamy | 30 Caps | فورمامى | 30 كبسولة (Similarity: 70.3%)
+  - Candidate: Pyridovit | 30 Caps | بيريدوفيت | 30 كبسولة ‎ (Similarity: 64.5%)
+
+Row 121: 'امريزول 100 مل تنقيط وريدى'
+  - Candidate: Amrizole 200mg/5ml Susp | 120ml | امريزول 200مجم/5مل معلق | 120مل (Similarity: 52.6%)
+  - Candidate: Emami oil | 7*1 | 100Ml | زيت ايمامى | 7*1 | 100مل (Similarity: 51.1%)
+  - Candidate: Harir Pro Oil | 100 ml | زيت حرير برو | 100مل (Similarity: 51.1%)
+
+Row 122: 'ميوجريل بلاس 30قرص'
+  - Candidate: Nutriville B Complex | 30 Tabs | نيوترفيل بي كومبلكس | 30 قرص (Similarity: 65.2%)
+  - Candidate: Thiotacid Plus XR | 30 Tabs | ثيوتاسيد بلس اكس ار | 30 قرص (Similarity: 60.9%)
+  - Candidate: Nutriville Slimming | 30 Tabs | نيوترفيل سليمينج | 30 قرص (Similarity: 60.5%)
+
+Row 123: 'فليكسيلاكس 30 قرص'
+  - Candidate: Librax | 30 Tab | ليبراكس | 30 قرص مغلف بالسكر (Similarity: 78.6%)
+  - Candidate: Coloverin A | 30 Tabs | كولوفيرين أ | 30 قرص (Similarity: 66.7%)
+  - Candidate: Antox | 30 Tabs | انتوكس أقراص مضاد للأكسدة للنساء والرجال antox | ٣٠ قرص (Similarity: 66.7%)
+
+Row 138: 'رامى-دينير 60مل معلق'
+  - Candidate: Pure Castor Oil | 60ml | بيور | زيت خروع | 60مل (Similarity: 58.5%)
+  - Candidate: Rame Zithro 200mg/5ml Susp | 30ml | رامي زيثرو 200مجم/5مل شراب معلق | 30مل (Similarity: 51.7%)
+  - Candidate: Bio Me | Gorgeous Me Hair Serum | 60ml | بايو مى | جورجس مي سيروم الشعر | 60مل (Similarity: 50.9%)
+
+Row 141: 'مامى فيتال 3.5جم 14كيس'
+  - Candidate: Renal-s | 5gm | 12sachet | رينال إس | فوار مطهر للمسالك البولية | 12 كيس (Similarity: 67.9%)
+  - Candidate: Windy | 200mg | 10sachet | ويندي | 200مجم | 10اكياس فوار (Similarity: 64.0%)
+  - Candidate: Klacid XL 500mg | 14 Tabs | كلاسيد إكس إل 500مجم | 14 قرص (Similarity: 62.7%)
+
+Row 150: 'ناترى صابونة 100 جم'
+  - Candidate: Imtenan | Oat Honey soap | 100gm | امتنان | صابون الشوفان بالعسل | 100جم (Similarity: 69.6%)
+  - Candidate: Imtenan | Propolis Soap | 100gm | امتنان | صابون صمغ النحل | 100جم (Similarity: 66.7%)
+  - Candidate: Imtenan | Glycerine Soap | 100gm | امتنان | صابون الجلسرين | 100جم (Similarity: 65.2%)
+
+Row 151: 'كيتورال بلس شامبو 125 ملل'
+  - Candidate: Pert Plus | Hair Shampoo | 600ml | بيرت بلس | شامبو شعر | 600مل (Similarity: 60.4%)
+  - Candidate: Chi | Power Plus Exfoliate Shampoo | 355ml | تشي | باور بلس شامبو مقشر | 355مل (Similarity: 58.6%)
+  - Candidate: Pert Plus | Shampoo for All Hairs | 200 ml | بيرت بلس | شامبو لجميع انواع الشعر | 200 مل (Similarity: 57.6%)
+
+Row 152: 'اورديسكا 120مل شراب'
+  - Candidate: Guaiadesca | Syrup | 120Ml | جواياديسكا | شراب | 120مل (Similarity: 83.7%)
+  - Candidate: Ramdeep | Syrup | 120Ml | رامديب | شراب | 120مل (Similarity: 80.0%)
+  - Candidate: Decal B12 | Syrup | 120ml | ديكال ب12 | شراب | 120مل (Similarity: 79.1%)
+
+Row 160: 'دراى ماكسى الماسية سميكة 9 فوطة'
+  - Candidate: Sofy | Maxi Thick Long Pads | 8 Pcs | سوفي | ماكسي فوط طويلة سميكة | 8 قطعة (Similarity: 52.9%)
+  - Candidate: Sofy | Maxi Thick Long Pads | 16 Pcs | سوفي | ماكسي فوط طويلة سميكة | 16 قطعة (Similarity: 52.2%)
+  - Candidate: Molped | Maxi Thick Long Sanitary Pads | 22Pads | مولبيد | فوط صحية ماكسي سميك طويل | 22فوطة (Similarity: 49.3%)
+
+Row 162: 'طقم اظافر اطفال'
+  - Candidate: La Frutta | Nail Scissors for Kids Blue | لا فروتا | مقص اظافر للاطفال ازرق (Similarity: 54.2%)
+  - Candidate: Nice baby teether | Nice baby teether (Similarity: 51.9%)
+  - Candidate: nice baby teether. | nice baby teether. (Similarity: 51.9%)
+
+Row 164: 'حلمة بنك بلودواء' -> [MISSING FROM DB]
+Row 166: 'فرشاة شعر سشوار خشب'
+  - Candidate: Rush Brush | Hair Revolver Grey | راش براش | مكواة الشعر الدوارة رمادي (Similarity: 52.0%)
+  - Candidate: Qualita | Hollow Hair Brush | كواليتا | فرشاة شعر هولو (Similarity: 51.2%)
+  - Candidate: Roofa | Nail Brush - Pink | روفا | فرشاة آظافر - بينك (Similarity: 47.6%)
+
+Row 168: 'فيتال هير زيت شعر 60 ملل'
+  - Candidate: Vatika | Hair Cactus Oil | 180ml | فاتيكا | زيت صبار الشعر | 180 مل (Similarity: 60.7%)
+  - Candidate: Vita Hair | 60 Film Coated Tabs | أقراص فيتا هير للشعر | 60 قرص (Similarity: 60.4%)
+  - Candidate: Dabur Amla | Hair Oil | 90ml | دابر املا | زيت الشعر | 90 مل (Similarity: 60.4%)
+
+Row 172: 'الترا فيت كريم 50 جم'
+  - Candidate: Ultra Care Cream | 30gm | الترا كير كريم | 30جم (Similarity: 78.0%)
+  - Candidate: Infinity | Cica Repair Cream | 50gm | انفينيتي | سيكا ريبير كريم | 50جم (Similarity: 66.7%)
+  - Candidate: Ageal Rich | Cream | 50ml | اجيل ريتش | كريم | 50مل (Similarity: 65.1%)
+
+Row 174: 'سترونج فيل كريم للشعر 120 جم'
+  - Candidate: Strongville hair nourishing cream for hair loss | 120gm | سترونج فيل كريم للشعر لعلاج التساقط | 120جم (Similarity: 76.1%)
+  - Candidate: Movelex | Cream | 120gm | موڤليكس | كريم | 120جم (Similarity: 74.4%)
+  - Candidate: Areej | Orange Peel Cream | 200gm | أريج | كريم البرتقال | 200جرام (Similarity: 67.9%)
+
+Row 180: 'مثبت كانيولا عدد 1 قطعة'
+  - Candidate: Limitless Kids Calcium Chocolate | 30 Balls | ليمتلس كيدز كالسيوم | 30 قطعة (Similarity: 53.8%)
+  - Candidate: Private | Confidence | 18 Pcs | برايفت | كونفدنس | 18 قطعة (Similarity: 53.1%)
+  - Candidate: Baby Junior | Nursing Breast Pads | 12 Pads | بيبى جونيور | وسادات ثدى | 12 قطعة (Similarity: 52.6%)
+
+Row 182: 'لوف مغربى' -> [MISSING FROM DB]
+Row 183: 'افتر ميلز 30 كبسولات'
+  - Candidate: Pharafero 18 | 30Cap | فارافيرو 18 | 30كبسولة (Similarity: 66.7%)
+  - Candidate: Matrix | 30 Caps | ماتريكس | 30 كبسولة (Similarity: 66.7%)
+  - Candidate: Actimar | 30Cap | اكتيمار لزيادة الوزن وبناء العضلات | 30 كبسولة (Similarity: 64.5%)
+
+Row 184: 'انتي ديازوكس 500 مج 12 قرص'
+  - Candidate: Nitazode | 500Mg | 18Tab | نيتازود | 500مجم | 18قرص (Similarity: 64.0%)
+  - Candidate: Cataflam 50mg | 20 Tabs | اقراص كتافلام 50 مسكن للاسنان والصداع cataflam | ٢٠ قرص (Similarity: 64.0%)
+  - Candidate: Androcur 50mg | 20 Tabs | اندروكيور 50مجم | 20 قرص (Similarity: 64.0%)
+
+Row 202: 'اندوبوكسيتين 60 مجم 3 قرص مغلف'
+  - Candidate: Recoxitro 60mg | 30 Film Coated Tabs | ريكوكسيترو 60مجم | 30 قرص مغلف (Similarity: 73.3%)
+  - Candidate: Pixcolt 5mg | 30 Film Coated Tabs | بيكسكولت 5مجم | 30 قرص مغلف (Similarity: 66.7%)
+  - Candidate: Westoxetin 30mg | 3 Tab | ويستوكسيتين 30مجم | 3 اقراص (Similarity: 66.7%)
+
+Row 213: 'كو-ديلاترول 30قرص'
+  - Candidate: Antox | 30 Tabs | انتوكس أقراص مضاد للأكسدة للنساء والرجال antox | ٣٠ قرص (Similarity: 66.7%)
+  - Candidate: Integrol | 5mg | 30Tab | انتيجرول | 5مجم | 30قرص (Similarity: 63.2%)
+  - Candidate: Glaryl 3mg | 30 Tabs | جلاريل 3مج | 30 قرص (Similarity: 61.1%)
+
+Row 224: 'ديكانست ممتد المفعول 20قرص'
+  - Candidate: Divakote | E.R 250mg | 30Tab | ديفاكوت | ممتد المفعول 250مجم | 30قرص (Similarity: 73.0%)
+  - Candidate: Paroxetine CR 12.5mg | 30 Tabs | باروكسيتين ممتد المفعول 12.5مج | 30 قرص (Similarity: 64.6%)
+  - Candidate: Quitcool XR 400mg | 30 Tabs | كويتكول ممتد المفعول 400مجم | 30 قرص (Similarity: 64.5%)
+
+Row 230: 'ايفيجاد ممتد المفعول 75 مجم 30كبسول'
+  - Candidate: Conventin Xr | 300mg | 30Cap | كونفينتين | ممتدة المفعول 300مجم | 30كبسولة (Similarity: 69.2%)
+  - Candidate: Divido Pain Reliever 75gm | 30 Caps | ديفيدو مسكن للالم 75جم | 30 كبسولة (Similarity: 66.7%)
+  - Candidate: Divakote | E.R 250mg | 30Tab | ديفاكوت | ممتد المفعول 250مجم | 30قرص (Similarity: 66.7%)
+
+Row 235: 'جنكوبيلوبا 30 كبسولة'
+  - Candidate: Grapexon | 30 Caps | جرابيكسون | 30 كبسولة (Similarity: 68.3%)
+  - Candidate: Grapexon Chromium | 30 Caps | جريبكسون كروميوم | 30 كبسولة (Similarity: 66.7%)
+  - Candidate: Sanso Ginkona Plus | 30 Caps | سانسو جينكونا بلس | 30 كبسولة (Similarity: 65.3%)
+
+Row 249: 'ايكاندرا 50 مجم 30 قرص'
+  - Candidate: Androcur 50mg | 20 Tabs | اندروكيور 50مجم | 20 قرص (Similarity: 78.0%)
+  - Candidate: Bi-Alcofan 150mg | 30 Tabs | باى-الكوفان 150مجم | 30 قرص (Similarity: 77.3%)
+  - Candidate: Vilgat 50mg | 30 Tabs | فيلجات 50مجم | 30 قرص (Similarity: 76.9%)
+
+Row 253: 'ماجيكبيكلون 2 مجم'
+  - Candidate: Mepacolon | 135Mg | 20Tab | ميباكولون | 135مجم | 20قرص (Similarity: 51.2%)
+  - Candidate: Parkicapone | 200 Mg | 20 tablet | باركيكابون | 200 ملجم | 20 قرص (Similarity: 51.1%)
+  - Candidate: Mavilor | 10mg | 30Tab | مافيلور | 10مجم | 30قرص (Similarity: 50.0%)
+
+Row 255: 'موليفارت 5/ 320 مجم 14 قرص'
+  - Candidate: Moodamash 10mg | 14 Tabs | مودا ماش 10مجم | 14 قرص (Similarity: 65.3%)
+  - Candidate: Co Tareg 80/12.5mg | 14 Tabs | كوتارج 80/ 12.5مجم | 14 قرص (Similarity: 64.2%)
+  - Candidate: Clear Air | 10Mg | 14Tab | كلير اير | 10مجم | 14قرص (Similarity: 64.0%)
+
+Row 258: 'هيربال برونش شراب'
+  - Candidate: Decal B12 | Syrup | 120ml | ديكال ب12 | شراب | 120مل (Similarity: 53.7%)
+  - Candidate: Rotahelex Syrup for Coush | 120ml | روتاهيلكس شراب للرضع والأطفال للكحه والبلغم | 120مل (Similarity: 52.0%)
+  - Candidate: Visceralgine Syrup | 120ml | فسيرالچين شراب | 120مل (Similarity: 51.3%)
+
+Row 269: 'يورونيميا' -> [MISSING FROM DB]
+Row 273: 'افيرون' -> [MISSING FROM DB]
+Row 279: 'دياكالديرم مرهم موضعى'
+  - Candidate: Diprosalic Topical Ointment | 30gm | ديبروساليك مرهم موضعي | 30جم (Similarity: 61.2%)
+  - Candidate: Mupirax 2% Topical Ointment | 10gm | ميوبيراكس 2% مرهم موضعي | 10جم (Similarity: 57.6%)
+  - Candidate: Pentaburn Topical Ointment | 15gm | بنتابرن مرهم للحروق للأطفال والكبار | 15 جم (Similarity: 57.6%)
+
+Row 280: 'فيوسيكورت 20جم كريم'
+  - Candidate: Corega cream 20 gm | كريم كوريجا ٢٠ جم (Similarity: 61.5%)
+  - Candidate: Camisan Cream | 20gm | كاميزان كريم | 20جم (Similarity: 60.0%)
+  - Candidate: Pato | Cream | 30gm | باتو | كريم مرطب لعلاج جفاف الجلد | 30جم (Similarity: 59.5%)
+
+Row 283: 'كو-افازير 10مل معلق'
+  - Candidate: Co-Avazir | Eye Ointment | 5gm | كو-أفازير | مرهم للعين | 5جم (Similarity: 51.1%)
+  - Candidate: Co Avazir | 0.3% Eye Drop | 5ml | كو افازير | 0.3% نقط للعين | 5مل (Similarity: 50.0%)
+  - Candidate: Audax | Ear Drops | 10 Ml | اوداكس قطرة للاذن المسدودة مسكنة و لاذابة الشمع | 10 مل (Similarity: 48.8%)
+
+Row 287: 'سويكسولات محلول عين 10 مللى'
+  - Candidate: Acne Zinc Topical Solution | 20ml | اكني زنك محلول موضعي | 20مل (Similarity: 55.6%)
+  - Candidate: Optizolin Eye Drops | 10ml | اوبتيزولين قطرة للعين | 10مل (Similarity: 54.5%)
+  - Candidate: Conjyclear 0.7 Sterile Ophthalmic Solution | 2.5ml | كونجي كلير 0.7 محلول معقم للعين | 2.5مل (Similarity: 54.5%)
+
+Row 291: 'بونجيل سبراى 60 مل'
+  - Candidate: Myorel Message Spray | 60ml | ميوريل سبراى مساج | 60مل (Similarity: 66.7%)
+  - Candidate: Rotahelex Spray | 30ml | روتاهيلكس سبراى | 30مل (Similarity: 65.0%)
+  - Candidate: Bobai Hand Gel - 60ml | بوباي هاند جيل - 60 مل (Similarity: 65.0%)
+
+Row 292: 'سيبرى بخاخة' -> [MISSING FROM DB]
+Row 294: 'AZIROWA 1000 mg 2f.c.tab'
+  - Candidate: ANSELACOX 120 MG 10 F.C.TABS. | ANSELACOX 120 MG 10 F.C.TABS. (Similarity: 65.4%)
+  - Candidate: CHOLEROSE PLUS 10/10 MG 14 F.C.TABS. | CHOLEROSE PLUS 10/10 MG 14 F.C.TABS. (Similarity: 57.6%)
+  - Candidate: Rastiglo 10mg | 20 Film Coated Tabs | راستيجلو 10مجم | 20 قرص مغلف (Similarity: 51.7%)
+
+Row 296: 'موكسافيدكس 400 مجم 5 قرص'
+  - Candidate: Mafo 400mg | 30 Tabs | مافو 400مجم | 30 قرص (Similarity: 68.2%)
+  - Candidate: Baloxdot 40mg | 2Tabs | بالوكسدوت 40مجم | 2قرص (Similarity: 65.2%)
+  - Candidate: Klacid XL 500mg | 14 Tabs | كلاسيد إكس إل 500مجم | 14 قرص (Similarity: 64.2%)
+
+Row 298: 'فورفاكت 320 مجم'
+  - Candidate: Factive 320mg | 5 Tabs | فاكتيف 320 مجم | 5 أقراص (Similarity: 61.5%)
+  - Candidate: Baloxdot 20mg | 2Tabs | بالوكسدوت 20 مجم | 2قرص (Similarity: 52.6%)
+  - Candidate: Farorecta 10mg | 12 Tabs | فاروريكتا 10مجم | 12 قرص (Similarity: 51.3%)
+
+Row 306: 'بنتاسا 1 مجم فوار'
+  - Candidate: Coli-urinal | Effervescent | 60gm | كولى يورينال | فوار | 60 جم (Similarity: 65.5%)
+  - Candidate: Redoxon | Vitamin C 1000mg | 15 Eff. Tabs | فوار ريدوكسون فيتامين سي لتقوية وتعزيز المناعة | 15 قرص (Similarity: 62.9%)
+  - Candidate: Urosolvine Gout | 12 Eff Sach | يوروسولفين فوار لعلاج النقرس وحصوات الكلى | 12 كيس فوار (Similarity: 60.3%)
+
+Row 308: 'اكس ريلاتو 10 مجم 10 اقراص'
+  - Candidate: Rivaxarelt 10mg | 10Tab | ريفاكساريلت 10مجم | 10 اقراص (Similarity: 84.4%)
+  - Candidate: Imutrexate 10mg | 10 Tabs | اميوتركسات 10مج | 10 اقراص (Similarity: 75.6%)
+  - Candidate: Exaretic 10mg | 30 Tabs | اكساريتك 10مج | 30 قرص (Similarity: 74.4%)
+
+Row 315: 'سونو صابونة 100 جم'
+  - Candidate: Nunu | Baby Soap | 150gm | نونو | صابون أطفال | 150جم (Similarity: 63.6%)
+  - Candidate: Nunu | baby powder | 100gm | نونو | بودرة اطفال | 100جم (Similarity: 59.1%)
+  - Candidate: Johnson's | Baby Soap | 75gm | جونسون | صابونة للاطفال | 75جم (Similarity: 58.3%)
+
+Row 317: 'كينارا 250 مل غسول الفم والاسنان'
+  - Candidate: Yara | Hand Wash Rose | 500Ml | يارا | غسول اليد برائحة الورد | 500مل (Similarity: 56.1%)
+  - Candidate: Depurdent | Mouth rinse Whitening Wash | 250ml | ديبوردنت | غسول للفم لتبييض الاسنان | 250مل (Similarity: 53.3%)
+  - Candidate: Yara | Hand Wash Aloe Vera | 500Ml | يارا | غسول اليد برائحة الصبار | 500مل (Similarity: 51.6%)
+
+Row 320: 'نيكسيبرو بودرة'
+  - Candidate: Stevia | Castello Powder | 300gm | ستيفيا | سكر بودرة | 300جم (Similarity: 45.0%)
+  - Candidate: Johnson | Baby Powder | 50gm | جونسون | بودرة أطفال | 50جم (Similarity: 43.9%)
+  - Candidate: Nido | One Plus Milk Powder | 576gm | نيدو | وان بلس حليب بودر | 576جم (Similarity: 43.5%)
+
+Row 325: 'موفيبريب اكياس'
+  - Candidate: Carminex | 6 Sachets | كارمينكس | 6 أكياس (Similarity: 62.5%)
+  - Candidate: cogex 10 sachets | cogex 10 sachets (Similarity: 60.0%)
+  - Candidate: Isis | Chamomile | 20 Bags | إيزيس | بابونج | 20 كيس (Similarity: 56.4%)
+
+Row 343: 'مون لايت كريم تفتيح 50 جم'
+  - Candidate: Feel Good Canada Four Lite Lightening Cream - 50gm | فيل جود فورلايت كريم تفتيح 50 جرام (Similarity: 78.0%)
+  - Candidate: Alejon | Whitening Cream | 50ml | اليجون | كريم التفتيح | 50مل (Similarity: 67.9%)
+  - Candidate: Flare day | Whitening cream | 60gm | فلير داي | كريم تفتيح | 60جم (Similarity: 67.9%)
+
+Row 347: 'ايميروزا لوشن للشعر'
+  - Candidate: Caveo Hair Lotion 50 ml | كافيو لوشن للشعر 50 مل (Similarity: 68.3%)
+  - Candidate: Bio | Hair Olive Oil Serum | 75ml | بيو | سيروم زيت الزيتون للشعر | 75مل (Similarity: 54.5%)
+  - Candidate: Products for Hair Growth | منتجات معالجة للشعر (Similarity: 52.6%)
+
+Row 350: 'مويست-1 كريم 100 مل'
+  - Candidate: Avene | Cold Cream | 100ml | افين | مرطب يستخدم للترطيب يلائم البشرة جميع انواع البشرة | 100مل (Similarity: 65.1%)
+  - Candidate: SuperKids | Hair Cream | 200ml | كريم سوبر كيدز للشعر للاطفال من عمر سنة | 200مل (Similarity: 63.8%)
+  - Candidate: Capixy | Hair Cream | 120ml | كابيكسي | كريم للشعر | 120مل (Similarity: 63.6%)
+
+Row 357: 'زيرو فريز سيرم 148 مل'
+  - Candidate: Zero Frizz | Triple Butter Hair Serum | 148ml | زيرو فريز | سيروم لنعومة الشعر | 148مل (Similarity: 67.8%)
+  - Candidate: Zero Frizz Keratin Conditioner - 355Ml | زيرو فريز بلسم بالكيراتين - 355مل (Similarity: 63.0%)
+  - Candidate: Yara | Hair Serum | 150Ml | يارا | سيرم للشعر | 150مل (Similarity: 61.9%)
+
+Row 364: 'فانجيباسيد 5 مللى' -> [MISSING FROM DB]
+Row 368: 'اسيتون بيور 70 مل'
+  - Candidate: Alejon | Sun Screen Cream | 75Ml | صن بلوك اليجون كريم alejon للبشرة الجافة والعادية | 75 مل (Similarity: 62.7%)
+  - Candidate: Alejon | Urea Cream 10% | 200ml | اليجون يوريا كريم لجلد الوزة alejon urea cream | ٢٠٠ مل (Similarity: 61.2%)
+  - Candidate: Pure | Vaseline Petroleum Jelly | 70ml | بيور | فازلين جيلي بتروليوم | 70مل (Similarity: 59.6%)
+
+Row 369: 'ترمومتر طبى'
+  - Candidate: Rossmax | Thermometer Digital | روزماكس | ترمومتر ديجيتال لقياس درجة الحرارة (Similarity: 69.6%)
+  - Candidate: Granzia | KFT-03 Digital Thermometer | جرانزيا ترمومتر ديجيتال لقياس الحرارة بدقة عالية (Similarity: 60.4%)
+  - Candidate: Medical Gauze 15 cm | Medical Gauze 15 cm (Similarity: 52.6%)
+
+Row 374: 'قصافة كبيرة'
+  - Candidate: La Frutta | Nail Clipper | لا فروتا | قصافة أظافر للاطفال (Similarity: 45.7%)
+
+Row 380: 'تريتو-الس 40مجم 14كبسول'
+  - Candidate: Protopan 40mg | 14 Caps | بروتوبان 40مجم | 14 كبسولة (Similarity: 73.5%)
+  - Candidate: Epirazole 40mg | 10 Caps | ابيرازول 40مجم | 10 كبسولات‎ (Similarity: 69.4%)
+  - Candidate: Protopan 20mg | 14 Caps | بروتوبان 20مجم | 14 كبسولة (Similarity: 69.4%)
+
+Row 391: 'فيردينوديب 20 مجم'
+  - Candidate: Sperience | 20 Capsules | Sperience | 20 Capsules (Similarity: 56.2%)
+  - Candidate: Depreban 20mg | 10 Caps | ديبريبان 20مج | 10 كبسولات (Similarity: 54.1%)
+  - Candidate: Feldene 20mg/1ml | 3 Amps | فلدين 20مجم/1مل | 3 امبول (Similarity: 53.7%)
+
+Row 394: 'اميكاسكيف 500 مجم 2 مللى'
+  - Candidate: Edicin 500mg | 1 Vial | اديسين 500مجم | 1 فيال (Similarity: 60.9%)
+  - Candidate: Rameceftrax | 500mg For I.M. Injection | 1Vial | راميسيفتراكس | 500 مجم عضل | 1فيال (Similarity: 58.6%)
+  - Candidate: Levocarnine | 500mg | 20 Tabs | ليفوكارنين | 500 مجم | 20 قرص (Similarity: 56.6%)
+
+Row 395: 'ماش صن بلوك 45 اس بي اف 125 مل'
+  - Candidate: Mash95 | Sun Screen Lotion | 125ml | ماش95 | صن سكرين لوشن | 125مل (Similarity: 65.6%)
+  - Candidate: Mash | Sun Protection With SPF 45 | 125ml | ماش صن بلوك لوشن SPF45 لجميع أنواع البشرة | 125 مل (Similarity: 62.5%)
+  - Candidate: Man Look | Aftershave Balsam with Mint | 125gm | مان لوك | بلسم حلاقة | 125مل (Similarity: 62.1%)
+
+Row 396: 'حزام بطن +صدر متعدد' -> [MISSING FROM DB]
+Row 397: 'هاى ديرم صابونة شفافة'
+  - Candidate: Beesline Whitening Facial Soap | بيزلاين صابونة تفتيح (Similarity: 53.7%)
+  - Candidate: Mood | Oriental Musk Soap | 115gm | مود | اورينتال مسك صابونة | 115جم (Similarity: 49.1%)
+  - Candidate: Areej | CLarifying Soap | أريج | صابونة كلاريفاينج (Similarity: 48.9%)
+
+Row 412: 'قصرية سرير للمرضى دلتا ماكس'
+  - Candidate: Beurer | TS 15 Heated Underblanket | بيورير | غطاء سرير حراري تي اس 15 (Similarity: 43.3%)
+
+Row 414: 'صابون بيبى بيور 125جم'
+  - Candidate: Hero Baby | Pear Puree from +6M | 125gm | هيرو بيبي | كمثري بيوريه من عمر 6 شهور فأكبر | 125جم (Similarity: 62.3%)
+  - Candidate: Lux | Soap Magical Beauty | 165Gm | لوكس | صابون سحر زهرة الاوركيد | 165جم (Similarity: 61.8%)
+  - Candidate: Lux | Dream Delight Soap | 120gm | لوكس | صابونة بحلم السعادة | 120جم (Similarity: 59.3%)
+
+Row 415: 'جونسون شامبو قبل النوم لافندر 100 مل'
+  - Candidate: Johnson's | Gold Shampoo | 100ml | جونسون | شامبو للاطفال الأصلي الاصفر | 100مل (Similarity: 70.0%)
+  - Candidate: Johnson's | Shampoo No More Tangles | 100ml | جونسون | شامبو لا تشابك بعد اليوم للاطفال | 100مل (Similarity: 68.2%)
+  - Candidate: Johnson's | Gold Shampoo | 200ml | جونسون | شامبو للاطفال الأصلي الاصفر | 200مل (Similarity: 67.5%)
+
+Row 417: 'فارماستين 0.5%' -> [MISSING FROM DB]
+Row 421: 'مناديل معطرة كلاسى 20 منديل'
+  - Candidate: Dettol | Fresh Skin Wipes | 20s | ديتول | مناديل مبللة الاصلي | 20 مناديل (Similarity: 63.6%)
+  - Candidate: Dettol | Fresh Skin Wipes | 40 Wipes | ديتول | مناديل مبللة الاصلي | 40 منديل (Similarity: 61.5%)
+  - Candidate: Easy Care | Baby Wipes | 20 Wipes | ايزي كير | مناديل مبللة للاطفال | 20 منديل (Similarity: 60.9%)
+
+Row 423: 'اليكوس 2.5 مجم 20 قرص'
+  - Candidate: Aironyl | 2.5mg | 20 Tablet | ايرونيل | 2.5 ملجم | 20 قرص (Similarity: 82.1%)
+  - Candidate: Rotahelex | 25mg | 30 Tabs | روتاهيلكس | 25مجم | 30 قرص (Similarity: 80.0%)
+  - Candidate: Lactodel 2.5Mg | 20 Tabs | لاكتودل 2.5مجم | 20 قرص (Similarity: 80.0%)
+
+Row 425: 'نوفوميكس فليكس-بين 50'
+  - Candidate: Genuphil Original | 50 Tabs | جينوفيل الأصلي | 50 قرص (Similarity: 45.5%)
+  - Candidate: Natavis | Vitamin C Moisturizer | 50ml | ناتافيس | مرطب بفيتامين سي | 50مل (Similarity: 44.4%)
+  - Candidate: UVEPRO Milk SPF 50+ | 200ml | يو في برو ميلك اس بى اف +50 | 200مل (Similarity: 42.9%)
+
+Row 426: 'اكستنشن بلس 300/12.5 مجم 28 قرص'
+  - Candidate: X-Tension Plus 150/12.5 mg | 28Tab | اكستنشن بلس 150/12.5مجم | 28قرص (Similarity: 87.1%)
+  - Candidate: Valsatens Plus | 80/12.5mg | 30Tab | فالساتينس بلس | 80/12.5مجم | 30قرص (Similarity: 70.8%)
+  - Candidate: X-Tension Plus High Blood Pressure 300/12.5mg | 28 Tabs | اكستنشن بلس لعلاج إرتفاع ضغط الدم 300/12.5مج | 28 قرص (Similarity: 69.0%)
+
+Row 433: 'زيلوكين جيل 2%'
+  - Candidate: Bobai | After Sun Gel | 200gm | بوباى | جيل افتر صن | 200جم (Similarity: 51.3%)
+  - Candidate: Starville | Whitening Gel SPF 50+ | 60gm | ستارفيل | وايتينج جيل | 60جم (Similarity: 47.6%)
+  - Candidate: Truffles | Go-Curly Styling Gel | 250ml | ترافلز | جو كيرلي جيل | 250مل (Similarity: 46.5%)
+
+Row 435: 'ORAVEX MOUTH WASH STRAWBERRY'
+  - Candidate: Mash Premiere | Aqua Dent Mouth Wash with Strawberry | 200ml | ماش بريمير | غسول فم اكوادنت بطعم الفراولة | 200مل (Similarity: 58.8%)
+  - Candidate: Mash Premiere | Aqua Dent Mouth Wash with Orange | 200ml | ماش بريمير | غسول فم اكوادنت بطعم البرتقال | 200مل (Similarity: 46.9%)
+  - Candidate: Orex Spray for Oral Cavity Care Mouth wash | 60ml | اوركس بخاخ orex spray مطهر للفم والحلق | 60 مل (Similarity: 44.7%)
+
+Row 443: 'اكستنشن بلس 150/12.5 28قرص'
+  - Candidate: X-Tension Plus 150/12.5 mg | 28Tab | اكستنشن بلس 150/12.5مجم | 28قرص (Similarity: 91.2%)
+  - Candidate: Valsatens Plus | 80/12.5mg | 30Tab | فالساتينس بلس | 80/12.5مجم | 30قرص (Similarity: 63.3%)
+  - Candidate: Chartoreg Plus 80/25mg | 28 Tabs | شارتوريج بلس 80/25مجم | 28قرص (Similarity: 61.8%)
+
+Row 444: 'بريفاكوند قطرة 5 مللى'
+  - Candidate: Brimonidine 0.2% Eye Drops | 5ml | بريمونيدين 0.2% قطرة للعين | 5مل (Similarity: 56.6%)
+  - Candidate: Dexatobrin Eye Drop | 5ml | ديكساتوبرين قطرة عين | 5مل (Similarity: 55.3%)
+  - Candidate: Ramedazolamide Eye Drops | 5ml | راميدازولاميد قطرة للعين | 5مل (Similarity: 54.9%)
+
+Row 447: 'ياز 28 كبسول'
+  - Candidate: Reagila 3mg | 28 Caps | ريجيلا 3مجم | 28 كبسولة (Similarity: 62.9%)
+  - Candidate: Reagila 6mg | 28 Caps | رياجيلا 6مجم | 28 كبسولة (Similarity: 61.1%)
+  - Candidate: Herbana | 20 Caps | هيربانا كبسول مدر للبن للرضاعه | 20 كبسولة (Similarity: 58.3%)
+
+Row 449: 'مارسالاز 500 مجم 30 قرص'
+  - Candidate: Marcal 700mg | 30 Tabs | ماركال اقراص 700 مجم كالسيوم marcal tab لمرضى الكلى | 30 قرص (Similarity: 85.7%)
+  - Candidate: Shorsalin | 150Mg | 30Tab | شورسالين | 150مجم | 30قرص (Similarity: 75.6%)
+  - Candidate: Shorsalin | 300Mg | 30Tab | شورسالين | 300مجم | 30قرص (Similarity: 75.6%)
+
+Row 457: 'زيلويال مونو محلول 12'
+  - Candidate: Borgalendro | Oral Solution | 75ml | بورجاليندرو | محلول بالفم | 75مل (Similarity: 51.7%)
+  - Candidate: Royal | Cinnamon | 12Bags | رويال | شاي القرفة | 12فتلة (Similarity: 51.0%)
+  - Candidate: Desio | contact lenses Solution | 100ml | ديسيو | محلول لتنظيف وتعقيم وترطيب العدسات اللاصقة الملونة | 100 مل (Similarity: 50.8%)
+
+Row 466: 'فارما اكتيف سيلفر سبراى'
+  - Candidate: Malizia | Silver Spray | 150ml | ماليزيا | ماء تواليت سبراى سيلفر | 150مل (Similarity: 60.4%)
+  - Candidate: Isis pharma | Uveblock Spray Spf 50 | 200Ml | إيزيس فارما | يوفبلوك سبراي بمعامل حماية 50 | 200مل (Similarity: 51.5%)
+  - Candidate: Isis Pharma | Uveblock Spf 50 Spray Kids | 200ml | ايزيس فارما | بخاخ يوفى بلوك بعامل حماية من الشمس 50 للأطفال | 200مل (Similarity: 50.7%)
+
+Row 471: 'البستكس 8 مجم 30 اقراص'
+  - Candidate: Rotahelex | 25mg | 30 Tabs | روتاهيلكس | 25مجم | 30 قرص (Similarity: 66.7%)
+  - Candidate: Westoxetin 30mg | 3 Tab | ويستوكسيتين 30مجم | 3 اقراص (Similarity: 65.3%)
+  - Candidate: Anticox 15mg | 30 Tabs | انتيكوكس 15ملجم | 30 قرص (Similarity: 65.2%)
+
+Row 475: 'هاى بوتنس فورميولا30   كبسول'
+  - Candidate: Formamy | 30 Caps | فورمامى | 30 كبسولة (Similarity: 58.5%)
+  - Candidate: Omega 3 Plus | 30 Caps | اوميجا 3 بلس كبسولات للوزن وتعزيز الذاكرة والمناعة | 30 كبسول (Similarity: 52.2%)
+  - Candidate: Sanso B Complex | 30 Caps | سانسو بي كومبلكس فيتامين ب للاعصاب | 30 كبسولة (Similarity: 51.4%)
+
+Row 480: 'سبيكا 100 مجم 12 اقراص'
+  - Candidate: Virecta 100mg | 12 Tabs | فايركتا 100مجم | 12 قرص (Similarity: 82.1%)
+  - Candidate: Carcemia | 100mg | 10Tab | كارسيميا | 100مجم | 10اقراص (Similarity: 80.0%)
+  - Candidate: Viavag 100mg | 10 Tabs | اقراص فيافاج 100 مجم لضعف الانتصاب viavag | ١٠ اقراص (Similarity: 78.9%)
+
+Row 483: 'أوكسا مستحلب 0.2جم 20قطعه'
+  - Candidate: Ordesca 5Mg 20Tab (Rameda)7 | أورديسكا | 5مجم | 20قرص (Similarity: 50.0%)
+  - Candidate: Astin 20mg | 20 Tabs | أستين 20مجم | 20 قرص (Similarity: 48.9%)
+  - Candidate: Agnucaston 20mg | 30 Tabs | اجنوكاستون 20مجم | 30 قرص (Similarity: 48.0%)
+
+Row 487: 'فاستافلام 50 مج 20 قرص'
+  - Candidate: Episalpride 50mg | 20 Tabs | ابيسالبرايد 50مجم | 20 قرص (Similarity: 70.8%)
+  - Candidate: Vastaflam Anti inflammatory 50mg | 20 Tabs | فاستا فلام مضاد للإلتهابات 50مج | 20 قرص (Similarity: 67.7%)
+  - Candidate: Olfen | 50mg | 20 Tabs | اوفلين | 50 جم | 20 قرص (Similarity: 66.7%)
+
+Row 491: 'ابراتروبيم .25 مجم 10 وحدات'
+  - Candidate: Epirazole 40mg | 10 Caps | ابيرازول 40مجم | 10 كبسولات‎ (Similarity: 58.2%)
+  - Candidate: Inflacam 20mg | 10 Caps | انفلاكام 20مجم | 10 كبسولات (Similarity: 55.6%)
+  - Candidate: Imutrexate | 7.5mg | 10 Tabs | اميوتريكسات | 7.5 مجم | 10 أقراص (Similarity: 54.2%)
+
+Row 498: 'فيرنس كريم 50 جم'
+  - Candidate: Vorek | Cream | 50gm | فوريك كريم ملطف للجلد للدوالى وآلام العظام والمفاصل | 50 جم (Similarity: 82.4%)
+  - Candidate: Movelex | Cream | 50gm | موڤليكس | كريم | 50جم (Similarity: 77.8%)
+  - Candidate: Momenta Cream | 30gm | مومنتا كريم | 30جم (Similarity: 77.8%)
+
+Row 500: 'سنس لايت كريم 60 جم'
+  - Candidate: Romix | Skin Cream | 60gm | رومكس | كريم للبشره | 60جم (Similarity: 65.1%)
+  - Candidate: Ultra Care Cream | 30gm | الترا كير كريم | 30جم (Similarity: 65.1%)
+  - Candidate: Srilane 5% Cream | 60gm | سريلان 5% كريم | 60جم (Similarity: 65.0%)
+
+Row 502: 'نو هير كريم شعر 75 مل'
+  - Candidate: Dove | Awakening Ritual Nourishing Secrets Hand Cream | 75ml | دوف | هاند كريم | 75 مل (Similarity: 68.2%)
+  - Candidate: Tamara | Hair Cream | 55Ml | تمارا | كريم شعر | 55جم (Similarity: 68.1%)
+  - Candidate: Palmer's | Hair Cream | 50 ml | بالمرز | كريم الشعر | 50 مل (Similarity: 65.3%)
+
+Row 505: 'شفاء حلبه 12 كيس'
+  - Candidate: Isis | Green Tea | 12 Bags | إيزيس | شاي اخضر | 12 كيس (Similarity: 63.8%)
+  - Candidate: Fennel from Isis | 20 Bags | حلبه من إيزيس | 20 كيس (Similarity: 61.2%)
+  - Candidate: Isis | Green Tea | 20 Bags | ايزيس | شاى اخضر | 20 كيس (Similarity: 59.6%)
+
+Row 513: 'جي.بي.سي كريم 50 جم'
+  - Candidate: J.B.C | Cream | 100gm | جى.بى.سى | كريم | 100جم (Similarity: 75.7%)
+  - Candidate: J.B.C Skin Moist Cream | 50gm | جي.بي.سي كريم ترطيب البشرة | 50جم (Similarity: 69.2%)
+  - Candidate: Myocool Cream | 50gm | ميوكول كريم مساج مسكن لآلام المفاصل والعضلات | 50جم (Similarity: 68.4%)
+
+Row 514: 'تاكسيموديل 2 جم فيال'
+  - Candidate: ZINOL | 1G | VIAL | زينول | 1جم | فيال (Similarity: 63.2%)
+  - Candidate: Cefotax | Antibiotic | 2 g | 1 Vial | سيفوتاكس | مضاد حيوي | 2 جم | 1 فيال (Similarity: 60.7%)
+  - Candidate: Cefotax Antibiotic 1g | 1 Vial | سيفوتاكس مضاد حيوي 1جم | 1 فيال (Similarity: 58.8%)
+
+Row 517: 'سيميلاك جولد 2'
+  - Candidate: Amla | Gold | 270Ml | املا | جولد | 270مل (Similarity: 60.6%)
+  - Candidate: S-26 Gold Milk 3 | 900gm | اس 26 جولد لبن اطفال | 900جم (Similarity: 59.5%)
+  - Candidate: Similac | Total Comfort Gold 1 | 360gm | سيميلاك | توتال كومفورت جولد 1 لبن لتغذية الرضع من عمر الولادة | 360جم (Similarity: 53.1%)
+
+Row 534: 'نيو-برنكوفين 125 مل شراب'
+  - Candidate: Bronchophane | Syrup | 125Ml | برونكوفين | شراب | 125مل (Similarity: 92.6%)
+  - Candidate: Neo-Bronchophane | Susp Expectorant | 125ml | نيو-برونكوفين | شراب طارد للبلغم | 125مل (Similarity: 69.3%)
+  - Candidate: Nono Water Syrup | 120ml | ماء نونو دواء مغص للرضع والأطفال | 120مل (Similarity: 69.2%)
+
+Row 536: 'انتوسيد 1 شريط' -> [MISSING FROM DB]
+Row 538: 'ون كريم ازالة شعر عادي 40 جم أزرق'
+  - Candidate: Veet | Hair Removal Cream Normal Skin | 100gm | كريم فيت لازالة الشعر للبشرة العادية | 100 جم (Similarity: 61.5%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 56.8%)
+  - Candidate: Motions | Professional Super Hair Relaxer | 425gm | موشنز | كريم الشعر ريلاكسر | 425جم (Similarity: 56.7%)
+
+Row 539: 'ون كريم ازالة شعر عادي 140 جم أزرق'
+  - Candidate: Veet | Hair Removal Cream Normal Skin | 100gm | كريم فيت لازالة الشعر للبشرة العادية | 100 جم (Similarity: 63.3%)
+  - Candidate: J. Casanova | Regular Hair Cream | 150gm | ج. كازانوفا | كريم للشعر العادي | 150جم (Similarity: 57.5%)
+  - Candidate: Harir | sweet natural hair removal | 100gm | حرير | سويت الطبيعي لازالة الشعر بدون الم | 100جم (Similarity: 57.1%)
+
+Row 540: 'ون كريم ازالة شعر عادي 90 جم أزرق'
+  - Candidate: Veet | Hair Removal Cream Normal Skin | 100gm | كريم فيت لازالة الشعر للبشرة العادية | 100 جم (Similarity: 61.5%)
+  - Candidate: Harir | Sweet Natural Hair Removal Jar | 90gm | حرير | سويت طبيعي لازالة الشعر بدون الم برطمان | 90جم (Similarity: 58.2%)
+  - Candidate: One | Hair Removal Cream Enriched With Lanolin For Normal Skin | 90gm | ون | كريم لازالة الشعر الزائد باللانولين للبشرة العادية | 90جم (Similarity: 56.8%)
+
+Row 541: 'ون كريم ازالة شعر حساس 40 جم أحمر'
+  - Candidate: Harir | Sweet Natural Hair Removal Jar | 90gm | حرير | سويت طبيعي لازالة الشعر بدون الم برطمان | 90جم (Similarity: 59.0%)
+  - Candidate: Veet | Hair Removal Cream Sensitive Skin | 100ml | فيت | كريم لازالة الشعر للبشرة الحساسة | 100مل (Similarity: 58.2%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 57.5%)
+
+Row 542: 'ون كريم ازالة شعر حساس 140 جم أحمر'
+  - Candidate: Veet | Hair Removal Cream Sensitive Skin | 100ml | فيت | كريم لازالة الشعر للبشرة الحساسة | 100مل (Similarity: 60.0%)
+  - Candidate: Veet | Hair Removal Cream Normal Skin | 100gm | كريم فيت لازالة الشعر للبشرة العادية | 100 جم (Similarity: 58.2%)
+  - Candidate: Harir | Sweet Natural Hair Removal Jar | 90gm | حرير | سويت طبيعي لازالة الشعر بدون الم برطمان | 90جم (Similarity: 58.2%)
+
+Row 543: 'ون كريم ازالة شعر حساس 90 جم أحمر'
+  - Candidate: Harir | Sweet Natural Hair Removal Jar | 90gm | حرير | سويت طبيعي لازالة الشعر بدون الم برطمان | 90جم (Similarity: 61.5%)
+  - Candidate: Veet | Hair Removal Cream Sensitive Skin | 100ml | فيت | كريم لازالة الشعر للبشرة الحساسة | 100مل (Similarity: 58.2%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 57.5%)
+
+Row 544: 'ون كريم ازالة شعر عسل 40 جم أصفر'
+  - Candidate: Avuva | Depilatory Wax Hair Removal Yellow | 100gm | افوفا | شمع لازالة الشعر اصفر | 100جم (Similarity: 63.5%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 58.5%)
+  - Candidate: Motions | Professional Super Hair Relaxer | 425gm | موشنز | كريم الشعر ريلاكسر | 425جم (Similarity: 57.6%)
+
+Row 545: 'ون كريم ازالة شعر عسل 140 جم أصفر'
+  - Candidate: Avuva | Depilatory Wax Hair Removal Yellow | 100gm | افوفا | شمع لازالة الشعر اصفر | 100جم (Similarity: 65.1%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 57.8%)
+  - Candidate: Mink | Palmers Cream - Honey Yellow | 125gm | مينك | هير واكس بالعسل وزيت الارجان | 150جم (Similarity: 57.1%)
+
+Row 546: 'ون كريم ازالة شعر عسل 90 جم أصفر'
+  - Candidate: Avuva | Depilatory Wax Hair Removal Yellow | 100gm | افوفا | شمع لازالة الشعر اصفر | 100جم (Similarity: 63.5%)
+  - Candidate: Easy Sweet | Hair Removal Sweet with Honey | 90gm | ايزي سويت | سويت لازالة الشعر بالعسل | 90جم (Similarity: 58.7%)
+  - Candidate: Aloe Eva | Hair Cream For All Hair Types | 50gm | الو ايفا | كريم شعر لجميع أنواع الشعر | 50جم (Similarity: 58.5%)
+
+Row 550: 'مان لوك كريم حلاقة نعناع 140 جم'
+  - Candidate: Man Look | Shaving Cream With Allantoin | 40gm | مان لوك | كريم حلاقة بالالنتوين | 40جم (Similarity: 75.4%)
+  - Candidate: Man Look | Shaving Cream for highly sensitive skin with Allantoin | 90gm | مان لوك | كريم حلاقة بالالنتوين | 90جم (Similarity: 72.5%)
+  - Candidate: Man Look | Cream Shaving Green | 90Ml | مان لوك | كريم حلاقة أخضر | 90 مل (Similarity: 71.9%)
+
+Row 567: 'ايفازلين برطمان 45 جم'
+  - Candidate: Evasiline | Petroleum Jelly | 70gm | إيڤازلين | برطمان | 70جم (Similarity: 75.6%)
+  - Candidate: Evasiline | Petroleum Jelly | 35gm | إيڤازلين | برطمان | 35جم (Similarity: 75.6%)
+  - Candidate: Vaseline | 50gm | فازلين | برطمان ليفر | 50جم (Similarity: 72.7%)
+
+Row 568: 'ايفازلين برطمان 100  جم'
+  - Candidate: Evasiline | Petroleum Jelly | 70gm | إيڤازلين | برطمان | 70جم (Similarity: 72.3%)
+  - Candidate: Evasiline | Petroleum Jelly | 35gm | إيڤازلين | برطمان | 35جم (Similarity: 72.3%)
+  - Candidate: Vaseline | Lever jar | 100Ml | فازلين | برطمان ليفر | 100مل (Similarity: 70.6%)
+
+Row 569: 'ايفازلين برطمان 200  جم'
+  - Candidate: Evasiline | Petroleum Jelly | 70gm | إيڤازلين | برطمان | 70جم (Similarity: 72.3%)
+  - Candidate: Evasiline | Petroleum Jelly | 35gm | إيڤازلين | برطمان | 35جم (Similarity: 72.3%)
+  - Candidate: Vaseline | 50gm | فازلين | برطمان ليفر | 50جم (Similarity: 70.6%)
+
+Row 573: 'سبوتلس كريم 18جرام'
+  - Candidate: J.B.C | Cream | 100gm | جى.بى.سى | كريم | 100جم (Similarity: 61.1%)
+  - Candidate: Pato | Cream | 30gm | باتو | كريم مرطب لعلاج جفاف الجلد | 30جم (Similarity: 58.8%)
+  - Candidate: Movelex | Cream | 120gm | موڤليكس | كريم | 120جم (Similarity: 57.9%)
+
+Row 574: 'اي كيراتين سيرم لحماية الشعر 100 مل'
+  - Candidate: Infinity | Treato Serum SPF30 Hair Protection | 80ml | انفينيتي | ترياتو سيرم لحماية الشعر | 80مل (Similarity: 72.7%)
+  - Candidate: Les Karites | Serum with Shea Oil | 100ml | لي كاريتيه | سيروم بزيت الشيا | 100مل (Similarity: 63.9%)
+  - Candidate: Senator | Hair Serum | 100ml | سيناتور | سيرم للشعر | 100مل (Similarity: 63.5%)
+
+Row 575: 'اي كيراتين ماسك للشعر 200 جم'
+  - Candidate: Acadia | Konda Hair Mask | 200gm | اكاديا | كوندا ماسك للشعر | 200جم (Similarity: 72.1%)
+  - Candidate: Aroma | Argan Hair Mask | 500ml | اروما | ارجان ماسك للشعر | 500مل (Similarity: 66.7%)
+  - Candidate: Clary | Hair Mask | 300ml | كلاري | ماسك للشعر | 300مل (Similarity: 66.7%)
+
+Row 581: 'DHEA 50MG 60TAB SUPPLAMINT * imp'
+  - Candidate: Bone Cal | supplement | 500 mg | 30 tab | بون كال 500 | لعلاج نقص الكالسيوم (Similarity: 70.8%)
+  - Candidate: Cetal Pain Reliever 500mg | 20 Tabs | سيتال مسكن للآلام 500مج | 20 قرص (Similarity: 64.6%)
+  - Candidate: Apple Lite 500mg | 30 Tabs | أبل لايت 500مج | 30 قرص (Similarity: 64.3%)
+
+Row 583: 'سلازوبيرين 500مج 100 قرص *مستورد'
+  - Candidate: Anapramine SR 75mg | 10 Tabs | انابرامين إس آر 75مجم | 10 اقراص (Similarity: 67.7%)
+  - Candidate: Ponstan Forte 500mg | 20 Tabs | بونستان فورت 500مجم | 20 قرص (Similarity: 66.7%)
+  - Candidate: Apple Lite 500mg | 30 Tabs | أبل لايت 500مج | 30 قرص (Similarity: 66.7%)
+
+Row 595: 'باليت نوجة متلالئ 65-7'
+  - Candidate: Palette | Naturals Super Beige Blonde Hair Dye Number 10-4 | باليت | ناتشورالز صبغة رقم 10-4 اشقر بيج (Similarity: 41.9%)
+
+Row 605: 'لوريال الفيف شامبو مغذى بالزيت 6 زيوت بنى شعر جاف 200 مل'
+  - Candidate: L'Oreal Paris | Elvive Extraordinary Oil Shampoo for Very Dry Hair | 200ml | لوريال باريس | الفيف شامبو بالزيوت الثمينة للشعر شديد الجفاف | 200مل (Similarity: 67.7%)
+  - Candidate: L'Oréal Paris | Elvive Extraordinary Oil Shampoo Normal to Dry | 400Ml | لوريال باريس | شامبو مغذي بالزيت غير العادي للشعر العادي والجاف | 400مل (Similarity: 66.1%)
+  - Candidate: L'Oreal Paris | Elvive Extraordinary Oil Nourishing Shampoo | 400ml | 15% Off | لوريال باريس | الفيف شامبو غني بالزيوت للشعر الجاف | 400مل | 15% خصم (Similarity: 66.1%)
+
+Row 606: 'لوريال الفيف شامبو اسود تساقط الشعر 200مل'
+  - Candidate: Dove | Hair Fall Rescue Shampoo | 200ml | دوف | شامبو ضد تساقط الشعر | 200مل (Similarity: 74.7%)
+  - Candidate: L’Oreal Paris | Elvive Argenine Fall Resist X3 Shampoo | 400ml | لوريال باريس | شامبو الفيف شامبو لتساقط الشعر | 400مل (Similarity: 74.5%)
+  - Candidate: Alejon | Anti Hair Loss Shampoo | 200ml | أليجون | شامبو ضد تساقط الشعر | 200مل (Similarity: 74.4%)
+
+Row 607: 'لوريال الفيف شامبو معالج شعر تالف 400 مل'
+  - Candidate: L'Oreal Paris | Elvive Total Repair 5 Shampoo for Damaged Hair | 400Ml | لوريال باريس | الفيف شامبو معالجة كاملة 5 للشعر التالف | 400مل (Similarity: 76.5%)
+  - Candidate: L'Oreal | Elvive Glycolic Gloss Hair Care Shampoo for Dull Hair | 400ml | لوريال | الفيف شامبو جليكوليك جلوس للشعر الباهت | 400مل (Similarity: 71.6%)
+  - Candidate: L'Oreal Paris Elvive | Hyaluron Moisture Shampoo | 400ml | لوريال باريس الفيف | شامبو هيالرون مرطب | 400مل (Similarity: 69.0%)
+
+Row 608: 'لوريال كريم تصفيف 200 مل ضد التساقط'
+  - Candidate: Blob Wax | Hair Styling Cream | 170ml | بلوب واكس | كريم تصفيف الشعر | 170مل (Similarity: 72.7%)
+  - Candidate: Vatika | Styling Hair Cream Almond | 70ml | فاتيكا | كريم تصفيف الشعر باللوز | 70مل (Similarity: 69.1%)
+  - Candidate: Vatika | Hair FallControl Styling Hair Cream | 70ml | فاتيكا | كريم تصفيف الشعر ضد التساقط | 70مل (Similarity: 68.1%)
+
+Row 609: 'لوريال الفيف بلسم معالج شعر تالف 200مل'
+  - Candidate: L'Oréal Paris | Professionnel Serie Expert B6 Biotin Inforcer Masque | 250ml | لوريال باريس | بلسم للشعر التالف | 250مل (Similarity: 74.4%)
+  - Candidate: L’Oréal Paris | Elvive conditioner total repair 5 | 360ml | لوريال باريس | بلسم الفيف المعالجة الكاملة 5 | 360مل (Similarity: 69.2%)
+  - Candidate: L'Oreal Elvive | Hyaluron Moisture Plump Serum | 150ml | لوريال الفيف | سيرم لترطيب الشعر الجاف | 150مل (Similarity: 69.0%)
+
+Row 610: 'غارنيية انتنستى صبغة احمر غامق و حاد 4.60'
+  - Candidate: Garnier | Nutrisse Hair Color | 3 Dark Brown | غارنييه | نيوتريس صبغة شعر | 3 بني غامق (Similarity: 55.0%)
+  - Candidate: Garnier | Dark blond | 6 | غارنييه | اشقر غامق | 6 (Similarity: 53.1%)
+  - Candidate: Garnier | Color Naturals Permanent Crème Hair Color | 6 Dark Blonde | 15% off | غارنييه | كولر ناتشورالز صبغة شعر دائمة | 6 اشقر غامق | 15% خصم (Similarity: 50.0%)
+
+Row 611: 'ارتيكو-سيف50 مجم 30كبسول'
+  - Candidate: Sanso | lactoferrin | 250mg | 30Cap | سانسو | لاكتوفرين | 250مجم | 30كبسول (Similarity: 71.2%)
+  - Candidate: Quick Slim 120mg | 30 Caps | كويك سليم 120مجم | 30 كبسولة (Similarity: 69.2%)
+  - Candidate: Erdosolvine | 300Mg | 10Cap | إيردوسولفين | 300مجم | 10كبسولات (Similarity: 67.9%)
+
+Row 612: 'بروفين 600فوار'
+  - Candidate: Brufen 600mg | 10 Sachets | بروفين 600ملجم | 10 اكياس (Similarity: 56.4%)
+  - Candidate: Brufen | 600mg | 20 Sachets | بروفين 600 ملجم مسكن قوي | 20 كيس (Similarity: 46.8%)
+  - Candidate: Brufen | 600Mg | 30Tab | بروفين مسكن للالم 600 مجم | 30قرص (Similarity: 46.8%)
+
+Row 633: 'لاروش بوسيه افاكلار غسول جل بشره دهنيه 200 مل'
+  - Candidate: La Roche Posay | Effaclar | Astringent Lotion | 200ml | لاروش بوزيه | ايفاكلار تونر للبشرة الدهنية | 200مل (Similarity: 75.8%)
+  - Candidate: La Roche Posay | Effaclar Micellar Water for Oily & Sensitive Skin | 200ml | لاروش بوزيه ايفاكلار ماء ميسيلار للبشرة الدهنية الحساسة | 200 مل (Similarity: 69.7%)
+  - Candidate: La Roche Posay | Effaclar Foaming Gel | 400ml | لاروش بوزيه ايفاكلار غسول جل رغوي للبشرة الدهنية المعرضة لحب الشباب | 400 مل (Similarity: 67.8%)
+
+Row 634: 'لاروش بوسيه انتليوس فلويد تنت  +spf 50 صن بلوك 50مل'
+  - Candidate: La Roche Posay | Anthelios Shaka Tinted Fluid SPF 50+ | 50ml | لاروش بوساي | أنثيليوس شاكا سائل ملون بعامل حماية من الشمس 50+ | 50مل (Similarity: 53.3%)
+  - Candidate: La Roche Posay | Anthelios Shaka Tinted Fluid SPF 50+ | 50ml | لاروش بوساي | أنثيليوس شاكا سائل ملون بعامل حماية من الشمس 50+ | 50مل (Similarity: 53.3%)
+  - Candidate: La Roche Posay | Anthelios Ultra Non-Perfumed Cream SPF50+ | 50ml | لاروش بوزيه أنثيليوس الترا صن بلوك كريم للبشرة الحساسة SPF50+‎ | ٥٠ مل (Similarity: 52.9%)
+
+Row 635: 'ليزا شامبو وبلسم جرجير شعر عادى اخضر 750 مل'
+  - Candidate: Cliven | Shampoo + Conditioner | 500 ml | كليفن | شامبو + بلسم | 500 مل (Similarity: 65.1%)
+  - Candidate: Sparkle | Shampoo & Conditioner For Normal Hair | 350Ml | سباركل | شامبو وبلسم للشعر العادي | 350مل (Similarity: 64.3%)
+  - Candidate: Top Hair | Conditioner Hair Loss Treatment | 250ml | توب هير | بلسم لعلاج تساقط الشعر | 250مل (Similarity: 64.0%)
+
+Row 643: 'غارنيية صبغة (8.1) اشقر فاتح رمادى كولور ناتشرلز كريم 40مل'
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 4 Brown | غارنييه | صبغة شعر كولور ناتشرالز كريم | 4 بني (Similarity: 67.3%)
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 4.62 Sweet Cherry | غارنييه | صبغة شعر كولور ناتشرالز كريم | 4.62 كرز (Similarity: 65.4%)
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 6.60 Fiery Pure Red | غارنييه | صبغة شعر كولور ناتشرلز كريم | 6.60 احمر نقي (Similarity: 64.9%)
+
+Row 644: 'غارنيية صبغة (9.1) اشقر رمادى فاتح جدا كولور ناتشرلز كريم 40مل'
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 4 Brown | غارنييه | صبغة شعر كولور ناتشرالز كريم | 4 بني (Similarity: 64.8%)
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 4.62 Sweet Cherry | غارنييه | صبغة شعر كولور ناتشرالز كريم | 4.62 كرز (Similarity: 63.1%)
+  - Candidate: Garnier | Color Naturals Crème Hair Color | 6.60 Fiery Pure Red | غارنييه | صبغة شعر كولور ناتشرلز كريم | 6.60 احمر نقي (Similarity: 62.6%)
+
+Row 652: 'هاى بوتنسى 30قرص'
+  - Candidate: Sanso | Hematinic | 30Tab | سانسو | 30قرص (Similarity: 62.1%)
+  - Candidate: Hi Glitazone 15Mg | 30 Tabs | هاى جليتازون 15مجم | 30قرص (Similarity: 57.1%)
+  - Candidate: Vilgat 50mg | 30 Tabs | فيلجات 50مجم | 30 قرص (Similarity: 54.1%)
+
+Row 653: 'مودش كريم تصفيف 250 مل'
+  - Candidate: Divol | Leave in Cream | 250ml | ديفول | ليف ان كريم | 250مل (Similarity: 70.4%)
+  - Candidate: Sunsilk | styling cream coconut | 210ml | صانسيلك | كريم تصفيف الشعر بجوز الهند | 210مل (Similarity: 66.7%)
+  - Candidate: Melatex | Lightening Cream | 50ml | ميلاتكس | كريم لتفتيح البقع الداكنة وتوحيد لون البشرة | 50مل (Similarity: 66.7%)
+
+Row 654: 'مودش جل 500جم'
+  - Candidate: Avetrix | Gel | 100gm | افيتركس جل avetrix gel للرجال مزلق طبي لتسهيل العلاقة الزوجية | 100 جم (Similarity: 62.9%)
+  - Candidate: Diclac | 5% Gel | 30gm | ديكلاك | 5% چل | 30جم (Similarity: 62.9%)
+  - Candidate: Grapexon Gel | 100gm | جريبكسون جل | 100جم (Similarity: 61.1%)
+
+Row 655: 'زيرو فريز بلسم ليف ان 237 مل مستورد'
+  - Candidate: The Hair Addict | Frizz Off Leave in Conditioner | 250ml | ذا هير اديكت | فريز أوف بلسم ليف إن | 250مل (Similarity: 74.2%)
+  - Candidate: The Hair Addict | Frizz Off MEN Leave-in Conditioner | 250ml | ذا هير اديكت | فريز أوف للرجال كريم للشعر | 250مل (Similarity: 71.3%)
+  - Candidate: Seropipe | Leave In Conditioner | 200ml | سيروبايب ليف ان للشعر المتساقط والجاف والكيرلى | 200 مل (Similarity: 70.0%)
+
+Row 656: 'ابراتروبيم 0.5 مجم 10 وحدات'
+  - Candidate: Epirazole 40mg | 10 Caps | ابيرازول 40مجم | 10 كبسولات‎ (Similarity: 61.8%)
+  - Candidate: Rapizapine 30mg | 10 Tabs | رابيزابين 30مجم | 10 اقراص (Similarity: 56.6%)
+  - Candidate: Inflacam 20mg | 10 Caps | انفلاكام 20مجم | 10 كبسولات (Similarity: 55.6%)
+
+Row 662: 'لزقة تجميل 6*100'
+  - Candidate: Flazol Vial 500mg | 100ml | فلازول فيال 500مجم | 100مل (Similarity: 42.9%)
+  - Candidate: No Rash | White Cream | 100gm | نوراش | كريم علاج حمو النيل والتسلخات والحساسية | 100جم (Similarity: 41.9%)
+  - Candidate: Bubbles | Baby Powder Large | 100gm | بابلز | بودرة اطفال | 100جم (Similarity: 41.9%)
+
+Row 664: 'حفاضة كبار السن'
+  - Candidate: Adult Diapers | حفائض كبار السن (Similarity: 93.3%)
+  - Candidate: Adult Diapers | حفائض كبار السن (Similarity: 93.3%)
+  - Candidate: Adult Diapers | حفائض كبار السن (Similarity: 93.3%)
+
+Row 665: 'اصابع جلد 3 قطعه'
+  - Candidate: D3 Candy Adult | 30 Pcs | د3 كاندى كبار | 30 قطعه (Similarity: 51.3%)
+  - Candidate: PAMPERS | SPLASHERS 3-4 | 12 PCS | بامبرز | اسبلاشرز 3-4 | 12 قطعه (Similarity: 46.8%)
+  - Candidate: Private | Super Double | 18pads | برايفت | سوبر دوبل | 18 قطعه (Similarity: 45.5%)
+
+Row 667: 'كوب بلاستيك'
+  - Candidate: La Frutta | Plastic Feeding Bottle | 270ml | لا فروتا | بيبرونة بلاستيك | 270مل (Similarity: 44.4%)
+  - Candidate: La Frutta | Plastic Rattle 22751 | لافروتا | شخليله اشكال 22751 (Similarity: 43.9%)
+  - Candidate: HAIR BRUSH FOR DRYER PLASTIC | HAIR BRUSH FOR DRYER PLASTIC (Similarity: 41.0%)
+
+Row 669: 'حلمه سليكون'
+  - Candidate: La Frutta | Silicon Teat Small | 1 Pc | لا فروتا | حلمة سليكون صغير | 1 قطعة (Similarity: 42.6%)
+  - Candidate: Smart Baby | Cup with Silicone Teat & Handle Blue | سمارت بيبى | كوب بحلمة سليكون ويد ازرق (Similarity: 40.8%)
+
+Row 670: 'شفاط ثدي فلاي بيبي'
+  - Candidate: Chicco | Manual Breast Pump | شيكو | شفاط ثدي يدوي (Similarity: 57.9%)
+  - Candidate: Potato | Breast Pump Pink | بوتاتو | شفاط ثدي يدوي بينك (Similarity: 57.8%)
+  - Candidate: Bubbles | Manual Breast Pump | بابلز | شفاط ثدي يدوي (Similarity: 56.4%)
+
+Row 671: 'ماسك اوكسجين اطفال'
+  - Candidate: Bubbles | Baby Sponge | بابلز | اسفنجة اطفال (Similarity: 47.4%)
+  - Candidate: Evony | Face Mask | 46pcs | ايفوني | ماسك للوجه | 46قطعة (Similarity: 47.1%)
+  - Candidate: Somavie | Mask | 450ml | سومافي | ماسك | 450مل (Similarity: 45.7%)
+
+Row 677: 'نوفاكتام 1000 مجم  امبول'
+  - Candidate: ZINOL | 1G | VIAL | زينول | 1جم | فيال (Similarity: 82.4%)
+  - Candidate: Sigmataxim | 1gm | 1Vial | سيجماتاكسيم | 1جم | 1فيال (Similarity: 79.3%)
+  - Candidate: Fortazedim | 1gm | 2Amp | فورتازيديم | 1جم | 2امبول (Similarity: 79.3%)
+
+Row 678: 'نوفاكتام 750 مجم  امبول'
+  - Candidate: Inflacam 20mg | 3 Amp | انفلاكام 20مجم | 3 امبولات (Similarity: 79.2%)
+  - Candidate: ZINOL | 500Mg | VIAL | زينول | 500 ملي | فيال (Similarity: 77.6%)
+  - Candidate: Novactam 375mg | 12 Tabs | نوفاكتام 375مجم | 12 قرص‎ (Similarity: 75.0%)
+
+Row 679: 'موف ايز 5 مجم 20 قرص'
+  - Candidate: Moveasy 5mg | 20 Tabs | موفيزي 5مج | 20 قرص (Similarity: 82.1%)
+  - Candidate: Nouvonase 5mg | 30 Tabs | نوفونيز 5مجم | 30 قرص (Similarity: 73.2%)
+  - Candidate: Rheumarene 50mg | 20 Tabs | رومارين 50مجم | 20 قرص (Similarity: 71.4%)
+
+Row 680: 'بلاك اجين-ان  150 مل كريم'
+  - Candidate: Luna | Sun Block SPF 62 Cream | 130ml | لونا صن بلوك SPF62 كريم لجميع أنواع البشرة | 130 مل (Similarity: 63.3%)
+  - Candidate: Blankie | Hair Cream | 120ml | بلانكي | كريم للشعر | 120مل (Similarity: 62.7%)
+  - Candidate: Ageal Rich | Cream | 50ml | اجيل ريتش | كريم | 50مل (Similarity: 62.5%)
+
+Row 681: 'موف ايز 10مجم 20 قرص'
+  - Candidate: Moveasy 5mg | 20 Tabs | موفيزي 5مج | 20 قرص (Similarity: 76.9%)
+  - Candidate: Mepacofen L A 150mg | 20 Tabs | ميباكوفين ال ايه 150مجم | 20 قرص (Similarity: 73.1%)
+  - Candidate: Suvreza 10/10mg | 30 Tabs | سوفريزا 10/10مجم | 30 قرص (Similarity: 71.1%)
+
+Row 683: 'جوى بيبي ببرونة'
+  - Candidate: Potato | Baby Plastic Bottle | 150ml | بوتاتو | ببرونة بلاستيك للأطفال | 150مل (Similarity: 55.2%)
+  - Candidate: Potato | Baby Plastic Bottle | 270ml | بوتاتو | ببرونة بلاستيك للاطفال | 270مل (Similarity: 55.2%)
+  - Candidate: Johnson's | Baby Bath | 300ml | جونسون | سائل استحمام للأطفال | 300مل (Similarity: 54.9%)
+
+Row 688: 'LIPO 6 black HERS 60 CAP FOR WOMEN'
+  - Candidate: Vitamount | for Women | 10 Caps | فيتامونت | للنساء | 10 كبسولات (Similarity: 60.0%)
+  - Candidate: Xl | Body Spray for Men Black | 150ml | اكس ال | اسبراى للجسم للرجال اسود | 150مل (Similarity: 55.9%)
+  - Candidate: Malizia | Spray for Men Black & Wild | 150ml | ماليزيا مزيل عرق سبراى للرجال بلاك اند وايلد | 150مل (Similarity: 54.8%)
+
+Row 690: 'ويل ديرم كريم 50 جم'
+  - Candidate: Sensoderm Cream | 50gm | سنسوديرم كريم مرطب وملطف للجلد | 50جم (Similarity: 82.6%)
+  - Candidate: Movelex | Cream | 50gm | موڤليكس | كريم | 50جم (Similarity: 68.2%)
+  - Candidate: Betaderm Cream 0.1% | 30gm | بيتاديرم كريم 0.1٪ | 30جم (Similarity: 68.2%)
+
+Row 691: 'كوب اطفال بيبي كاندل بيد شاليموه برتقالي'
+  - Candidate: Chicco | Baby Moments Round Tip Baby Nail Scissors 0M+ Orange | 1 Pc | شيكو | بيبي مومنتس مقص أظافر للأطفال برتقالي من عمر حديثى الولاده | 1 قطعة (Similarity: 48.5%)
+  - Candidate: Baby Joy | Baby Diaper Size 2 | 10 Pcs | بيبي جوي | حفاضات اطفال مقاس 2 | 10 قطع (Similarity: 47.1%)
+  - Candidate: Bubbles | Baby Spoon Orange | 1 Pc | بابلز | ملعقة اطفال برتقالي | 1 قطعة (Similarity: 46.2%)
+
+Row 695: 'بايو بوينت كريم 250 جم'
+  - Candidate: J.B.C Skin Moist Cream | 50gm | جي.بي.سي كريم ترطيب البشرة | 50جم (Similarity: 72.0%)
+  - Candidate: Srilane 5% Cream | 20gm | سريلان 5% كريم | 20جم (Similarity: 69.8%)
+  - Candidate: Camisan Cream | 20gm | كاميزان كريم | 20جم (Similarity: 68.3%)
+
+Row 696: 'البستكس دي 16/ 12.5 مجم 30 قرص'
+  - Candidate: Valsatens Plus | 160/25mg | 30Tab | فالساتينس بلس | 160/25مجم | 30قرص (Similarity: 66.7%)
+  - Candidate: Valsatens Plus | 80/12.5mg | 30Tab | فالساتينس بلس | 80/12.5مجم | 30قرص (Similarity: 65.6%)
+  - Candidate: Paroxedep CR 12.5mg | 30 Tabs | باروكسديب سي آر 12.5مج | 30 قرص (Similarity: 65.6%)
+
+Row 703: 'فيبكس ماكس ديو ازرق 1 كيس'
+  - Candidate: Vebix | Max Deo Cream Classic | 4ml | فيبكس | كريم ماكس ديو كلاسيك | 4مل (Similarity: 61.0%)
+  - Candidate: Isis | Green Tea | 12 Bags | إيزيس | شاي اخضر | 12 كيس (Similarity: 56.0%)
+  - Candidate: Vebix | Max Blue Active Deo Cream For Men | 10ml | فيبكس | كريم مزيل العرق ماكس بلو اكتيف للرجال | 10مل (Similarity: 55.6%)
+
+Row 713: 'ك ل واى جيل 82 جل'
+  - Candidate: Hair Code | Hair Gel | 22ml | هير كود | جل للشعر | 22مل (Similarity: 52.4%)
+  - Candidate: Man Look | Wet Hair Gel | 250ml | مان لوك | جيل للشعر ويت لوك | 250مل (Similarity: 52.2%)
+  - Candidate: Frida | Shower Gel Sweet Day | 250ml | فريدا | سويت داي شاور جل | 250مل (Similarity: 51.0%)
+
+Row 725: 'جهاز نقل دم'
+  - Candidate: Rossmax | Blood Pressure Monitor | روسماكس | جهاز قياس ضغط الدم (Similarity: 46.2%)
+  - Candidate: Rossmax x3 Automatic Blood Pressure Monitor | روسماكس جهاز قياس ضغط الدم x3 (Similarity: 45.0%)
+  - Candidate: Codefree | Blood Glucose Sugar Monitor Meter | كودفري | جهاز قياس نسبة السكر في الدم (Similarity: 41.7%)
+
+Row 726: 'كلبس صره' -> [MISSING FROM DB]
+Row 729: 'سفن سيز اورانج شراب 150 مل مستورد'
+  - Candidate: Sansoimune Syrup | 200ml | سانسوميون شراب | 200مل (Similarity: 62.1%)
+  - Candidate: Postine Syrup | 120ml | بوستين شراب | 120مل (Similarity: 61.8%)
+  - Candidate: Dove | Steak Go Fresh Imported Apple | 40ml | دوف | ستيك جو فريش تفاح مستورد | 40مل (Similarity: 61.3%)
+
+Row 731: 'سوبر راجون بودرة حشرات زاحفة 80 جم'
+  - Candidate: Ragon | Spray GrawlingInsect Killer | 300ml | راجون | سبراي مبيد الحشرات الزاحفة | 300مل (Similarity: 60.5%)
+  - Candidate: Ragon | Insect Killer Spray for Crawling Insects | 250ml | راجون | سبراي سوبر قاتل للحشرات الزاحفة | 250مل (Similarity: 59.3%)
+  - Candidate: Pure | Talc Powder | 60gm | بيور | بودرة تلك | 60جم (Similarity: 56.1%)
+
+Row 736: 'الحجامه الاسلاميه صغيره' -> [MISSING FROM DB]
+Row 737: 'جهاز نيبولايزر استنشاق بيور ايطالي'
+  - Candidate: Granzia | Extremo Compressor Nebulizer | جرانزيا | أكستريمو جهاز نيبولايزر لاستنشاق البخار (Similarity: 60.2%)
+  - Candidate: Beurer | IH 18 Nebulizer | بيورير | جهاز نبيوليزر اتش اي 18 (Similarity: 57.6%)
+  - Candidate: Granzia | Pure Nebulizer - White/blue | جرانزيا | بيور جهاز الاستنشاق بالبخار (Similarity: 47.9%)
+
+Row 743: 'بيور شاور جيل 1.5 لتر'
+  - Candidate: Pure | Rose Shower Gel | 1.5L | بيور | شاور جيل ورد | 1.5لتر (Similarity: 81.6%)
+  - Candidate: Pure | Apple Shower Gel | 1.5L | بيور | شاور جيل تفاح | 1.5لتر (Similarity: 80.0%)
+  - Candidate: Pure | Shower Gel Musk | 1.5L | بيور | شاور جل بالمسك | 1.5لتر (Similarity: 74.5%)
+
+Row 744: 'حافظه انسولين كبيره' -> [MISSING FROM DB]
+Row 750: 'SENOR HAIR CREAM 150 GM'
+  - Candidate: Sensoderm Cream | 50gm | سنسوديرم كريم مرطب وملطف للجلد | 50جم (Similarity: 77.3%)
+  - Candidate: Eva Honey Hair Cream | 185gm | إيڤا هونى هير كريم | كريم شعر بالعسل | 185جم (Similarity: 76.0%)
+  - Candidate: Vividol | Hair Cream | 100gm | فيفيدول | كريم للشعر لتنشيطه وتحسين صحته | 100جم (Similarity: 75.0%)
+
+Row 755: 'BABY CARE BREAST PAD 4 PCS'
+  - Candidate: La Frutta | Disposable Breast Pad | 24 Pcs | لا فروتا | ضمادات الواقية للثدي من تسريب الحليب | 24 قطعة (Similarity: 57.1%)
+  - Candidate: La Frutta | Breast Pump with Baby Bottle | لا فروتا | مضخة شفط حليب تعمل بيد واحدة (Similarity: 56.7%)
+  - Candidate: Smart Baby | Disposable Breast Pads | 12 Pcs | سمارت بيبي | وسادات ثدي للاستخدام مرة واحدة | 12 قطعة (Similarity: 55.2%)
+
+Row 756: 'لوريال الفيف بديل الزيت المغذى شعر جاف 300 مل'
+  - Candidate: L'Oreal Paris | Elvive Nourishing Oil Replacement For Dry Hair | 125ml | 15% Off | خصم لوريال باريس | إلفيف بديل الزيت المغذي للشعر الجاف | 125مل | 15% (Similarity: 72.6%)
+  - Candidate: L'Oreal Paris | Elvive Total Repair 5 Oil Replacement | 300ml | لوريال باريس | بديل الزيت الفيف العلاج الخماسي المتكامل للشعر | 300مل (Similarity: 71.3%)
+  - Candidate: L'Oreal | Elvive Nourishing Extraordinary Oil Mask | 300ml | لوريال | الفيف إكستروردنري اويل زيت المغذي | 300مل (Similarity: 69.5%)
+
+Row 758: 'ببرونه بلاستيك 150مل بدون يد'
+  - Candidate: Potato | Baby Plastic Bottle with Hand | 150ml | بوتاتو | ببرونة اطفال بلاستيك بيد | 150مل (Similarity: 77.5%)
+  - Candidate: Potato | Baby Plastic Bottle | 150ml | بوتاتو | ببرونة بلاستيك للأطفال | 150مل (Similarity: 71.4%)
+  - Candidate: Bubbles | Classic Baby Bottle with Hand Pink | 150ml | بابلز | ببرونة بابلز كلاسيك بيد بينك | 150مل (Similarity: 67.4%)
+
+Row 759: 'كلين اند كلير غسول وجه رغوي منعش 150 مل'
+  - Candidate: Clean & Clear | Facial Cream Wash Deep Action | 100ml | كلين اند كلير | غسول كريمي للوجه تنظيف عميق | 100مل (Similarity: 68.9%)
+  - Candidate: Clean & Clear | Foam Facial Wash Deep Cleansing | 150ml | كلين & كلير | غسول وجه فوم للتنظيف العميق | 150مل (Similarity: 68.2%)
+  - Candidate: Lux | Hand Wash Refreshing Verbena | 500Ml | لوكس | غسول يدين بانتعاش اللويزة | 500مل (Similarity: 68.2%)
+
+Row 761: 'فرشاه شعر خشب'
+  - Candidate: Rush Brush | Hair Revolver Grey | راش براش | مكواة الشعر الدوارة رمادي (Similarity: 54.5%)
+  - Candidate: Qualita | Hollow Hair Brush | كواليتا | فرشاة شعر هولو (Similarity: 48.6%)
+  - Candidate: Wet Brush | Kids Hair Brush MultiColor | ويت براش | فرشاة شعر للأطفال متعددة الألوان (Similarity: 47.1%)
+
+Row 765: 'PHARMA COLL SPOTS' -> [MISSING FROM DB]
+Row 766: 'عدسات فريش لوك الوان'
+  - Candidate: FreshLook | One-Day | Blue | فريش لوك | عدسات العناية اليومية | أزرق (Similarity: 53.1%)
+  - Candidate: FreshLook | One-Day Sterling Gray Lenses | فريش لوك | عدسات يومية ستيرلينج رمادي (Similarity: 52.3%)
+  - Candidate: Freshlook | One-Day Color Blue | 10 Lenses | فريش لوك | عدسات زرقاء للاستخدام اليومي | 10 عدسات (Similarity: 52.3%)
+
+Row 773: 'خلة اسنان بلاستيك 40 ق'
+  - Candidate: Oral B | Classic M40 ToothBrush | 2+1 Free | اورال بي | فرشاة اسنان M40 كلاسيك | 2+1 Free (Similarity: 48.5%)
+  - Candidate: La Frutta | Plastic Feeding Bottle | 150ml | لا فروتا | زجاجة رضاعة بلاستيك | 150مل (Similarity: 46.7%)
+  - Candidate: Potato | Baby Plastic Bottle with Hand | 150ml | بوتاتو | ببرونة اطفال بلاستيك بيد | 150مل (Similarity: 44.4%)
+
+Row 784: 'كانيولا 3 شعيه ازرق مقاس 22 عدد 1 قطعة'
+  - Candidate: Canped | Absorbent Panty Adult Diaper Size XL | 8 Pcs | كانبيد | سروال داخلي للكبار مقاس اكس لارج | 8 قطع (Similarity: 50.6%)
+  - Candidate: Molfix | Diapers Jumbo Pack Mini Size 2 | 60 Pcs | مولفيكس | حفاضات ميني جامبو عبوة اقتصادية مقاس 2 | 60 قطعة (Similarity: 50.0%)
+  - Candidate: La Frutta | Silicone Baby Pacifier Small Orange 22231 | 1 Pc | لافروتا | لهاية اطفال سيليكون برتقالي مقاس صغير 22231 | 1 قطعة (Similarity: 50.0%)
+
+Row 787: 'كيس جمع بول'
+  - Candidate: cogex 10 sachets | cogex 10 sachets (Similarity: 55.2%)
+  - Candidate: Carminex | 6 Sachets | كارمينكس | 6 أكياس (Similarity: 51.6%)
+  - Candidate: Isis | Anise | 50 Bags | إيزيس | ينسون | 50 كيس (Similarity: 47.1%)
+
+Row 788: 'اولويز حساس نعومه القطن 8فوطة'
+  - Candidate: Always | Cotton Soft Maxi Extra Long Sanitary Pads | 7 Pcs | اولويز | ماكسي بنعومة القطن فوط صحية طويلة جدا | 7 قطع (Similarity: 57.8%)
+  - Candidate: Always | Cotton Soft Maxi Thick Extra Long Pads | 14Pads | اولويز | فوط صحية سوفت ماكسى طويله | 14فوطة (Similarity: 55.6%)
+  - Candidate: Always | Ultra Thin Extra Long Sanitary Pads With Wings | 28Pcs | اولويز | فوط صحية طويله رفيعه جدا بالاجنحه | 28فوطة (Similarity: 52.5%)
+
+Row 790: 'سوفى بالاجنحه 12 فوطه طويل جدا جدا'
+  - Candidate: Sofy Maxi | Anti-cluster | Too long | 14Pcs | سوفى ماكسى | بالمسك ضد الكلكعه | طويل جدًا | 14 قطعة (Similarity: 52.6%)
+  - Candidate: Isis | Anise & Lemon | 12 Bag | إيزيس | يانسون وليمون | 12 كيس (Similarity: 52.2%)
+  - Candidate: Sofy | Maxi Lump Ex Long | 14Pad | 2pcs | سوفي | فوط صحية طويلة جدا ماكسي | 14فوطة | 2قطعه (Similarity: 51.9%)
+
+Row 793: 'مولبد ماكسى سميكه 10 عاديه'
+  - Candidate: Molped | Maxi Thick Long | 28Pcs + 4 Free | مولبيد | فوطه حمايه ماكسى سميكه طويل | 28قطعه +4مجانا (Similarity: 67.8%)
+  - Candidate: Molped | Maxi Thick Long | 24Pcs + 2 Free | مولبيد | فوطه حمايه ماكسى سميكه طويل | 24قطعه +2مجانا (Similarity: 67.8%)
+  - Candidate: Molped | Antibacterial Maxi Thick Extra Long | 18Pcs +2free | مولبيد | ماكسى سميكه طويل جدا | 18قطعه + 2مجانا (Similarity: 57.5%)
+
+Row 795: 'مبوله حريمى' -> [MISSING FROM DB]
+Row 797: 'مبوله رجالي' -> [MISSING FROM DB]
+Row 802: 'اميو جارد 14 كيس *3 جم بواكى'
+  - Candidate: Renal-s | 5gm | 12sachet | رينال إس | فوار مطهر للمسالك البولية | 12 كيس (Similarity: 63.3%)
+  - Candidate: Sweetal Diet Sugar 1gm | 100 Sachets | سكر دايت سويتال للتخسيس ومرضى السكرى sweetal | ١٠٠ كيس (Similarity: 61.1%)
+  - Candidate: Sweetal Diet Sugar 2gm | 50 Sachets | سويتال سكر دايت 2جم | 50 كيس (Similarity: 59.2%)
+
+Row 803: 'اماندا قلم كحل سوفت لاينر ازرق'
+  - Candidate: Amanda | Bold Kajal Aye Liner | اماندا | بولد كاجال اي لاينر (Similarity: 62.1%)
+  - Candidate: Dabur Amla | Vitamin Cream Blue | دابر أملا | كريم كبير فيتامين ازرق (Similarity: 56.2%)
+  - Candidate: Amanda | Milano Cozy Eyeliner - Black | اماندا | ميلانو كوزي ايلاينر - اسود (Similarity: 55.4%)
+
+Row 804: 'ازوميبكس 40مجم 14 كبسول'
+  - Candidate: Gesomezol 40mg | 14 Caps | جيزوميزول 40مجم | 14 كبسولة (Similarity: 76.0%)
+  - Candidate: Atomafutix | 40mg | 30Cap | اتومافيوتيكس | 40مجم | 30كبسولة (Similarity: 70.4%)
+  - Candidate: Napizole 20mg | 14 Caps | نابيزول 20مج | 14 كبسولة (Similarity: 68.1%)
+
+Row 807: 'لوريال الفيف بديل الزيت معالج 300 مل'
+  - Candidate: L'Oreal | Elvive Total Repair 5 Hair Conditioner | 360ml | لوريال | ايلفيف بلسم شعر توتال معالج | 360مل (Similarity: 72.5%)
+  - Candidate: L’Oréal Paris | elvive extra ordinary oil replacement | 300ml | لوريال باريس | الفيف اكسترا اورديناري بديل الزيت | 300مل (Similarity: 68.6%)
+  - Candidate: L'Oreal Paris | Elvive Total Repair 5 Oil Replacement | 300ml | لوريال باريس | بديل الزيت الفيف العلاج الخماسي المتكامل للشعر | 300مل (Similarity: 68.6%)
+
+Row 808: 'لوريال الفيف بديل الزيت ضد التساقط 300 مل'
+  - Candidate: L’Oréal Paris | elvive extra ordinary oil replacement | 300ml | لوريال باريس | الفيف اكسترا اورديناري بديل الزيت | 300مل (Similarity: 65.5%)
+  - Candidate: Loreal Paris | Elvive Extraordinary Oil Cream | 300ml | لوريال باريس | كريم إلفيف بالزيت الاستثنائي | 300مل (Similarity: 65.2%)
+  - Candidate: L'Oreal | Elvive Nourishing Extraordinary Oil Mask | 300ml | لوريال | الفيف إكستروردنري اويل زيت المغذي | 300مل (Similarity: 63.7%)
+
+Row 809: 'قصافة كبيرة'
+  - Candidate: La Frutta | Nail Clipper | لا فروتا | قصافة أظافر للاطفال (Similarity: 45.7%)
+
+Row 810: 'سكاته مستورده aiyb' -> [MISSING FROM DB]
+Row 811: 'سكاته طيور الجنه' -> [MISSING FROM DB]
+Row 815: '' -> [MISSING FROM DB]
+Row 828: 'افينت وسائد ثدي20 قطعه نايت'
+  - Candidate: Avene | Physiolift Night Cream | 30ml | افين | فيزيوليفت كريم الليل | 30مل (Similarity: 41.4%)
+  - Candidate: Africana | Smooth Night Moon Lotion | 250ml | افريكانا | لوشن سموث نايت مون | 250مل (Similarity: 40.6%)
+
+Row 830: 'لورد بريميم بلس ماكينة حلاقة معدن+ 3امواس'
+  - Candidate: Lord | Disposable Razor Twin Blades with Lubricating | 10+4 Pcs | لورد | كيس شفرتين 10+4 ماكينة حلاقة مع شريط مرطب (Similarity: 58.4%)
+  - Candidate: Lord | 10 Disposable Razors Twin Blade with Lubricating Strip | لورد | 10 ماكينة حلاقة شفرتين مع شريط مرطب (Similarity: 57.8%)
+  - Candidate: Gillette | All Purpose Styler | جيليت | ماكينة حلاقة لجميع الاغراض (Similarity: 56.0%)
+
+Row 835: 'هيد اند شولدرز شامبو نظيف وانيق 600 مل'
+  - Candidate: Head & Shoulders | Anti Hairfall Shampoo | 600ml | هيد آند شولدرز | شامبو ضد تساقط الشعر | 600مل (Similarity: 75.9%)
+  - Candidate: Head & Shoulders | Shampoo Apple Fresh | 600ml | هيد اند شولدرز | شامبو التفاح المنعش | 600مل (Similarity: 75.3%)
+  - Candidate: Head & Shoulders | Smooth and Silky Anti Dandruff Shampoo | 400ml | هيد اند شولدرز | شامبو انسيابي وحريري | 400مل (Similarity: 74.7%)
+
+Row 836: 'هيد اند شولدرز شامبو منعش 600 مل'
+  - Candidate: Head & Shoulders | Shampoo Apple Fresh | 600ml | هيد اند شولدرز | شامبو التفاح المنعش | 600مل (Similarity: 81.6%)
+  - Candidate: Head & Shoulders | Anti-dandruff Shampoo Men | 600ml | هيد آند شولدرز | شامبو ضد القشرة للرجال | 600مل (Similarity: 79.1%)
+  - Candidate: Head & Shoulders | Menthol Refresh Shampoo | 90ml | هيد آند شولدرز | شامبو منعش بالمنثول | 90 مل (Similarity: 76.3%)
+
+Row 839: 'اكستنشن 150 مج 28 قرص'
+  - Candidate: X-Tension Plus 150/12.5 mg | 28Tab | اكستنشن بلس 150/12.5مجم | 28قرص (Similarity: 73.1%)
+  - Candidate: Baloxdot 10mg | 2 Tabs | بالوكسدوت 10مجم | 2 قرص (Similarity: 68.2%)
+  - Candidate: Effegad | 150 mg | 28 Tablet | دواء ايفيجاد 150 مضاد للاكتئاب سريع المفعول | 28 كبسولة (Similarity: 66.7%)
+
+Row 845: 'روزماكس ميزان زجاج wb 101'
+  - Candidate: Rossmax | GB102 Aneroid Blood Pressure Monitor | روزماكس | مراقب ضغط الدم اللاسائلي (Similarity: 50.7%)
+  - Candidate: Beurer | GS 213 Glass Digital Scale Maximum Weight 180kg | Black | بيورير | ميزان حمام زجاجي جي اس 213 (Similarity: 50.0%)
+  - Candidate: Beurer | MS 01 Personal Analogue Scale | بيورير | ميزان مؤشر ام اس 01 (Similarity: 49.1%)
+
+Row 848: 'كولاجين 7 اكياس'
+  - Candidate: Clear Air 4mg | 7 Sachets | كلير اير 4مج | 7 اكياس (Similarity: 65.0%)
+  - Candidate: Selona Orange | 20 Sachets | سيلونا فوار فيتامين سى اكياس selona | ٢٠ كيس (Similarity: 60.0%)
+  - Candidate: Floslek | Anti Aging | 4 Sachets | فلوسلك | ماسك مضاد التجاعيد | 4 اكياس (Similarity: 59.1%)
+
+Row 855: 'M N كريم اساس'
+  - Candidate: MN | Foundation 2 BB | 42ml | ام ان | كريم اساس تو بي بي | 42مل (Similarity: 68.2%)
+  - Candidate: Hiderm | Exfoliation Cream | 50gm | هاي ديرم | كريم لترطيب البشرة وعلاج الالتهابات | 50جم (Similarity: 60.0%)
+  - Candidate: Asala | Sanding cream | اصاله | كريم صنفره (Similarity: 56.4%)
+
+Row 856: 'اريس 5مجم 20قرص'
+  - Candidate: Crestor | 5mg | 7tab | كريستور | 5مجم | 7قرص (Similarity: 77.8%)
+  - Candidate: Rheumarene 50mg | 20 Tabs | رومارين 50مجم | 20 قرص (Similarity: 75.7%)
+  - Candidate: Moveasy 5mg | 20 Tabs | موفيزي 5مج | 20 قرص (Similarity: 75.7%)
+
+Row 862: 'فيانسيةشامبو 170 مل'
+  - Candidate: Rovital Detox | Shampoo | 150ml | روفيتال ديتوكس | شامبو | 150 مل (Similarity: 60.0%)
+  - Candidate: Sunsilk | Shampoo | 600Ml | صن سيلك | شامبو | 600مل (Similarity: 57.1%)
+  - Candidate: Tresemme | Shampoo Repair | 400 ml | تريسمي شامبو ريبير | 400 مل (Similarity: 56.5%)
+
+Row 869: 'تربو سليم 30 كبسولة'
+  - Candidate: Sleevar | 30 Caps | سليفار | 30 كبسولة (Similarity: 70.3%)
+  - Candidate: Strogenzo | 30 Cap | ستروجينزو | 30 كبسولة (Similarity: 70.0%)
+  - Candidate: Grapexon | 30 Caps | جرابيكسون | 30 كبسولة (Similarity: 70.0%)
+
+Row 873: 'اي باتش اطفال'
+  - Candidate: Smart baby عضاضة جوانتى | Smart baby عضاضة جوانتى (Similarity: 51.4%)
+  - Candidate: La Frutta | Child Teether | لا فروتا | عضاضة اطفال (Similarity: 51.4%)
+  - Candidate: Blankie | Baby Oil | 100ml | بلانكي | زيت اطفال | 100مل (Similarity: 51.3%)
+
+Row 879: 'بيونيم شرائط قياس سكر جي اس 300'
+  - Candidate: ACCU CHEK Performa Diabetes Test Strips - 50 Strips | اكيو تشيك بريفورما شرائط قياس سكر (Similarity: 59.4%)
+  - Candidate: Accu Chek | Active Strips | 50 Pcs | اكيو تشيك اكتيف شرائط لقياس السكر في الدم | 50 شريط (Similarity: 58.5%)
+  - Candidate: Bionime | GS300 Blood Glucose Meter Test Strip | 50 Strips | بايونيم | جي اس 300 أزرق شرائط قياس سكر | 50 شريط (Similarity: 57.5%)
+
+Row 888: 'جوانتى لاتكس 100 قطعه L'
+  - Candidate: Imtenan | Blackseed Oil | 100ml | امتنان | زيت حبة البركه البكر | 100مل (Similarity: 58.8%)
+  - Candidate: Rotahelex Guard | 100ml | روتاهيلكس جارد | 100مل (Similarity: 57.8%)
+  - Candidate: Adidas | Champions League | 100ml | أديداس | دوري ابطال اوروبا | 100مل (Similarity: 56.6%)
+
+Row 894: 'بيتاسين بودرة مضاد حيوي 30 جرام'
+  - Candidate: Stevia | Castello Powder | 300gm | ستيفيا | سكر بودرة | 300جم (Similarity: 68.0%)
+  - Candidate: Johnson | Baby Powder | 50gm | جونسون | بودرة أطفال | 50جم (Similarity: 65.2%)
+  - Candidate: Bubbles | Baby Powder | 40gm | بابلز | بودرة للأطفال | 40جم (Similarity: 65.2%)
+
+Row 900: 'غيار سيرجيكال باد 10 * 10 سم 1 قطعة'
+  - Candidate: Surgical Top | Absorption Surgical Pads Size 10*20cm | 20 Pcs | سيرجيكال توب | غيار جراحي قوي الامتصاص مقاس 10*20سم | 20 قطعة (Similarity: 50.0%)
+  - Candidate: Farorecta 10mg | 12 Tabs | فاروريكتا 10مجم | 12 قرص (Similarity: 47.5%)
+  - Candidate: Aripiprazole 10mg | 20 Tabs | اريبيبرازول 10مجم | 20 قرص (Similarity: 45.9%)
+
+Row 903: 'هاى بانتين بلس لوسيون للبشره'
+  - Candidate: Hipanthen Plus Cream | 30gm | هاي بانتين بلاس كريم لترطيب للبشرة وعلاج الجفاف | 30 جم (Similarity: 56.0%)
+  - Candidate: Hipanthen Plus Cream | 60gm | هاي بانتين بلاس كريم لترطيب للبشرة وعلاج الجفاف | 60 جم (Similarity: 56.0%)
+  - Candidate: Pantene | Conditioner Milky | 200ml | بانتين | بلسم بالحليب | 200مل (Similarity: 52.6%)
+
+Row 904: 'ايكاندرا بلس 10اقراص'
+  - Candidate: Thiotacid Plus XR | 30 Tabs | ثيوتاسيد بلس اكس ار | 30 قرص (Similarity: 69.8%)
+  - Candidate: L - Carnitine Plus | 20 Tabs | إل - كارنيتين بلس | 20 قرص (Similarity: 66.7%)
+  - Candidate: Concor Plus 10Mg | 30 Tabs | كونكور بلس 10مجم | 30قرص (Similarity: 65.1%)
+
+Row 909: 'بريجنا كير بيفور كونسيبشن 30 كبسوله( مستورد )'
+  - Candidate: Mepacure | 30 Tabs | ميباكيور | 30 كبسولة (Similarity: 49.2%)
+  - Candidate: Grapexon | 30 Caps | جرابيكسون | 30 كبسولة (Similarity: 48.5%)
+  - Candidate: Pregnacare | 30 Tabs | بريجناكير فيتامين للحامل لدعم صحة الأم والجنين | 30 قرص (Similarity: 48.4%)
+
+Row 912: 'ميســــاكلــور 250مجم 60مللى'
+  - Candidate: Salmetocort 50/250mcg Inhaled | 60 Caps | سالميتوكورت 50/250مجم | 60 كبسولة (Similarity: 52.5%)
+  - Candidate: Duricef Antibiotic 250mg/5ml | 60ml | ديوريسف مضاد حيوي 250مج/5مل | 60مل (Similarity: 51.6%)
+  - Candidate: Cetal Syrup 250mg/5ml Susp | 60ml | سيتال شراب 250جم/5مل ملعقة | 60مل (Similarity: 49.2%)
+
+Row 913: 'ميســــاكلــور 125مجم 100مللى'
+  - Candidate: Mucosin Syrup 15mg\5ml | 100ml | ميوكوسين شراب 15مجم\5مل | 100مل (Similarity: 53.3%)
+  - Candidate: Flazol Vial 500mg | 100ml | فلازول فيال 500مجم | 100مل (Similarity: 50.9%)
+  - Candidate: Mucotec | 175mg/5ml Oral Susp | 100ml | ميوكوتيك | 175مجم/5مل معلق | 100مل (Similarity: 50.8%)
+
+Row 916: 'سماعه ليتمان'
+  - Candidate: Granzia Dual Head Stethoscope | جرانزيا سماعة طبيب ثنائية الرأس (Similarity: 51.1%)
+
+Row 919: 'بيوتين 10000  100 كبسولة'
+  - Candidate: Epanutin 100mg | 50 Caps | ايبانوتين 100مجم | 50 كبسولة (Similarity: 73.1%)
+  - Candidate: Epicopentin 600mg | 30 Caps | ابيكوبنتين 600مجم | 30 كبسولة (Similarity: 71.7%)
+  - Candidate: Conventin 300mg | 30 Caps | كونفنتين 300مج | 30 كبسولة (Similarity: 68.0%)
+
+Row 924: 'لوريال برودجى صبغة برونزي بني ذهبي فاتح 5.3'
+  - Candidate: L'Oréal Paris | Prodigy 5.3 Light Golden Brown Haircolor | لوريال باريس | صبغة شعر بروديجي 5.3 بني ذهبي فاتح (Similarity: 71.7%)
+  - Candidate: L’Oréal Paris | Excellence Light Golden Brown Haircolor | لوريال باريس | صبغة شعر اكسلينس من باللون بني ذهبي فاتح (Similarity: 65.3%)
+  - Candidate: L'Oreal Paris | Prodigy Ammonia Free Hair Color | 5.0 Light Brown | لوريال باريس | صبغة شعر برودجي بدون أمونيا | 5.0 بني فاتح (Similarity: 62.0%)
+
+Row 925: 'keraket shampoo 5%keratin'
+  - Candidate: CHI | Keratin Shampoo | 355ml | تشي | شامبو كيراتين | 355مل (Similarity: 62.7%)
+  - Candidate: Tresemme | Shampoo Pro Keratin | 250ml | تريسيمي برو كيراتين | شامبو بدون سلفات بعد البروتين | 250مل (Similarity: 60.0%)
+  - Candidate: OGX | Keratin Oil Shampoo | 385ml | او جي اكس | شامبو زيت الكيرياتين | 385مل (Similarity: 58.2%)
+
+Row 926: 'وصايا زيت'
+  - Candidate: Raw African Moroccan Argan Oil 75ml | رو افريكان زيت الارجان المغربي (Similarity: 41.0%)
+
+Row 927: 'سترونج فيل هير تونيك سبراي 220 مل'
+  - Candidate: Clary | Hair Fall Control Spray | 200ml | كلاري | سبراي لتقليل تساقط الشعر | 200مل (Similarity: 68.6%)
+  - Candidate: Capixy | Hair Fertlizer Tonic Spray | 250Ml | بخاخ كابيكسي للشعر لعلاج التساقط | 250 مل (Similarity: 67.6%)
+  - Candidate: Strongville Hair Tonic Spray Anti-Hair Loss | 220ml | سترونج فيل سبراي بخاخ لتساقط الشعر من الصيدلية | 220 مل (Similarity: 66.7%)
+
+Row 928: 'سترونج فيل شامبو للشعر 220 مل'
+  - Candidate: Strongville | Men Shampoo & Conditioner | 220ml | سترونج فيل | شامبو وبلسم شعر للرجال | 220مل (Similarity: 75.0%)
+  - Candidate: StrongVille | Extra Shampoo | 220ml | شامبو سترونج فيل للتساقط وتقوية الشعر | 220 مل (Similarity: 73.7%)
+  - Candidate: Trix | Shampoo | 200ml | تريكس | شامبو لتنظيف فروة الرأس ومنع التساقط | 200مل (Similarity: 72.7%)
+
+Row 930: 'نظاره مقاسات جراب' -> [MISSING FROM DB]
+Row 931: 'نظاره مقاسات عاده' -> [MISSING FROM DB]
+Row 932: 'لوريال الفيف شامبوبالكيراتين للشعر المجعد و المتشابك 400 مل'
+  - Candidate: L'Oreal Paris | Elvive Extraordinary Oil Shampoo for Normal to Dry Hair | 200ml | لوريال باريس | شامبو الفيف للشعر العادي والجاف | 200مل (Similarity: 69.0%)
+  - Candidate: Zero Frizz | Keratin Shampoo For Frizzy Hair | 355ml | زيرو فريز | شامبو بالكيراتين للشعر المجعد | 355مل (Similarity: 68.5%)
+  - Candidate: L'Oréal Paris | Elvive Extraordinary Oil Shampoo Normal to Dry | 400Ml | لوريال باريس | شامبو مغذي بالزيت غير العادي للشعر العادي والجاف | 400مل (Similarity: 67.7%)
+
+Row 933: 'لوريال الفيف بلسم شعر مجعد و متشابك 200مل'
+  - Candidate: L'Oreal | Elvive Total Repair 5 Hair Conditioner | 360ml | لوريال | ايلفيف بلسم شعر توتال معالج | 360مل (Similarity: 70.6%)
+  - Candidate: L'Oreal Paris | Elvive Conditioner Anti-Hair Fall | 360ml | لوريال باريس | الفيف لوريال باريس بلسم مضاد لتساقط الشعر | 360مل (Similarity: 67.9%)
+  - Candidate: L’Oréal Paris | Elvive Hyaluron Pure Rehydrating Conditioner for Oily Hair | 200ml | لوريال باريس | بلسم الفيف هيالورون بيور لإعادة الترطيب للشعر الدهني | 200مل (Similarity: 67.2%)
+
+Row 934: 'لوريال الفيف بديل الزيت شعر مجعد و متشابك 300 مل'
+  - Candidate: L'Oreal Paris | Elvive Oil Replacement for Long and Frizzy Hair | 300ml | لوريال باريس الفيف دريم لونج ستريت بديل الزيت للشعر الطويل والمجعد | 300 مل (Similarity: 65.0%)
+  - Candidate: L’Oréal Paris | elvive extra ordinary oil replacement | 300ml | لوريال باريس | الفيف اكسترا اورديناري بديل الزيت | 300مل (Similarity: 65.0%)
+  - Candidate: L'Oreal | Elvive Total Repair 5 Hair Conditioner | 360ml | لوريال | ايلفيف بلسم شعر توتال معالج | 360مل (Similarity: 63.0%)
+
+Row 936: 'مفرش سرير تركى' -> [MISSING FROM DB]
+Row 940: 'هيموكابرون 20قرص'
+  - Candidate: Metograine | 20 Tabs | ميتوجرين | 20 قرص (Similarity: 60.6%)
+  - Candidate: Pro S | 20Tab | برو إس | 20قرص (Similarity: 60.0%)
+  - Candidate: Recartopair | 30 Tabs | ريكارتوبير | 30 قرص (Similarity: 57.1%)
+
+Row 946: 'كير فرى فوط يوميه فلكسى كومفرت 20 قطعه'
+  - Candidate: Carefree | Flexicomfort Fresh Panty Liners | 40 Pcs | كير فرى | فوطة يومية فليكسي كومفورت فريش قطنية | 40 قطعة (Similarity: 72.3%)
+  - Candidate: Carefree | Flexi Comfort Fresh | 20 Pcs | كير فري | فوط صحية فلكسي كمفورت فريش | 20 فوطة (Similarity: 66.7%)
+  - Candidate: Carefree | Flexicomfort Cotton Panty Liners Normal Size | 40 Pcs | كير فرى | فوط صحية يومية فليكسي كومفورت قطنية مقاس عادي | 40 قطعة (Similarity: 66.0%)
+
+Row 952: 'هاى ميديك رباط ضاغط 12سم'
+  - Candidate: Hyzaar | High Blood Pressure 50/12.5mg | 14 Tabs | هيزار | لعلاج ارتفاع ضغط الدم 50/12.5مج | 14 قرص (Similarity: 47.5%)
+  - Candidate: VANO COMPRESSION STOCKINGS  شراب | فانو شراب ضاغط (Similarity: 47.4%)
+  - Candidate: Hysartan | High Blood Pressure 50/12.5mg | 10 Tabs | هيسارتان | لعلاج ضغط الدم المرتفع 50/12.5مج | 10 اقراص (Similarity: 46.3%)
+
+Row 953: 'سولوفريش 10ملل قطره'
+  - Candidate: Suvreza 10/10mg | 30 Tabs | سوفريزا 10/10مجم | 30 قرص (Similarity: 54.5%)
+  - Candidate: Adolor | 10mg | 20Tab | ادولور | 10مجم | 20قرص (Similarity: 53.7%)
+  - Candidate: Fine | 10 Pcs | فاين | 10 قطع (Similarity: 50.0%)
+
+Row 954: 'سيروكويل اكس ار 400 مجم 30قرص'
+  - Candidate: Kepradil XR 500mg | 30 Tabs | كيبراديل اكس ار 500مجم | 30 قرص (Similarity: 76.7%)
+  - Candidate: Quitcool XR 400mg | 30 Tabs | كويتكول ممتد المفعول 400مجم | 30 قرص (Similarity: 75.5%)
+  - Candidate: Seroquel | Schizophrenia | 300 mg | 30 Tab | سيروكويل | لعلاج الفصام العقلي | 300 مج | 30 اقراص (Similarity: 71.9%)
+
+Row 955: 'درسنج 10*10سم'
+  - Candidate: Mornigag | 10/10mg | 30Tabs | مورنيجاج | 10/10مجم | 30قرص (Similarity: 45.0%)
+  - Candidate: Exforge High Blood Pressure 10/160mg | 14 Tabs | اكسفورج لعلاج إرتفاع ضغط الدم 10\160مج | 14 قرص (Similarity: 42.6%)
+  - Candidate: Inderal Blood Pressure 10mg | 50 Tabs | اندرال لعلاج ضغط الدم 10مج | 50 قرص (Similarity: 42.3%)
+
+Row 961: 'قربة مياه 2.5 لتر فرو'
+  - Candidate: Baby Junior | Bottle | 250ml | بيبى جونيور | ببرونة | 250مل (Similarity: 65.3%)
+  - Candidate: Chicco | Bottle Well Being | 250ml | شيكو | ببرونه ويل بينج | 250مل (Similarity: 61.8%)
+  - Candidate: Bubbles | Rubber Hot Water | 1 Liter | بابلز | قربة مياه | 1 لتر (Similarity: 60.9%)
+
+Row 963: 'لولب هرموني'
+  - Candidate: Mirena Hormonal loop 52mg | 1 Pc | ميرينا لولب هرموني 52مجم | 1 قطعة (Similarity: 50.0%)
+
+Row 964: 'ليبتوبرينول 500 مج اقراص'
+  - Candidate: Levocarnine | 500mg | 20 Tabs | ليفوكارنين | 500 مجم | 20 قرص (Similarity: 64.2%)
+  - Candidate: Azibactocin 500mg | 3 Film Coated Tabs | ازيباكتوسين 500مجم | 3 اقراص مغلفة (Similarity: 62.1%)
+  - Candidate: Flibanorin 100mg | 10 Film Coated Tabs | فليبانورين 100مجم | 10 اقراص مغلفة (Similarity: 62.1%)
+
+Row 965: 'temp cool cooling gel sheet 40sheets'
+  - Candidate: Eva Skin Clinic | Vitamin C Sheet Face Mask | 3 Sheets | ايفا سكين كلينيك | ماسك ورقي للبشرة بفيتامين سي | 3 قطع (Similarity: 52.9%)
+  - Candidate: Qualita | Fever Cooling Gel Patches For Babies | 4 Pcs | كواليتا | لاصقات جل لخفض درجة الحرارة للاطفال | 4 قطعة (Similarity: 48.2%)
+  - Candidate: Nivea | Men Fresh & Cool Shaving Gel | 200ml | نيفيا | جل حلاقة فريش اند كوو للرجال | 200مل (Similarity: 47.4%)
+
+Row 967: 'COQ10 100 mg 60 cap'
+  - Candidate: Ketofan 100 S.R | 100mg | 10Cap | كيتوفان 100 إس أر | 100مجم | 10كبسوله (Similarity: 69.4%)
+  - Candidate: Doxydox | 100mg | 10Cap | دوكسيدوكس | 100مجم | 10كبسولات (Similarity: 68.3%)
+  - Candidate: Mucotec | 150mg | 20Cap | ميوكوتك | 150جم | 20كبسول (Similarity: 68.3%)
+
+Row 968: 'لاروش بوسيه انتليوس اكس ال جل كريم +spf 50 صن بلوك 100 مل'
+  - Candidate: Cosmo APPE | Sunscreen Gel Cream | 60ml | كوزمو أبي | كريم جل واقي الشمس | 60مل (Similarity: 61.1%)
+  - Candidate: Avene | Sun Care Cream SPF 50+ Sunblock Creme | 50ml | افين | كريم صن بلوك خالى من العطر | 50مل (Similarity: 57.9%)
+  - Candidate: La Roche Posay | Anthelios UV Mune gel Cream SPF50+ tinted | 50ml | صن بلوك لاروش بالفاونديشن أنثيليوس يوفي ميون SPF50+ جل كريم تنتد | 50 مل (Similarity: 57.9%)
+
+Row 973: 'امبـــوفير 5امبولات'
+  - Candidate: Spasmofen | 3 Amp | سبازموفين | 3 امبولات (Similarity: 65.0%)
+  - Candidate: ZINOL | 500Mg | VIAL | زينول | 500 ملي | فيال (Similarity: 56.5%)
+  - Candidate: Levophrine 4ml | 5 Amp | ليفوفرين 4مل | 5 امبولات (Similarity: 55.8%)
+
+Row 974: 'نوبلاك مضمضه 250مل'
+  - Candidate: Orovex | Mouthwash | 150ml | مضمضة اوروفكس اتش orovex h لالتهاب الفم وآلام الاسنان | 150 مل (Similarity: 69.6%)
+  - Candidate: orovex mouthwash clove | 250ml | اوروفكس orovex مضمضة لالتهاب اللثة بالقرنفل | 250 مل (Similarity: 65.4%)
+  - Candidate: Luna | Tri-Care Mouthwash | 250ml | لونا | غسول فم خالٍ من الكحول برائحة النعناع المنعشة‎ | 250مل (Similarity: 64.2%)
+
+Row 976: 'بيبى تشيك اختبار حمل الاصلى'
+  - Candidate: Schick | Exacta 3 Men | 4pcs | تشيك | شفرات ازالة شعر اكساكتا 3 شفرات رجالي | 4 قطع (Similarity: 45.8%)
+  - Candidate: Hero Baby AR Milk | 400gm | لبن هيرو بيبى اي ار لحالات الارتجاع | 400جم (Similarity: 45.7%)
+  - Candidate: Schick | Xtreme3 Sens | 3 Blad Men | 4 Pcs | تشيك | شفرات ازالة شعر اكستريم رجالى | 3 شفرات | 4 قطع (Similarity: 43.3%)
+
+Row 977: 'لوريال كريم تصفيف 200 مل زيوت ثمينه'
+  - Candidate: Clear | Styling Cream Cool Sport | 210Ml | كلير | كريم تصفيف كول سبورت | 210مل (Similarity: 66.7%)
+  - Candidate: Blob Wax | Hair Styling Cream | 170ml | بلوب واكس | كريم تصفيف الشعر | 170مل (Similarity: 61.1%)
+  - Candidate: Clear | styling cream hair fall defense | 210ml | كلير | كريم لمنع تساقط الشعر ستايلج ديفنس | 210مل (Similarity: 61.0%)
+
+Row 981: 'جرين كوفى اكستراكت 60 كبسول'
+  - Candidate: Pepon Prostate Treatment | 30 Caps | بيبون لعلاج البروستاتا | 30 كبسول (Similarity: 56.7%)
+  - Candidate: Calcisome D | 60 Caps | كالسيزوم د | 60 كبسولة (Similarity: 49.0%)
+  - Candidate: Brufen Flu Syrup | 60ml | بروفين فلو شراب | 60مل (Similarity: 49.0%)
+
+Row 983: 'كير فرى فوط يوميه فلكسى كومفرت فريش قطن 44 قطعه'
+  - Candidate: Carefree | Flexicomfort Fresh Panty Liners | 40 Pcs | كير فرى | فوطة يومية فليكسي كومفورت فريش قطنية | 40 قطعة (Similarity: 83.5%)
+  - Candidate: Carefree | Flexicomfort Extrafit Panty Liners | 44 Pcs | كير فري | فوط صحية فليكسي كومفورت إكسترا فت | 44 قطعة (Similarity: 68.0%)
+  - Candidate: Carefree | Flexicomfort Cotton Panty Liners Normal Size | 40 Pcs | كير فرى | فوط صحية يومية فليكسي كومفورت قطنية مقاس عادي | 40 قطعة (Similarity: 67.9%)
+
+Row 989: 'محلول ملح 0.9%25 مل'
+  - Candidate: Aroma | Body Lotion Lavender | 250ml | اروما | لوشن للجسم برائحة اللافندر | 250 مل (Similarity: 53.6%)
+  - Candidate: Savlon | Antiseptic Liquid | 125ml | سافلون | محلول مطهر | 125مل (Similarity: 52.2%)
+  - Candidate: Savlon | Antiseptic Liquid | 250ml | سافلون | محلول مطهر | 250مل (Similarity: 52.2%)
+
+Row 1017: 'جستيكــول 10مجم 14قرص'
+  - Candidate: Justechol 10mg | 28 Tabs | جستيكول 10مجم | 28 قرص (Similarity: 79.1%)
+  - Candidate: Justechol 20mg | 28 Tabs | جستيكول 20ملجم | 28قرص (Similarity: 74.4%)
+  - Candidate: Justechol | 5mg | 28Tab | جستيكول | 5مجم | 28قرص (Similarity: 69.8%)
+
+Row 1018: 'جابا 750 مج 90 قرص'
+  - Candidate: Vilgat 50mg | 30 Tabs | فيلجات 50مجم | 30 قرص (Similarity: 75.7%)
+  - Candidate: Gabimash 800mg | 30 Tabs | جابيماش 800مجم | 30 قرص (Similarity: 75.0%)
+  - Candidate: Gabimash 800mg | 20 Tabs | جابيماش 800مجم | 20 قرص (Similarity: 75.0%)
+
+Row 1019: 'جلسرين طبي 90 مل نقي'
+  - Candidate: Weiser | Liquid Pure Glycerin Spray | 90ml | ويزر | جليسرين طبي سبراي | 90مل (Similarity: 63.6%)
+  - Candidate: Pure | Roll On Glycerin | 45 ml | بيور | رول أون جلسرين | 45مل (Similarity: 63.0%)
+  - Candidate: Creme 21 | Glycerin Cream | 250ml | كريم 21 | كريم جليسيرين الالماني | 250مل (Similarity: 59.6%)
+
+Row 1021: 'ستار فيل كريم تفتيح 60 جم'
+  - Candidate: Starville | Whitening Cream | 60gm | كريم ستارفيل للتفتيح starville whitening cream | ٦٠ مل (Similarity: 72.1%)
+  - Candidate: Flare day | Whitening cream | 60gm | فلير داي | كريم تفتيح | 60جم (Similarity: 71.7%)
+  - Candidate: Srilane 5% Cream | 60gm | سريلان 5% كريم | 60جم (Similarity: 65.2%)
+
+Row 1025: 'ميثيكوبال 500 مكج 30 قرص'
+  - Candidate: Cobal F 500/200mcg | 40 Tabs | كوبال ف 500/200مكجم | 40 قرص (Similarity: 69.2%)
+  - Candidate: Marcal 700mg | 30 Tabs | ماركال اقراص 700 مجم كالسيوم marcal tab لمرضى الكلى | 30 قرص (Similarity: 66.7%)
+  - Candidate: Serpass 50mg | 30 Tabs | سيرباس 50مج | 30 قرص (Similarity: 63.6%)
+
+Row 1026: 'فاردينوريكت 10مجم 4 أقراص'
+  - Candidate: Farorecta 10mg | 12 Tabs | فاروريكتا 10مجم | 12 قرص (Similarity: 80.0%)
+  - Candidate: Diamonrecta 20mg | 4 Tabs | ديامونركتا 20مجم | 4 قرص (Similarity: 73.9%)
+  - Candidate: Virecta 100mg | 12 Tabs | فايركتا 100مجم | 12 قرص (Similarity: 72.7%)
+
+Row 1028: 'لبان فياجرا' -> [MISSING FROM DB]
+Row 1031: 'نوديبرين 50مجم 30قرص'
+  - Candidate: Covaprendo 5/10mg | 30Tabs | كوفابريندو 5/10مجم | 30قرص (Similarity: 73.9%)
+  - Candidate: Amipride 50mg | 30 Tabs | اميبريد 50مج | 30 قرص (Similarity: 73.2%)
+  - Candidate: Prismaven 50mg | 30 Tabs | بريسمافين 50مجم | 30 قرص (Similarity: 72.7%)
+
+Row 1037: 'جلوكوستار 50 شريط'
+  - Candidate: Gluco Dr | 50 Strips | جلوكو دكتور | 50 شرائط (Similarity: 71.8%)
+  - Candidate: GlucoDr.Auto A | Blood Glucose Test Strips | 50 Strips | جلوكو دكتور اوتو ايه | شرائط سكر | 50 شريط (Similarity: 50.8%)
+  - Candidate: Feel Good For Crack Cream 50 Gm | فيل جود فوركراك كريم 50 جرام (Similarity: 44.4%)
+
+Row 1040: 'حمض الساليسيلك صابونه 2%'
+  - Candidate: Liza | Soap Salicylic Acid 2% | 75gm | ليزا | صابون حمض الساليسيليك 2% | 75جم (Similarity: 54.8%)
+  - Candidate: Five Fives | Salicylic Soap | 50gm | خمس خمسات | صابونة حمض الساليسليك | 50جم (Similarity: 46.9%)
+  - Candidate: Raw African | Tea Tree Soap | رو افريكان | صابونه شجره الشاي (Similarity: 41.7%)
+
+Row 1041: 'كبريت صابونه 10%'
+  - Candidate: Five Fives | 10%Sulfur Soap | 70gm | خمس خمسات | صابون الكبريت 10% | 70جم (Similarity: 57.8%)
+  - Candidate: Weiser | Sulphur Soap | 45gm | ويزر | صابون كبريت | 45جم (Similarity: 56.4%)
+  - Candidate: Bubblzz | Cherry Soap | 160gm | بابلز | صابونه الكريز | 160جم (Similarity: 55.0%)
+
+Row 1048: 'رينيو محلول عدسات 60مللى'
+  - Candidate: Lenzy Contact Lens Solution | 120ml | لينزي محلول للعدسات | 120مل (Similarity: 74.5%)
+  - Candidate: ReNu | Solution for Contact Lens | 120ml | رينو | محلول عدسات لاصقة | 120مل (Similarity: 71.4%)
+  - Candidate: ReNu | Solution for Contact Lens | 120ml | رينو | محلول عدسات لاصقة | 120مل (Similarity: 71.4%)
+
+Row 1049: 'ديورسيف 1 جم 6 اقراص قابلة للانتشار'
+  - Candidate: Westrecta 10mg | 4 Oral Dispersible Tabs | ويستريكتا 10مجم | 4 اقراص قابلة للذوبان في الفم (Similarity: 63.4%)
+  - Candidate: Curisafe Antibiotic 500mg | 8 Tabs | كيوريسيف مضاد حيوى 500مج | 8 اقراص (Similarity: 58.0%)
+  - Candidate: Curisafe | Antibiotic | 1 mg | 8 Tab | كيوريسيف | مضاد حيوى | 1 مج | 8 اقراص (Similarity: 56.7%)
+
+Row 1053: 'فيتارم 32 كبسوله'
+  - Candidate: Vitazinc Soft Gelatin | 30 Caps | فيتازنك | 30 كبسولة (Similarity: 68.6%)
+  - Candidate: Sleevar | 30 Caps | سليفار | 30 كبسولة (Similarity: 64.7%)
+  - Candidate: Formamy | 30 Caps | فورمامى | 30 كبسولة (Similarity: 62.9%)
+
+Row 1054: 'سيلوكين زوك 100مجم 28 قرص'
+  - Candidate: Tenormin | 100mg | 28Tab | تينورمين | 100مجم | 28قرص (Similarity: 72.0%)
+  - Candidate: Amlodipine 10mg | 20 Tabs | أملوديبين 10مج | 20 قرص (Similarity: 69.4%)
+  - Candidate: Justechol 10mg | 28 Tabs | جستيكول 10مجم | 28 قرص (Similarity: 68.1%)
+
+Row 1055: 'سيلوكين زوك 50مجم 28 قرص'
+  - Candidate: Ciproquin | 750mg | 10Tab | سيبروكين | 750مجم | 10قرص (Similarity: 73.5%)
+  - Candidate: Declophen 50mg | 20 Tabs | ديكلوفين 50مج | 20 قرص (Similarity: 69.6%)
+  - Candidate: Ciprocin | 250mg | 10Tab | سيبروسين | 250مجم | 10قرص (Similarity: 69.4%)
+
+Row 1056: 'او-بيدال سبراى سيرم شعر'
+  - Candidate: L'Oreal Professional | Hair Serum | 50ml | لوريال بروفيشنال | سيروم للشعر | 50مل (Similarity: 56.7%)
+  - Candidate: L'Oreal Paris | Lash Serum | 8ml | لوريال باريس | سيرم للرموش | 8مل (Similarity: 54.5%)
+  - Candidate: Superkids | Hair Serum | 100ml | سوبر كيدز | سيروم شعر | 100مل (Similarity: 53.8%)
+
+Row 1057: 'سيتا كريم 50جم'
+  - Candidate: Corega cream 20 gm | كريم كوريجا ٢٠ جم (Similarity: 80.0%)
+  - Candidate: Myocool Cream | 50gm | ميوكول كريم مساج مسكن لآلام المفاصل والعضلات | 50جم (Similarity: 77.8%)
+  - Candidate: Movelex | Cream | 50gm | موڤليكس | كريم | 50جم (Similarity: 77.8%)
+
+Row 1065: 'لاروش بوسيه افاكلار غسول جل بشره دهنيه 400 مل'
+  - Candidate: La Roche Posay | Effaclar | Astringent Lotion | 200ml | لاروش بوزيه | ايفاكلار تونر للبشرة الدهنية | 200مل (Similarity: 73.7%)
+  - Candidate: La Roche Posay | Effaclar Foaming Gel | 400ml | لاروش بوزيه ايفاكلار غسول جل رغوي للبشرة الدهنية المعرضة لحب الشباب | 400 مل (Similarity: 69.4%)
+  - Candidate: La Roche Posay | Effaclar Micellar Water for Oily & Sensitive Skin | 200ml | لاروش بوزيه ايفاكلار ماء ميسيلار للبشرة الدهنية الحساسة | 200 مل (Similarity: 67.9%)
+
+Row 1066: 'فياجرا لافزون رجالي' -> [MISSING FROM DB]
+Row 1071: 'فيتامين دي 3 10000 وحده 100 كبسولة'
+  - Candidate: Puritan s Pride Vitamin C-1000mg | 100 Caps | بوريتانز برايد فيتامين سي 1000مجم | 100 كبسولة (Similarity: 65.0%)
+  - Candidate: Vibramycin Antibiotic 100mg | 10 Caps | فيبراميسين مضاد حيوى 100مج | 10 كبسولات (Similarity: 63.0%)
+  - Candidate: Vitazinc Soft Gelatin | 30 Caps | فيتازنك | 30 كبسولة (Similarity: 60.4%)
+
+Row 1072: 'ماتيوجاك 60مجم 3 قرص'
+  - Candidate: Rumaximap 60mg | 30 Tabs | روماكسيماب 60مجم | 30 قرص (Similarity: 71.1%)
+  - Candidate: Mafo 400mg | 30 Tabs | مافو 400مجم | 30 قرص (Similarity: 70.0%)
+  - Candidate: Myodonia 25mg | 30 Tabs | ميودونيا 20مجم | 30 قرص (Similarity: 69.8%)
+
+Row 1074: 'حافظة ادوية  كبيره'
+  - Candidate: PILL CARE حافظة ادوية 7 خانة وسط موف | PILL CARE حافظة ادوية 7 خانة وسط موف (Similarity: 48.1%)
+  - Candidate: Fish | Baby Milk Powder Box | 3 Levels | فيش | حافظة لبن اطفال | 3 دور (Similarity: 42.6%)
+
+Row 1079: 'باليت ارمد اشقر فاتح 8-1'
+  - Candidate: Palette | Intensive Color Creme 8-0 Light Blonde | 50ml | باليت | كريم صبغة الشعر انتنسيف كولور 8-0 أشقر فاتح | 50مل (Similarity: 56.8%)
+  - Candidate: Palette | Intensive Color Creme 8-1 Light Blonde Cendre | 50ml | صبغة باليت انتنسيف كولور | صبغة شعر اشقر رمادي فاتح رقم 8.1 (Similarity: 54.5%)
+  - Candidate: Palette | Permanent Naturals Color Creme 8-0 Light Blonde | 50ml | باليت | صبغة شعر كريم دائمة ناتشورالز 8-0 أشقر فاتح | 50مل (Similarity: 51.1%)
+
+Row 1080: 'سولباسيف 1.5 جرام 1 فيال'
+  - Candidate: Cefzim | 1 gm | 1 Vial | سيفيزيم | 1 جم | 1 فيال (Similarity: 63.8%)
+  - Candidate: Sulbin Antibiotic 1500mg | 1 Vial | سالبين مضاد حيوي 1500مج | 1 فيال (Similarity: 57.1%)
+  - Candidate: Edicin 1mg | Vial | إيديسين 1جم | فيال (Similarity: 57.1%)
+

@@ -171,17 +171,35 @@ def score_match_detailed(q_norm: str, c_norm: str, w_j: float = 0.7, w_s: float 
     query_coverage = len(matched_c_indices) / len(q_tokens) if q_tokens else 0
     if query_coverage >= 0.8: final_score *= 1.10
 
-    q_nums = set(re.findall(r'\b\d+\b', q_norm))
-    c_nums = set(re.findall(r'\b\d+\b', c_norm))
+    q_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', q_norm))
+    c_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', c_norm))
     
     if q_nums and c_nums:
-        q_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l|g|kg)', q_norm))
-        c_doses = set(re.findall(r'(\d+(?:\.\d+)?)\s*(?:mg|mcg|gm|iu|ml|l|g|kg)', c_norm))
+        dose_pat = r'\b(\d+(?:\.\d+)?)(?=\s*(?:[\s/]+\d+(?:\.\d+)?)*\s*(?:mg|mcg|gm|iu|ml|l|g|kg)\b)'
+        q_doses = set(re.findall(dose_pat, q_norm))
+        c_doses = set(re.findall(dose_pat, c_norm))
+        
+        # Check explicit dose/strength/volume mismatch
         if q_doses and c_doses:
             if not q_doses.intersection(c_doses):
                 final_score *= 0.60
+                
+        # Check other number mismatch (pack sizes, count, diaper size)
+        q_non_doses = q_nums - q_doses
+        c_non_doses = c_nums - c_doses
+        if q_non_doses and c_non_doses:
+            if not q_non_doses.intersection(c_non_doses):
+                final_score *= 0.65
         elif not q_nums.intersection(c_nums):
+            # Fallback if no specific doses were parsed
             final_score *= 0.65
+
+    # Combination drug mismatch penalty (e.g. Angiosartan vs Angiosartan Plus)
+    q_plus = any(w in q_tokens for w in ["plus", "co", "comp", "extra"])
+    c_plus = any(w in c_tokens for w in ["plus", "co", "comp", "extra"])
+    if q_plus != c_plus:
+        final_score *= 0.70
+
 
 
     # Brand mismatch penalty: if the first token of the query (if alphabetic) is unmatched,
