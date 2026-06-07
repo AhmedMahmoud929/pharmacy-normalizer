@@ -16,3 +16,17 @@ pm2 logs pharmatch-frontend --lines 100
 
 === RECOVER FAILED JOB ===
 sudo -u www-data /var/www/pharmatcher.bya3online.com/backend/venv/bin/python backend/tools/recover_job.py d6657643-212b-4e95-aa92-d9190bf44d87
+
+=== SEED EXTRACTED MAPPINGS (VPS) ===
+# 1. Pull latest code changes
+cd /var/www/pharmatcher.bya3online.com
+git pull
+
+# 2. Run the seeding script as www-data
+sudo -u www-data /var/www/pharmatcher.bya3online.com/backend/venv/bin/python /var/www/pharmatcher.bya3online.com/backend/tools/seed_extracted_mappings.py
+
+# 3. Export the database to json for reference
+sudo -u www-data /var/www/pharmatcher.bya3online.com/backend/venv/bin/python /var/www/pharmatcher.bya3online.com/backend/tools/export_mappings.py
+
+# 4. Restart the API to load the new mappings into memory
+sudo systemctl restart fastapi
