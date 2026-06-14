@@ -76,6 +76,8 @@ export const matcherColumnOptions: MatcherColumnOption[] = [
   { key: "price", label: "Catalog Price", group: "product", defaultChecked: false },
   { key: "in_stock", label: "In Stock Flag", group: "product", defaultChecked: false },
   { key: "stock", label: "Quantity Stock", group: "product", defaultChecked: false },
+  { key: "code", label: "Product Code", group: "product", defaultChecked: false },
+  { key: "international_barcode", label: "International Barcode", group: "product", defaultChecked: false },
   { key: "share_link", label: "Storefront Web Link", group: "product", defaultChecked: false },
   { key: "image", label: "Asset Thumbnail URL", group: "product", defaultChecked: false },
   { key: "image_name", label: "Image Name", group: "product", defaultChecked: false },
@@ -102,6 +104,8 @@ export const matcherColumnOptions: MatcherColumnOption[] = [
   { key: "custom_sub_sub_category_name_en", label: "sub_sub_category_name[en]", group: "custom", defaultChecked: true },
   { key: "custom_sub_sub_category_name_ar", label: "sub_sub_category_name[ar]", group: "custom", defaultChecked: true },
   { key: "custom_sub_sub_category_slug",    label: "sub_sub_category_slug",    group: "custom", defaultChecked: true },
-  { key: "custom_current_stock",            label: "current_stock",            group: "custom", defaultChecked: true }
+  { key: "custom_current_stock",            label: "current_stock",            group: "custom", defaultChecked: true },
+  { key: "custom_code",                     label: "code",                     group: "custom", defaultChecked: true },
+  { key: "custom_international_barcode",    label: "international_barcode",    group: "custom", defaultChecked: true }
 ];
 

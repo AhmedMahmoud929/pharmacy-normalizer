@@ -24,6 +24,15 @@ from tools.matcher_export import build_custom_columns
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
 
+def _extract_cell_string(val) -> Optional[str]:
+    """Normalize a spreadsheet cell value to a trimmed string."""
+    if pd.isna(val):
+        return None
+    val_str = str(val).strip()
+    if re.match(r"^\d+\.0$", val_str):
+        val_str = val_str[:-2]
+    return val_str if val_str else None
+
 _global_index = None
 
 def get_db_path() -> str:
@@ -172,7 +181,7 @@ def load_reference_db() -> List[Dict[str, Any]]:
                     current_obj_str.append(line)
         return products
 
-def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Optional[ProductIndex], top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None) -> dict:
+def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Optional[ProductIndex], top: int, match_threshold: float, review_threshold: float, uploaded_price: Optional[float] = None, uploaded_stock: Optional[int] = None, uploaded_code: Optional[str] = None, uploaded_international_barcode: Optional[str] = None) -> dict:
     """Core row matching computation executed inside ThreadPool or ProcessPool workers."""
     active_index = index_inst or _global_index
     if active_index is None:
@@ -186,6 +195,8 @@ def _process_single_row(idx: int, raw_name: str, norm_name: str, index_inst: Opt
         "normalized_name": norm_name,
         "uploaded_price": uploaded_price,
         "uploaded_stock": uploaded_stock,
+        "uploaded_code": uploaded_code,
+        "uploaded_international_barcode": uploaded_international_barcode,
         "matches": []
     }
     
@@ -233,6 +244,10 @@ async def run_matcher_background(
     use_uploaded_stock: bool = False,
     stock_column: Optional[str] = None,
     default_stock: int = 10,
+    use_uploaded_code: bool = False,
+    code_column: Optional[str] = None,
+    use_uploaded_international_barcode: bool = False,
+    international_barcode_column: Optional[str] = None,
     index_inst: Optional[ProductIndex] = None
 ):
     """Asynchronous worker task managing sheet matching execution and state persistence."""
@@ -327,8 +342,16 @@ async def run_matcher_background(
                     uploaded_stock = default_stock
             else:
                 uploaded_stock = default_stock
+
+            uploaded_code = None
+            if use_uploaded_code and code_column and code_column in df.columns:
+                uploaded_code = _extract_cell_string(row[code_column])
+
+            uploaded_international_barcode = None
+            if use_uploaded_international_barcode and international_barcode_column and international_barcode_column in df.columns:
+                uploaded_international_barcode = _extract_cell_string(row[international_barcode_column])
                         
-            queries.append((idx, raw_name, norm_name, uploaded_price, uploaded_stock))
+            queries.append((idx, raw_name, norm_name, uploaded_price, uploaded_stock, uploaded_code, uploaded_international_barcode))
 
         results_list = []
         matched_count = 0
@@ -364,9 +387,11 @@ async def run_matcher_background(
                         match_threshold, 
                         review_threshold,
                         uploaded_price,
-                        uploaded_stock
+                        uploaded_stock,
+                        uploaded_code,
+                        uploaded_international_barcode
                     )
-                    for idx, raw_name, norm_name, uploaded_price, uploaded_stock in queries
+                    for idx, raw_name, norm_name, uploaded_price, uploaded_stock, uploaded_code, uploaded_international_barcode in queries
                 ]
                 
                 # Consume as completed
@@ -431,7 +456,7 @@ async def run_matcher_background(
                         await asyncio.sleep(0.01)
         else:
             # Sequential execution loop
-            for idx, raw_name, norm_name, uploaded_price, uploaded_stock in queries:
+            for idx, raw_name, norm_name, uploaded_price, uploaded_stock, uploaded_code, uploaded_international_barcode in queries:
                 result_payload = _process_single_row(
                     idx, 
                     raw_name, 
@@ -441,7 +466,9 @@ async def run_matcher_background(
                     match_threshold, 
                     review_threshold,
                     uploaded_price,
-                    uploaded_stock
+                    uploaded_stock,
+                    uploaded_code,
+                    uploaded_international_barcode
                 )
                 results_list.append(result_payload)
                 
@@ -565,7 +592,9 @@ async def run_matcher_background(
                 p or None, 
                 override_price=uploaded_price, 
                 override_stock=uploaded_stock, 
-                default_stock=default_stock
+                default_stock=default_stock,
+                override_code=res.get("uploaded_code"),
+                override_international_barcode=res.get("uploaded_international_barcode")
             ))
                     
             excel_records.append(record)

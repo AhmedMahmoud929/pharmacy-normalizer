@@ -32,6 +32,14 @@ interface MatchConfigProps {
   setStockColumn: (col: string) => void;
   defaultStock: number;
   setDefaultStock: (val: number) => void;
+  useUploadedCode: boolean;
+  setUseUploadedCode: (val: boolean) => void;
+  codeColumn: string;
+  setCodeColumn: (col: string) => void;
+  useUploadedInternationalBarcode: boolean;
+  setUseUploadedInternationalBarcode: (val: boolean) => void;
+  internationalBarcodeColumn: string;
+  setInternationalBarcodeColumn: (col: string) => void;
 }
 
 export const MatchConfig: React.FC<MatchConfigProps> = ({
@@ -61,6 +69,14 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
   setStockColumn,
   defaultStock,
   setDefaultStock,
+  useUploadedCode,
+  setUseUploadedCode,
+  codeColumn,
+  setCodeColumn,
+  useUploadedInternationalBarcode,
+  setUseUploadedInternationalBarcode,
+  internationalBarcodeColumn,
+  setInternationalBarcodeColumn,
 }) => {
   if (!file) return null;
 
@@ -188,6 +204,100 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
             className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
           />
         </div>
+      </div>
+
+      {/* Uploaded Code */}
+      <div className="pt-4 border-t border-primary/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Use Uploaded Code</label>
+            <span className="text-[10px] text-zinc-400">Extract product code from sheet data</span>
+          </div>
+          <button
+            onClick={() => setUseUploadedCode(!useUploadedCode)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              useUploadedCode ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                useUploadedCode ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+        </div>
+        <AnimatePresence>
+          {useUploadedCode && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="text-xs font-medium text-neutral-gray block">Select Code Column</label>
+              <select
+                value={codeColumn}
+                onChange={(e) => setCodeColumn(e.target.value)}
+                className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none text-sm"
+              >
+                {columns.map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Uploaded International Barcode */}
+      <div className="pt-4 border-t border-primary/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Use Uploaded International Barcode</label>
+            <span className="text-[10px] text-zinc-400">Extract international barcode from sheet data</span>
+          </div>
+          <button
+            onClick={() => setUseUploadedInternationalBarcode(!useUploadedInternationalBarcode)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              useUploadedInternationalBarcode ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                useUploadedInternationalBarcode ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+        </div>
+        <AnimatePresence>
+          {useUploadedInternationalBarcode && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="text-xs font-medium text-neutral-gray block">Select International Barcode Column</label>
+              <select
+                value={internationalBarcodeColumn}
+                onChange={(e) => setInternationalBarcodeColumn(e.target.value)}
+                className="w-full p-3 bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none text-sm"
+              >
+                {columns.map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="space-y-6">

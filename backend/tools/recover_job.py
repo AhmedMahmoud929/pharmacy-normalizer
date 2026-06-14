@@ -98,10 +98,12 @@ def recover(job_id: str):
 
         # Append custom export columns per spec (matcher-custom-export.md)
         record.update(build_custom_columns(
-            p or None, 
+            p or None,
             override_price=uploaded_price,
             override_stock=uploaded_stock,
-            default_stock=default_stock
+            default_stock=default_stock,
+            override_code=res.get("uploaded_code"),
+            override_international_barcode=res.get("uploaded_international_barcode")
         ))
                 
         excel_records.append(record)

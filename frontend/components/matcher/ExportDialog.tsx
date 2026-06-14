@@ -240,7 +240,13 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               record["in_stock"] = hasStock ? "Yes" : "No";
               break;
             case "stock":
-              record["stock"] = v.stock || p.stock || 0;
+              record["stock"] = res.uploaded_stock !== undefined && res.uploaded_stock !== null ? res.uploaded_stock : (v.stock || p.stock || 0);
+              break;
+            case "code":
+              record["code"] = res.uploaded_code ?? "";
+              break;
+            case "international_barcode":
+              record["international_barcode"] = res.uploaded_international_barcode ?? "";
               break;
             case "share_link":
               const slug = p.slug || "";
@@ -345,6 +351,14 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             }
             case "custom_current_stock": {
               record["current_stock"] = res.uploaded_stock !== undefined && res.uploaded_stock !== null ? res.uploaded_stock : 10;
+              break;
+            }
+            case "custom_code": {
+              record["code"] = res.uploaded_code ?? "";
+              break;
+            }
+            case "custom_international_barcode": {
+              record["international_barcode"] = res.uploaded_international_barcode ?? "";
               break;
             }
             default:

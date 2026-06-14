@@ -61,7 +61,7 @@ def _extract_image_name(val: Union[str, List[str], None]) -> str:
     return str(val)
 
 
-def build_custom_columns(p: Optional[dict], override_price: Optional[float] = None, override_stock: Optional[int] = None, default_stock: int = 10) -> dict:
+def build_custom_columns(p: Optional[dict], override_price: Optional[float] = None, override_stock: Optional[int] = None, default_stock: int = 10, override_code: Optional[str] = None, override_international_barcode: Optional[str] = None) -> dict:
     """
     Given a product_data dict (from a matched result), return an ordered dict
     of the custom export columns defined in the spec.
@@ -73,6 +73,10 @@ def build_custom_columns(p: Optional[dict], override_price: Optional[float] = No
         if override_price is not None:
             cols["price"] = override_price
         cols["current_stock"] = override_stock if override_stock is not None else default_stock
+        if override_code is not None:
+            cols["code"] = override_code
+        if override_international_barcode is not None:
+            cols["international_barcode"] = override_international_barcode
         return cols
 
     l1 = _get_l1(p)
@@ -112,6 +116,8 @@ def build_custom_columns(p: Optional[dict], override_price: Optional[float] = No
         "sub_sub_category_name[ar]": l3.get("title_ar") or l3.get("name_ar") or "",
         "sub_sub_category_slug":     l3.get("slug") or "",
         "current_stock":             override_stock if override_stock is not None else default_stock,
+        "code":                      override_code if override_code is not None else "",
+        "international_barcode":     override_international_barcode if override_international_barcode is not None else "",
     }
 
 
@@ -124,7 +130,7 @@ def _empty_columns() -> dict:
         "category_name[en]", "category_name[ar]", "category_slug",
         "sub_category_name[en]", "sub_category_name[ar]", "sub_category_slug",
         "sub_sub_category_name[en]", "sub_sub_category_name[ar]", "sub_sub_category_slug",
-        "current_stock",
+        "current_stock", "code", "international_barcode",
     ]
     return {k: "" for k in keys}
 

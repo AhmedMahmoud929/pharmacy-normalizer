@@ -46,6 +46,10 @@ interface MatchResult {
   row_index: number;
   original_name: string;
   normalized_name: string;
+  uploaded_price?: number | null;
+  uploaded_stock?: number | null;
+  uploaded_code?: string | null;
+  uploaded_international_barcode?: string | null;
   matches: MatchCandidate[];
 }
 
@@ -74,6 +78,10 @@ export default function DrugMatcher() {
   const [useUploadedStock, setUseUploadedStock] = useState(false);
   const [stockColumn, setStockColumn] = useState("");
   const [defaultStock, setDefaultStock] = useState(10);
+  const [useUploadedCode, setUseUploadedCode] = useState(false);
+  const [codeColumn, setCodeColumn] = useState("");
+  const [useUploadedInternationalBarcode, setUseUploadedInternationalBarcode] = useState(false);
+  const [internationalBarcodeColumn, setInternationalBarcodeColumn] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -160,6 +168,20 @@ export default function DrugMatcher() {
         );
         if (foundStock) setStockColumn(foundStock);
         else setStockColumn(headers[0] || "");
+
+        const codeCandidates = ["code", "product_code", "item_code", "sku_code", "كود", "رمز"];
+        const foundCode = headers.find(h =>
+          codeCandidates.some(c => h.toLowerCase().includes(c.toLowerCase()))
+        );
+        if (foundCode) setCodeColumn(foundCode);
+        else setCodeColumn(headers[0] || "");
+
+        const barcodeCandidates = ["barcode", "international_barcode", "ean", "upc", "gtin", "باركود", "الباركود"];
+        const foundBarcode = headers.find(h =>
+          barcodeCandidates.some(c => h.toLowerCase().includes(c.toLowerCase()))
+        );
+        if (foundBarcode) setInternationalBarcodeColumn(foundBarcode);
+        else setInternationalBarcodeColumn(headers[0] || "");
       }
     };
     reader.readAsBinaryString(selectedFile);
@@ -195,6 +217,10 @@ export default function DrugMatcher() {
     setUseUploadedStock(!!job.use_uploaded_stock);
     setStockColumn(job.stock_column || "");
     setDefaultStock(job.default_stock !== undefined ? job.default_stock : 10);
+    setUseUploadedCode(!!job.use_uploaded_code);
+    setCodeColumn(job.code_column || "");
+    setUseUploadedInternationalBarcode(!!job.use_uploaded_international_barcode);
+    setInternationalBarcodeColumn(job.international_barcode_column || "");
 
     if (job.status === "completed") {
       setIsProcessing(false);
@@ -351,6 +377,10 @@ export default function DrugMatcher() {
     formData.append("use_uploaded_stock", useUploadedStock.toString());
     formData.append("stock_column", useUploadedStock ? stockColumn : "");
     formData.append("default_stock", defaultStock.toString());
+    formData.append("use_uploaded_code", useUploadedCode.toString());
+    formData.append("code_column", useUploadedCode ? codeColumn : "");
+    formData.append("use_uploaded_international_barcode", useUploadedInternationalBarcode.toString());
+    formData.append("international_barcode_column", useUploadedInternationalBarcode ? internationalBarcodeColumn : "");
 
     try {
       const response = await fetch(`${API_URL}/api/matcher/run`, {
@@ -776,6 +806,14 @@ export default function DrugMatcher() {
                       setStockColumn={setStockColumn}
                       defaultStock={defaultStock}
                       setDefaultStock={setDefaultStock}
+                      useUploadedCode={useUploadedCode}
+                      setUseUploadedCode={setUseUploadedCode}
+                      codeColumn={codeColumn}
+                      setCodeColumn={setCodeColumn}
+                      useUploadedInternationalBarcode={useUploadedInternationalBarcode}
+                      setUseUploadedInternationalBarcode={setUseUploadedInternationalBarcode}
+                      internationalBarcodeColumn={internationalBarcodeColumn}
+                      setInternationalBarcodeColumn={setInternationalBarcodeColumn}
                     />
                   </div>
 

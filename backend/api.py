@@ -2150,7 +2150,11 @@ async def run_matcher_job(
     price_column: Optional[str] = Form(None),
     use_uploaded_stock: bool = Form(False),
     stock_column: Optional[str] = Form(None),
-    default_stock: int = Form(10)
+    default_stock: int = Form(10),
+    use_uploaded_code: bool = Form(False),
+    code_column: Optional[str] = Form(None),
+    use_uploaded_international_barcode: bool = Form(False),
+    international_barcode_column: Optional[str] = Form(None)
 ):
     from tools.matcher_db import create_job
     from tools.matcher_runner import run_matcher_background, job_listeners
@@ -2182,7 +2186,11 @@ async def run_matcher_job(
         price_column=price_column,
         use_uploaded_stock=use_uploaded_stock,
         stock_column=stock_column,
-        default_stock=default_stock
+        default_stock=default_stock,
+        use_uploaded_code=use_uploaded_code,
+        code_column=code_column,
+        use_uploaded_international_barcode=use_uploaded_international_barcode,
+        international_barcode_column=international_barcode_column
     )
 
     # 3. Schedule the worker thread execution
@@ -2202,6 +2210,10 @@ async def run_matcher_job(
             use_uploaded_stock=use_uploaded_stock,
             stock_column=stock_column,
             default_stock=default_stock,
+            use_uploaded_code=use_uploaded_code,
+            code_column=code_column,
+            use_uploaded_international_barcode=use_uploaded_international_barcode,
+            international_barcode_column=international_barcode_column,
             index_inst=index
         )
     )
@@ -2484,7 +2496,9 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                 p or None, 
                 override_price=uploaded_price, 
                 override_stock=uploaded_stock, 
-                default_stock=default_stock_val
+                default_stock=default_stock_val,
+                override_code=res.get("uploaded_code"),
+                override_international_barcode=res.get("uploaded_international_barcode")
             ))
                     
             excel_records.append(record)
