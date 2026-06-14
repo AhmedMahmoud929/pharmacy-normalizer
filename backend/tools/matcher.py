@@ -318,7 +318,9 @@ class ProductIndex:
                     "image": product.get("image") or "",
                     "description_en": product.get("description_en") or product.get("meta_description_en") or "",
                     "description_ar": product.get("description_ar") or product.get("meta_description_ar") or "",
-                    "unit": product.get("unit") or ""
+                    "unit": product.get("unit") or "",
+                    "code": product.get("code") or "",
+                    "international_barcode": product.get("international_barcode") or "",
                 }
                 
                 idx = len(self.entries)

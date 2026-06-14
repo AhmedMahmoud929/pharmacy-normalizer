@@ -43,10 +43,12 @@ User (HTTPS)
 | `backend/data/extracted/` | Raw Chefaa products, categories, brands JSON |
 | `backend/data/normalized/` | Normalized product catalog (preferred by the API) |
 | `backend/data/media/` | Product and brand images |
-| `backend/data/input/` | Excel sheets to match |
+| `backend/data/input/` | Excel sheets to match (e.g. `sheet_with_code.xlsx`) |
 | `backend/normalizer/mappings/db/mappings.db` | SQLite mapping database (rebuilt from export) |
 
 The API loads `backend/data/normalized/chefaa_products_eg_normalized.json` first and falls back to `backend/data/extracted/chefaa_products_eg.json` if the normalized file is missing.
+
+After code enrichment (Step 4.7), matched catalog products also carry `code` and `international_barcode` fields used by the matcher export and API.
 
 ---
 
@@ -153,7 +155,7 @@ Rebuilds `normalizer/mappings/db/mappings.db` from `mappings_export.json`.
 #### 4.3 — Crawl products, categories, and brands
 
 ```bash
-cd tools/shefaa-crawler
+cd APP_DIR/backend/tools/shefaa-crawler
 
 # Products (~29k Egyptian catalog)
 python main.py --products medications --pages all --deep --localize \
@@ -196,6 +198,60 @@ python tools/merge_ghanem_products.py
 # Normalize input Excel sheets (place files in backend/data/input/ first)
 python tools/normalize.py --file data/input/standard.xlsx
 ```
+
+#### 4.7 — Enrich catalog with `code` and `international_barcode`
+
+If you have a master product sheet with internal codes and barcodes (e.g. `sheet_with_code.xlsx`), run this **after** Step 4.5. It matches the Chefaa catalog against your sheet, then writes `code` and `international_barcode` into `chefaa_products_eg_normalized.json` for products that match confidently (≥ 60% score).
+
+**Prerequisite:** copy your sheet to the server:
+
+```bash
+# Example: upload sheet_with_code.xlsx to:
+# APP_DIR/backend/data/input/sheet_with_code.xlsx
+```
+
+Run from `APP_DIR/backend` with the venv active:
+
+```bash
+cd APP_DIR/backend
+source venv/bin/activate
+
+# 1) Normalize your destination sheet (~3 min, once)
+python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
+# → data/normalized/sheet_with_code_normalized.xlsx
+
+# 2) Full coverage scan: catalog (source) → your sheet (destination)
+#    ~15 min with --parallel on an 8-core server; ~85 min without
+python tools/test_standard_in_sheet.py --full --skip-normalize --parallel
+# → data/normalized/sheet_coverage_report.xlsx
+
+# 3) Extract matched rows only (includes dest_code + dest_international_barcode)
+python tools/extract_matched_coverage.py
+# → data/normalized/sheet_coverage_matched.xlsx
+
+# 4) Inject codes into the standard catalog (creates .bak backup first)
+python tools/inject_catalog_codes.py
+# → updates data/normalized/chefaa_products_eg_normalized.json
+```
+
+Optional flags:
+
+```bash
+# Custom worker count for the full scan
+python tools/test_standard_in_sheet.py --full --skip-normalize --parallel --workers 8
+
+# Preview injection without writing
+python tools/inject_catalog_codes.py --dry-run
+
+# Custom paths
+python tools/inject_catalog_codes.py \
+  --catalog data/normalized/chefaa_products_eg_normalized.json \
+  --matched data/normalized/sheet_coverage_matched.xlsx
+```
+
+**Expected result:** ~10,500+ catalog products receive `code` and `international_barcode` (exact count depends on match quality). Restart the API after injection (Step 5 or `sudo systemctl restart fastapi`).
+
+If you rsync `data/normalized/` from a server that already ran Step 4.7, you can skip this section.
 
 ---
 
@@ -299,6 +355,7 @@ sudo chmod -R 775 APP_DIR/backend/data
 | Global search | Search for a known drug (e.g. "Panadol") |
 | Brand images | Brands page shows logos from `/media/brands/` |
 | Matcher upload | Upload a sheet from `backend/data/input/` |
+| Matcher export codes | Matched export includes `code` / `international_barcode` for enriched catalog products |
 | SSE streaming | Start a matcher job — progress streams without buffering |
 
 ---
@@ -322,6 +379,13 @@ sudo systemctl restart fastapi
 # After re-normalizing the catalog
 python tools/normalize.py --file data/extracted/chefaa_products_eg.json
 sudo systemctl restart fastapi
+
+# After updating your code/barcode sheet — re-run enrichment (Step 4.7)
+python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
+python tools/test_standard_in_sheet.py --full --skip-normalize --parallel
+python tools/extract_matched_coverage.py
+python tools/inject_catalog_codes.py
+sudo systemctl restart fastapi
 ```
 
 ---
@@ -337,6 +401,23 @@ python tools/import_mappings.py
 python tools/seed_chefaa_brands.py
 python tools/normalize.py --file data/extracted/chefaa_products_eg.json
 python tools/merge_ghanem_products.py          # optional
+
+sudo systemctl restart fastapi
+```
+
+---
+
+## Quick reference — code & barcode enrichment only
+
+If the catalog is already normalized and you only need to refresh codes from `sheet_with_code.xlsx`:
+
+```bash
+cd APP_DIR/backend && source venv/bin/activate
+
+python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
+python tools/test_standard_in_sheet.py --full --skip-normalize --parallel
+python tools/extract_matched_coverage.py
+python tools/inject_catalog_codes.py
 
 sudo systemctl restart fastapi
 ```

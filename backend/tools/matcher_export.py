@@ -116,8 +116,8 @@ def build_custom_columns(p: Optional[dict], override_price: Optional[float] = No
         "sub_sub_category_name[ar]": l3.get("title_ar") or l3.get("name_ar") or "",
         "sub_sub_category_slug":     l3.get("slug") or "",
         "current_stock":             override_stock if override_stock is not None else default_stock,
-        "code":                      override_code if override_code is not None else "",
-        "international_barcode":     override_international_barcode if override_international_barcode is not None else "",
+        "code":                      override_code if override_code is not None else (p.get("code") or ""),
+        "international_barcode":     override_international_barcode if override_international_barcode is not None else (p.get("international_barcode") or ""),
     }
 
 
