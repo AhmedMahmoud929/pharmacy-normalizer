@@ -104,6 +104,12 @@ export default function DrugMatcher() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  // Server-side pagination (used for completed/failed/stopped jobs)
+  const [isServerSide, setIsServerSide] = useState(false);
+  const [serverTotalItems, setServerTotalItems] = useState(0);
+  const [serverStats, setServerStats] = useState<{ total: number; matched: number; review: number; noMatch: number; accuracy: number } | null>(null);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
+
   // Modals
   const [selectedRowForDetails, setSelectedRowForDetails] = useState<MatchResult | null>(null);
   const [selectedRowForManual, setSelectedRowForManual] = useState<MatchResult | null>(null);
@@ -111,6 +117,9 @@ export default function DrugMatcher() {
   // Performance
   const [parallel, setParallel] = useState(true);
   const [workers, setWorkers] = useState(4);
+
+  // Debounce ref for server-side search
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const searchParams = useSearchParams();
   const queryJobId = searchParams.get("job_id");
@@ -219,6 +228,40 @@ export default function DrugMatcher() {
     }
   }, []);
 
+  // Fetch a single page of results from the server (server-side pagination)
+  const fetchPageResults = useCallback(async (
+    jobId: string,
+    page: number,
+    perPage: number,
+    search: string,
+    sort?: { key: string; direction: string } | null
+  ) => {
+    setIsLoadingPage(true);
+    const offset = (page - 1) * perPage;
+    const params = new URLSearchParams({
+      limit: perPage.toString(),
+      offset: offset.toString(),
+    });
+    if (search) params.set("search", search);
+    if (sort) {
+      params.set("sort_by", sort.key);
+      params.set("sort_dir", sort.direction);
+    }
+    try {
+      const res = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data.results || []);
+        setServerTotalItems(data.total ?? 0);
+        if (data.stats) setServerStats(data.stats);
+      }
+    } catch (err) {
+      console.error("Failed to fetch page results:", err);
+    } finally {
+      setIsLoadingPage(false);
+    }
+  }, []);
+
   const selectJob = async (job: any, autoOpenExport = false) => {
     setIsLoadingJob(true);
     setActiveJobId(job.job_id);
@@ -248,30 +291,34 @@ export default function DrugMatcher() {
       if (job.status === "completed") {
         setIsProcessing(false);
         setIsComplete(true);
+        setIsServerSide(true);
         setResults([]);
+        setCurrentPage(1);
+        setSortConfig(null);
+        setSearchQuery("");
+        // Stats come from job record — no need to scan 100k results
+        setServerStats({
+          total: job.total_rows || 0,
+          matched: job.matched_count || 0,
+          review: job.review_count || 0,
+          noMatch: job.no_match_count || 0,
+          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0
+        });
+        // Fetch first page only (fast)
+        await fetchPageResults(job.job_id, 1, itemsPerPage, "", null);
+        if (autoOpenExport) setIsExportDialogOpen(true);
 
-        // Fetch full results
-        try {
-          const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
-          if (response.ok) {
-            const data = await response.json();
-            setResults(data.results || []);
-            if (autoOpenExport) {
-              setIsExportDialogOpen(true);
-            }
-          }
-        } catch (err) {
-          console.error("Failed to fetch job results:", err);
-        }
       } else if (job.status === "running" || job.status === "pending") {
+        setIsServerSide(false);
+        setServerStats(null);
         setIsProcessing(true);
         setIsComplete(false);
         setResults([]);
         setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
 
-        // Fetch initial already-processed results so the table is not empty
+        // Fetch already-processed results (small page only — running job may have partial data)
         try {
-          const res = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
+          const res = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=200&offset=0`);
           if (res.ok) {
             const data = await res.json();
             setResults(data.results || []);
@@ -290,10 +337,7 @@ export default function DrugMatcher() {
 
         eventSource.addEventListener("progress", (e) => {
           const data = JSON.parse(e.data);
-          setProgress({
-            current: data.processed_rows,
-            total: data.total_rows
-          });
+          setProgress({ current: data.processed_rows, total: data.total_rows });
         });
 
         eventSource.addEventListener("result", (e) => {
@@ -304,16 +348,33 @@ export default function DrugMatcher() {
           });
         });
 
-        eventSource.addEventListener("complete", (e) => {
+        eventSource.addEventListener("complete", () => {
           setIsProcessing(false);
           setIsComplete(true);
+          setIsServerSide(true);
+          setCurrentPage(1);
+          setSortConfig(null);
+          setSearchQuery("");
           eventSource.close();
-          fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`)
-            .then(res => res.json())
-            .then(data => {
-              setResults(data.results || []);
-              setIsExportDialogOpen(true);
-            });
+          // Switch to server-side: fetch page 1 + stats
+          fetchPageResults(job.job_id, 1, itemsPerPage, "", null).then(() => {
+            setIsExportDialogOpen(true);
+          });
+          // Refresh job record to get final accurate stats
+          fetch(`${API_URL}/api/matcher/job/${job.job_id}`)
+            .then(r => r.json())
+            .then(updatedJob => {
+              setServerStats({
+                total: updatedJob.total_rows || 0,
+                matched: updatedJob.matched_count || 0,
+                review: updatedJob.review_count || 0,
+                noMatch: updatedJob.no_match_count || 0,
+                accuracy: updatedJob.total_rows > 0
+                  ? Math.round((updatedJob.matched_count / updatedJob.total_rows) * 100 * 10) / 10
+                  : 0
+              });
+            })
+            .catch(() => {/* stats fallback from fetchPageResults response is fine */});
         });
 
         eventSource.addEventListener("error", (e) => {
@@ -322,19 +383,22 @@ export default function DrugMatcher() {
           eventSource.close();
         });
       } else {
+        // failed / stopped — server-side, first page only
         setIsProcessing(false);
         setIsComplete(false);
+        setIsServerSide(true);
         setResults([]);
-
-        try {
-          const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
-          if (response.ok) {
-            const data = await response.json();
-            setResults(data.results || []);
-          }
-        } catch (err) {
-          console.error("Failed to fetch partial job results:", err);
-        }
+        setCurrentPage(1);
+        setSortConfig(null);
+        setSearchQuery("");
+        setServerStats({
+          total: job.total_rows || 0,
+          matched: job.matched_count || 0,
+          review: job.review_count || 0,
+          noMatch: job.no_match_count || 0,
+          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0
+        });
+        await fetchPageResults(job.job_id, 1, itemsPerPage, "", null);
 
         toast({
           title: `Job ${job.status.toUpperCase()}`,
@@ -357,6 +421,11 @@ export default function DrugMatcher() {
     setProgress({ current: 0, total: 0 });
     setCurrentPage(1);
     setActiveJobId(null);
+    setIsServerSide(false);
+    setServerStats(null);
+    setServerTotalItems(0);
+    setSearchQuery("");
+    setSortConfig(null);
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", window.location.pathname);
     }
@@ -472,16 +541,32 @@ export default function DrugMatcher() {
             });
           });
 
-          eventSource.addEventListener("complete", (e) => {
+          eventSource.addEventListener("complete", () => {
             setIsProcessing(false);
             setIsComplete(true);
+            setIsServerSide(true);
+            setCurrentPage(1);
+            setSortConfig(null);
+            setSearchQuery("");
             eventSource.close();
-            fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=100000`)
-              .then(res => res.json())
-              .then(resData => {
-                setResults(resData.results || []);
-                setIsExportDialogOpen(true);
-              });
+            // Switch to server-side: fetch page 1 + stats
+            fetchPageResults(data.job_id, 1, itemsPerPage, "", null).then(() => {
+              setIsExportDialogOpen(true);
+            });
+            fetch(`${API_URL}/api/matcher/job/${data.job_id}`)
+              .then(r => r.json())
+              .then(updatedJob => {
+                setServerStats({
+                  total: updatedJob.total_rows || 0,
+                  matched: updatedJob.matched_count || 0,
+                  review: updatedJob.review_count || 0,
+                  noMatch: updatedJob.no_match_count || 0,
+                  accuracy: updatedJob.total_rows > 0
+                    ? Math.round((updatedJob.matched_count / updatedJob.total_rows) * 100 * 10) / 10
+                    : 0
+                });
+              })
+              .catch(() => {});
           });
 
           eventSource.addEventListener("error", (e) => {
@@ -655,7 +740,10 @@ export default function DrugMatcher() {
   };
 
   // --- Logic ---
+  // When server-side: results already holds the current page from the API; skip client processing.
   const sortedAndFilteredResults = useMemo(() => {
+    if (isServerSide) return results; // server already filtered, sorted, paginated
+
     let filtered = results;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -666,12 +754,10 @@ export default function DrugMatcher() {
         (res.matching_method || "").toLowerCase().includes(q)
       );
     }
-
     if (sortConfig) {
       filtered = [...filtered].sort((a, b) => {
         let aValue: any;
         let bValue: any;
-
         if (sortConfig.key === 'score') {
           aValue = a.matches[0]?.score || 0;
           bValue = b.matches[0]?.score || 0;
@@ -685,40 +771,49 @@ export default function DrugMatcher() {
           aValue = (a as any)[sortConfig.key];
           bValue = (b as any)[sortConfig.key];
         }
-
         if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
         if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
-
     return filtered;
-  }, [results, searchQuery, sortConfig]);
+  }, [results, searchQuery, sortConfig, isServerSide]);
 
   const paginatedResults = useMemo(() => {
+    if (isServerSide) return results; // server already paginated
     const start = (currentPage - 1) * itemsPerPage;
     return sortedAndFilteredResults.slice(start, start + itemsPerPage);
-  }, [sortedAndFilteredResults, currentPage, itemsPerPage]);
+  }, [sortedAndFilteredResults, currentPage, itemsPerPage, isServerSide, results]);
 
-  const totalPages = Math.ceil(sortedAndFilteredResults.length / itemsPerPage);
+  const totalPages = isServerSide
+    ? Math.ceil(serverTotalItems / itemsPerPage)
+    : Math.ceil(sortedAndFilteredResults.length / itemsPerPage);
 
+  const displayTotalItems = isServerSide ? serverTotalItems : sortedAndFilteredResults.length;
+
+  // Stats: use pre-computed server stats when available (completed/stopped/failed jobs).
+  // For running jobs, compute from local SSE-accumulated results.
   const stats = useMemo(() => {
+    if (serverStats) return serverStats;
     const total = results.length;
     const matched = results.filter(r => r.matches[0]?.status === "matched").length;
     const review = results.filter(r => r.matches[0]?.status === "review").length;
     const noMatch = total - matched - review;
     const accuracy = total > 0 ? (matched / total) * 100 : 0;
-
     return { total, matched, review, noMatch, accuracy };
-  }, [results]);
+  }, [results, serverStats]);
 
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-    setSortConfig({ key, direction });
+    const newSort = { key, direction };
+    setSortConfig(newSort);
     setCurrentPage(1);
+    if (isServerSide && activeJobId) {
+      fetchPageResults(activeJobId, 1, itemsPerPage, searchQuery, newSort);
+    }
   };
 
   return (
@@ -944,23 +1039,41 @@ export default function DrugMatcher() {
             </AnimatePresence>
 
             {/* Right Column: Progress & Table */}
-            {(isProcessing || isComplete || results.length > 0) && (
+            {(isProcessing || isComplete || results.length > 0 || isServerSide) && (
               <div className="space-y-6">
                 <ProgressSection progress={progress} isProcessing={isProcessing} />
 
                 <ResultsTable
                   results={results}
                   sortedAndFilteredResults={paginatedResults}
-                  totalItems={sortedAndFilteredResults.length}
+                  totalItems={displayTotalItems}
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    if (isServerSide && activeJobId) {
+                      fetchPageResults(activeJobId, page, itemsPerPage, searchQuery, sortConfig);
+                    }
+                  }}
                   itemsPerPage={itemsPerPage}
-                  onItemsPerPageChange={setItemsPerPage}
+                  onItemsPerPageChange={(val) => {
+                    setItemsPerPage(val);
+                    setCurrentPage(1);
+                    if (isServerSide && activeJobId) {
+                      fetchPageResults(activeJobId, 1, val, searchQuery, sortConfig);
+                    }
+                  }}
                   searchQuery={searchQuery}
                   setSearchQuery={(q) => {
                     setSearchQuery(q);
                     setCurrentPage(1);
+                    if (isServerSide && activeJobId) {
+                      // Debounce 350ms to avoid hammering the API on every keystroke
+                      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                      searchDebounceRef.current = setTimeout(() => {
+                        fetchPageResults(activeJobId, 1, itemsPerPage, q, sortConfig);
+                      }, 350);
+                    }
                   }}
                   sortConfig={sortConfig}
                   requestSort={requestSort}
@@ -968,9 +1081,11 @@ export default function DrugMatcher() {
                   handleReject={handleReject}
                   onManualSelect={setSelectedRowForManual}
                   onViewDetails={setSelectedRowForDetails}
+                  isLoadingPage={isLoadingPage}
                 />
               </div>
             )}
+
           </div>
         </>
       )}

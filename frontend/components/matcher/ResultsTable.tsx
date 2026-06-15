@@ -20,6 +20,7 @@ interface ResultsTableProps {
   handleReject: (idx: number) => void;
   onManualSelect: (res: any) => void;
   onViewDetails: (res: any) => void;
+  isLoadingPage?: boolean;
 }
 
 const ProductImage: React.FC<{ src?: string; alt?: string }> = ({ src, alt }) => {
@@ -62,7 +63,22 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   handleReject,
   onManualSelect,
   onViewDetails,
+  isLoadingPage = false,
 }) => {
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
+  const outerRef = React.useRef<HTMLDivElement>(null);
+
+  // Automatically scroll viewport to the top of the table on page changes
+  React.useEffect(() => {
+    // Only scroll if this is not the initial load to avoid jumping on page mount
+    if (currentPage > 1 || results.length > 0) {
+      outerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  }, [currentPage]);
+
   const getMethodBadge = (method?: string) => {
     switch (method) {
       case "international barcode":
@@ -86,7 +102,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   };
 
   return (
-    <div className="rounded-2xl border border-primary/50 bg-white/50 dark:bg-black/50 backdrop-blur-md overflow-hidden flex flex-col h-[750px] w-full">
+    <div ref={outerRef} className="rounded-2xl border border-primary/50 bg-white/50 dark:bg-black/50 backdrop-blur-md overflow-hidden flex flex-col h-[750px] w-full">
       <div className="p-4 border-b border-primary/50 bg-primary/5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -122,8 +138,8 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto scrollbar-thin">
-        {results.length === 0 ? (
+      <div ref={tableContainerRef} className="flex-1 overflow-auto scrollbar-thin">
+        {results.length === 0 && !isLoadingPage ? (
           <div className="h-full flex flex-col items-center justify-center text-zinc-400 p-12 space-y-4">
             <Search className="w-12 h-12 opacity-20" />
             <p className="font-medium">No results yet. Start matching to see data here.</p>
@@ -163,90 +179,125 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
               </tr>
             </thead>
             <tbody>
-              {sortedAndFilteredResults.map((res) => (
-                <motion.tr
-                  key={res.row_index}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="group hover:bg-primary/5 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0"
-                >
-                  <td className="p-4 text-xs text-zinc-400">#{res.row_index + 1}</td>
-                  <td className="p-4">
-                    <ProductImage
-                      src={res.matches[0]?.image || res.matches[0]?.product_data?.image}
-                      alt={res.matches[0]?.name_en}
-                    />
-                  </td>
-                  <td className="p-4">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                      {res.matches[0]?.name_en || "---"}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 font-medium">
-                      SKU: {res.matches[0]?.sku || "N/A"}
-                    </p>
-                  </td>
-                  <td className="p-4">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{res.original_name}</p>
-                    <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[150px]">{res.normalized_name}</p>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                        {res.matches[0] ? (res.matches[0].score * 100).toFixed(1) + "%" : "0%"}
-                      </span>
-                      {res.matches[0] && (
-                        <div className="w-16 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mt-1 overflow-hidden">
-                          <div
-                            className={cn(
-                              "h-full rounded-full",
-                              res.matches[0].score >= 0.8 ? "bg-success" : res.matches[0].score >= 0.6 ? "bg-warning" : "bg-error"
-                            )}
-                            style={{ width: `${res.matches[0].score * 100}%` }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-4">{getStatusBadge(res.matches[0]?.status || "no_match")}</td>
-                  <td className="p-4">{getMethodBadge(res.matching_method)}</td>
-                  <td className="p-4">
-                    <div className="flex items-center justify-end gap-2">
-                      {res.matches[0]?.status === "review" && (
-                        <>
-                          <button
-                            onClick={() => handleApprove(res.row_index)}
-                            className="p-1.5 bg-success/10 text-success hover:bg-success/20 rounded-md transition-colors"
-                            title="Approve Match"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleReject(res.row_index)}
-                            className="p-1.5 bg-error/10 text-error hover:bg-error/20 rounded-md transition-colors"
-                            title="Reject Match"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => onManualSelect(res)}
-                        className="p-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
-                        title="Manual Selection"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onViewDetails(res)}
-                        className="p-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-md transition-colors"
-                        title="Details"
-                      >
-                        <Info className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+              {isLoadingPage ? (
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <tr key={idx} className="border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                    <td className="p-4">
+                      <div className="h-4 w-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-36 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-2" />
+                      <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-48 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-2" />
+                      <div className="h-3 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="h-5 w-12 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="h-6 w-16 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="h-6 w-20 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="h-8 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                sortedAndFilteredResults.map((res) => (
+                  <motion.tr
+                    key={res.row_index}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="group hover:bg-primary/5 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0"
+                  >
+                    <td className="p-4 text-xs text-zinc-400">#{res.row_index + 1}</td>
+                    <td className="p-4">
+                      <ProductImage
+                        src={res.matches[0]?.image || res.matches[0]?.product_data?.image}
+                        alt={res.matches[0]?.name_en}
+                      />
+                    </td>
+                    <td className="p-4">
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                        {res.matches[0]?.name_en || "---"}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-medium">
+                        SKU: {res.matches[0]?.sku || "N/A"}
+                      </p>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{res.original_name}</p>
+                      <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[150px]">{res.normalized_name}</p>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                          {res.matches[0] ? (res.matches[0].score * 100).toFixed(1) + "%" : "0%"}
+                        </span>
+                        {res.matches[0] && (
+                          <div className="w-16 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                            <div
+                              className={cn(
+                                "h-full rounded-full",
+                                res.matches[0].score >= 0.8 ? "bg-success" : res.matches[0].score >= 0.6 ? "bg-warning" : "bg-error"
+                              )}
+                              style={{ width: `${res.matches[0].score * 100}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4">{getStatusBadge(res.matches[0]?.status || "no_match")}</td>
+                    <td className="p-4">{getMethodBadge(res.matching_method)}</td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {res.matches[0]?.status === "review" && (
+                          <>
+                            <button
+                              onClick={() => handleApprove(res.row_index)}
+                              className="p-1.5 bg-success/10 text-success hover:bg-success/20 rounded-md transition-colors"
+                              title="Approve Match"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleReject(res.row_index)}
+                              className="p-1.5 bg-error/10 text-error hover:bg-error/20 rounded-md transition-colors"
+                              title="Reject Match"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => onManualSelect(res)}
+                          className="p-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+                          title="Manual Selection"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onViewDetails(res)}
+                          className="p-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-md transition-colors"
+                          title="Details"
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
             </tbody>
           </table>
         )}

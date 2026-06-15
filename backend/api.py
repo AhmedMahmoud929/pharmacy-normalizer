@@ -2275,28 +2275,44 @@ async def stop_matcher_job(job_id: str):
 async def get_matcher_job_results(
     job_id: str,
     offset: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100000),
+    limit: int = Query(50, ge=1, le=100000),
     status: Optional[str] = Query(None),
-    search: Optional[str] = Query(None)
+    search: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_dir: str = Query("asc")
 ):
     from tools.matcher_db import get_job
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-        
+
+    # Build stats from pre-computed job counters (instant, no file scan needed)
+    total_rows = job.get("total_rows", 0)
+    matched_count = job.get("matched_count", 0)
+    review_count = job.get("review_count", 0)
+    no_match_count = job.get("no_match_count", 0)
+    job_stats = {
+        "total": total_rows,
+        "matched": matched_count,
+        "review": review_count,
+        "noMatch": no_match_count,
+        "accuracy": round((matched_count / total_rows) * 100, 1) if total_rows > 0 else 0
+    }
+
     results_path = job["results_path"]
     if not results_path or not os.path.exists(results_path):
-        # Return empty list if processing is still pending
         if job["status"] in ["pending", "running"]:
             return {
                 "job_id": job_id,
                 "total": 0,
+                "total_unfiltered": 0,
                 "limit": limit,
                 "offset": offset,
-                "results": []
+                "results": [],
+                "stats": job_stats
             }
         raise HTTPException(status_code=404, detail="Job results file not found")
-        
+
     try:
         with open(results_path, "r", encoding="utf-8") as f:
             all_results = json.load(f)
@@ -2305,12 +2321,16 @@ async def get_matcher_job_results(
             return {
                 "job_id": job_id,
                 "total": 0,
+                "total_unfiltered": 0,
                 "limit": limit,
                 "offset": offset,
-                "results": []
+                "results": [],
+                "stats": job_stats
             }
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
-        
+
+    total_unfiltered = len(all_results)
+
     filtered_results = []
     for item in all_results:
         if search:
@@ -2319,23 +2339,42 @@ async def get_matcher_job_results(
             cand_match = any(q_lower in m.get("name_en", "").lower() for m in item.get("matches", []))
             if not (orig_match or cand_match):
                 continue
-                
+
         if status:
             top_status = item["matches"][0]["status"] if item.get("matches") else "no_match"
             if top_status != status:
                 continue
-                
+
         filtered_results.append(item)
-        
-    paginated = filtered_results[offset : offset + limit]
-    
+
+    # Server-side sorting
+    if sort_by:
+        reverse = sort_dir.lower() == "desc"
+        if sort_by == "row_index":
+            filtered_results.sort(key=lambda x: x.get("row_index", 0), reverse=reverse)
+        elif sort_by == "score":
+            filtered_results.sort(key=lambda x: (x.get("matches") or [{}])[0].get("score", 0), reverse=reverse)
+        elif sort_by == "status":
+            status_order = {"matched": 0, "review": 1, "no_match": 2}
+            filtered_results.sort(
+                key=lambda x: status_order.get((x.get("matches") or [{}])[0].get("status", "no_match"), 2),
+                reverse=reverse
+            )
+        elif sort_by == "matching_method":
+            filtered_results.sort(key=lambda x: x.get("matching_method", "normalizer") or "normalizer", reverse=reverse)
+
+    paginated = filtered_results[offset: offset + limit]
+
     return {
         "job_id": job_id,
         "total": len(filtered_results),
+        "total_unfiltered": total_unfiltered,
         "limit": limit,
         "offset": offset,
-        "results": paginated
+        "results": paginated,
+        "stats": job_stats
     }
+
 
 @app.post("/api/matcher/job/{job_id}/override")
 async def override_matcher_match(job_id: str, req: OverrideRequest):
