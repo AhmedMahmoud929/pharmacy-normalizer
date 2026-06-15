@@ -18,6 +18,7 @@ import { ResultsTable } from "./matcher/ResultsTable";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { ManualMatchModal } from "./ManualMatchModal";
 import { ExportDialog } from "./matcher/ExportDialog";
+import { MatcherSkeleton } from "./matcher/MatcherSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -70,6 +71,7 @@ export default function DrugMatcher() {
   const [progress, setProgress] = useState<ProgressState>({ current: 0, total: 0 });
   const [results, setResults] = useState<MatchResult[]>([]);
   const [previewRows, setPreviewRows] = useState<any[]>([]);
+  const [isLoadingJob, setIsLoadingJob] = useState(false);
 
   // Background & History states
   const [background, setBackground] = useState(true);
@@ -116,14 +118,18 @@ export default function DrugMatcher() {
   useEffect(() => {
     if (queryJobId) {
       const fetchAndSelectJob = async () => {
+        setIsLoadingJob(true);
         try {
           const res = await fetch(`${API_URL}/api/matcher/job/${queryJobId}`);
           if (res.ok) {
             const jobData = await res.json();
-            selectJob(jobData);
+            await selectJob(jobData);
+          } else {
+            setIsLoadingJob(false);
           }
         } catch (err) {
           console.error("Failed to rehydrate job from URL query parameter:", err);
+          setIsLoadingJob(false);
         }
       };
       fetchAndSelectJob();
@@ -214,6 +220,7 @@ export default function DrugMatcher() {
   }, []);
 
   const selectJob = async (job: any, autoOpenExport = false) => {
+    setIsLoadingJob(true);
     setActiveJobId(job.job_id);
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", `?job_id=${job.job_id}`);
@@ -237,104 +244,106 @@ export default function DrugMatcher() {
     setMatchWithCode(!!job.match_with_code);
     setMatchPosCodeColumn(job.match_pos_code_column || "");
 
-    if (job.status === "completed") {
-      setIsProcessing(false);
-      setIsComplete(true);
-      setResults([]);
-
-      // Fetch full results
-      try {
-        const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`);
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data.results || []);
-          if (autoOpenExport) {
-            setIsExportDialogOpen(true);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch job results:", err);
-      }
-    } else if (job.status === "running" || job.status === "pending") {
-      setIsProcessing(true);
-      setIsComplete(false);
-      setResults([]);
-      setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
-
-      // Fetch initial already-processed results so the table is not empty
-      fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`)
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error("Failed to fetch initial results");
-        })
-        .then(data => {
-          setResults(data.results || []);
-        })
-        .catch(err => {
-          console.error("Error fetching initial results for running job:", err);
-        });
-
-      // Subscribe to real-time streaming progress SSE channel
-      const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
-
-      eventSource.addEventListener("info", (e) => {
-        const data = JSON.parse(e.data);
-        setProgress(prev => ({ ...prev, total: data.total_rows }));
-      });
-
-      eventSource.addEventListener("progress", (e) => {
-        const data = JSON.parse(e.data);
-        setProgress({
-          current: data.processed_rows,
-          total: data.total_rows
-        });
-      });
-
-      eventSource.addEventListener("result", (e) => {
-        const payload = JSON.parse(e.data) as MatchResult;
-        setResults(prev => {
-          if (prev.some(r => r.row_index === payload.row_index)) return prev;
-          return [payload, ...prev];
-        });
-      });
-
-      eventSource.addEventListener("complete", (e) => {
+    try {
+      if (job.status === "completed") {
         setIsProcessing(false);
         setIsComplete(true);
-        eventSource.close();
-        fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`)
-          .then(res => res.json())
-          .then(data => {
+        setResults([]);
+
+        // Fetch full results
+        try {
+          const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
+          if (response.ok) {
+            const data = await response.json();
             setResults(data.results || []);
-            setIsExportDialogOpen(true);
-          });
-      });
-
-      eventSource.addEventListener("error", (e) => {
-        console.error("SSE stream error:", e);
-        setIsProcessing(false);
-        eventSource.close();
-      });
-    } else {
-      setIsProcessing(false);
-      setIsComplete(false);
-      setResults([]);
-
-      try {
-        const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=10000`);
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data.results || []);
+            if (autoOpenExport) {
+              setIsExportDialogOpen(true);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to fetch job results:", err);
         }
-      } catch (err) {
-        console.error("Failed to fetch partial job results:", err);
-      }
+      } else if (job.status === "running" || job.status === "pending") {
+        setIsProcessing(true);
+        setIsComplete(false);
+        setResults([]);
+        setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
 
-      toast({
-        title: `Job ${job.status.toUpperCase()}`,
-        description: job.error_msg ? `Status: ${job.error_msg}` : `This campaign was ${job.status}.`,
-        type: job.status === "stopped" ? "info" : "error"
-      });
+        // Fetch initial already-processed results so the table is not empty
+        try {
+          const res = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
+          if (res.ok) {
+            const data = await res.json();
+            setResults(data.results || []);
+          }
+        } catch (err) {
+          console.error("Error fetching initial results for running job:", err);
+        }
+
+        // Subscribe to real-time streaming progress SSE channel
+        const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
+
+        eventSource.addEventListener("info", (e) => {
+          const data = JSON.parse(e.data);
+          setProgress(prev => ({ ...prev, total: data.total_rows }));
+        });
+
+        eventSource.addEventListener("progress", (e) => {
+          const data = JSON.parse(e.data);
+          setProgress({
+            current: data.processed_rows,
+            total: data.total_rows
+          });
+        });
+
+        eventSource.addEventListener("result", (e) => {
+          const payload = JSON.parse(e.data) as MatchResult;
+          setResults(prev => {
+            if (prev.some(r => r.row_index === payload.row_index)) return prev;
+            return [payload, ...prev];
+          });
+        });
+
+        eventSource.addEventListener("complete", (e) => {
+          setIsProcessing(false);
+          setIsComplete(true);
+          eventSource.close();
+          fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`)
+            .then(res => res.json())
+            .then(data => {
+              setResults(data.results || []);
+              setIsExportDialogOpen(true);
+            });
+        });
+
+        eventSource.addEventListener("error", (e) => {
+          console.error("SSE stream error:", e);
+          setIsProcessing(false);
+          eventSource.close();
+        });
+      } else {
+        setIsProcessing(false);
+        setIsComplete(false);
+        setResults([]);
+
+        try {
+          const response = await fetch(`${API_URL}/api/matcher/job/${job.job_id}/results?limit=100000`);
+          if (response.ok) {
+            const data = await response.json();
+            setResults(data.results || []);
+          }
+        } catch (err) {
+          console.error("Failed to fetch partial job results:", err);
+        }
+
+        toast({
+          title: `Job ${job.status.toUpperCase()}`,
+          description: job.error_msg ? `Status: ${job.error_msg}` : `This campaign was ${job.status}.`,
+          type: job.status === "stopped" ? "info" : "error"
+        });
+      }
+    } finally {
+      setIsLoadingJob(false);
     }
   };
 
@@ -427,7 +436,7 @@ export default function DrugMatcher() {
           fetchHistory();
 
           // Fetch initial already-processed results so the table is not empty at startup
-          fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=10000`)
+          fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=100000`)
             .then(res => {
               if (res.ok) return res.json();
               throw new Error("Failed to fetch initial results");
@@ -467,7 +476,7 @@ export default function DrugMatcher() {
             setIsProcessing(false);
             setIsComplete(true);
             eventSource.close();
-            fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=10000`)
+            fetch(`${API_URL}/api/matcher/job/${data.job_id}/results?limit=100000`)
               .then(res => res.json())
               .then(resData => {
                 setResults(resData.results || []);
@@ -737,7 +746,7 @@ export default function DrugMatcher() {
             History Logs
           </button>
 
-          {isProcessing && (
+          {isProcessing && !isLoadingJob && (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
@@ -753,7 +762,7 @@ export default function DrugMatcher() {
             </div>
           )}
 
-          {(isComplete || activeJobId || (results.length > 0 && !isProcessing)) && (
+          {(isComplete || activeJobId || (results.length > 0 && !isProcessing)) && !isLoadingJob && (
             <div className="flex items-center gap-3">
               {isComplete && (
                 <button
@@ -780,185 +789,191 @@ export default function DrugMatcher() {
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <MatchStats stats={stats} isComplete={isComplete} />
+      {/* Stats Summary & Table layout or loading skeleton */}
+      {isLoadingJob ? (
+        <MatcherSkeleton />
+      ) : (
+        <>
+          <MatchStats stats={stats} isComplete={isComplete} />
 
-      <div className={cn(
-        "grid gap-8 transition-all duration-500 flex-1 w-full grid-cols-1"
-      )}>
-        {/* Left Column: Config & Upload */}
-        <AnimatePresence>
-          {(!isProcessing && !isComplete && results.length === 0) && (
-            <motion.div
-              initial={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full overflow-hidden"
-            >
-              {!file ? (
-                <div className="max-w-xl mx-auto py-12">
-                  <UploadZone file={file} onFileChange={handleFileChange} />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-                  {/* Left Column: Configuration Parameters */}
-                  <div className="lg:col-span-5 space-y-6">
-                    <MatchConfig
-                      file={file}
-                      columns={columns}
-                      selectedColumn={selectedColumn}
-                      setSelectedColumn={setSelectedColumn}
-                      matchThreshold={matchThreshold}
-                      setMatchThreshold={setMatchThreshold}
-                      reviewThreshold={reviewThreshold}
-                      setReviewThreshold={setReviewThreshold}
-                      parallel={parallel}
-                      setParallel={setParallel}
-                      workers={workers}
-                      setWorkers={setWorkers}
-                      isProcessing={isProcessing}
-                      onStart={startMatching}
-                      background={background}
-                      setBackground={setBackground}
-                      useUploadedPrice={useUploadedPrice}
-                      setUseUploadedPrice={setUseUploadedPrice}
-                      priceColumn={priceColumn}
-                      setPriceColumn={setPriceColumn}
-                      useUploadedStock={useUploadedStock}
-                      setUseUploadedStock={setUseUploadedStock}
-                      stockColumn={stockColumn}
-                      setStockColumn={setStockColumn}
-                      defaultStock={defaultStock}
-                      setDefaultStock={setDefaultStock}
-                      useUploadedCode={useUploadedCode}
-                      setUseUploadedCode={setUseUploadedCode}
-                      codeColumn={codeColumn}
-                      setCodeColumn={setCodeColumn}
-                      useUploadedInternationalBarcode={useUploadedInternationalBarcode}
-                      setUseUploadedInternationalBarcode={setUseUploadedInternationalBarcode}
-                      internationalBarcodeColumn={internationalBarcodeColumn}
-                      setInternationalBarcodeColumn={setInternationalBarcodeColumn}
-                      matchWithInternationalBarcode={matchWithInternationalBarcode}
-                      setMatchWithInternationalBarcode={setMatchWithInternationalBarcode}
-                      matchInternationalBarcodeColumn={matchInternationalBarcodeColumn}
-                      setMatchInternationalBarcodeColumn={setMatchInternationalBarcodeColumn}
-                      matchWithCode={matchWithCode}
-                      setMatchWithCode={setMatchWithCode}
-                      matchPosCodeColumn={matchPosCodeColumn}
-                      setMatchPosCodeColumn={setMatchPosCodeColumn}
-                    />
-                  </div>
-
-                  {/* Right Column: Sheet Metadata and Data-Profiling Quick Preview */}
-                  <div className="lg:col-span-7 space-y-6">
-                    <div className="p-6 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/50 shadow-sm space-y-6">
-                      <div className="flex items-center justify-between border-b border-primary/10 pb-4">
-                        <div>
-                          <h3 className="text-md font-bold text-foreground truncate max-w-[280px]">
-                            {file.name}
-                          </h3>
-                          <p className="text-xs text-zinc-400 mt-1">
-                            {(file.size / 1024).toFixed(1)} KB • {columns.length} columns detected
-                          </p>
-                        </div>
-                        <button
-                          onClick={reset}
-                          className="px-4 py-2 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-full transition-all"
-                        >
-                          Change Sheet
-                        </button>
+          <div className={cn(
+            "grid gap-8 transition-all duration-500 flex-1 w-full grid-cols-1"
+          )}>
+            {/* Left Column: Config & Upload */}
+            <AnimatePresence>
+              {(!isProcessing && !isComplete && results.length === 0) && (
+                <motion.div
+                  initial={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="w-full overflow-hidden"
+                >
+                  {!file ? (
+                    <div className="max-w-xl mx-auto py-12">
+                      <UploadZone file={file} onFileChange={handleFileChange} />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+                      {/* Left Column: Configuration Parameters */}
+                      <div className="lg:col-span-5 space-y-6">
+                        <MatchConfig
+                          file={file}
+                          columns={columns}
+                          selectedColumn={selectedColumn}
+                          setSelectedColumn={setSelectedColumn}
+                          matchThreshold={matchThreshold}
+                          setMatchThreshold={setMatchThreshold}
+                          reviewThreshold={reviewThreshold}
+                          setReviewThreshold={setReviewThreshold}
+                          parallel={parallel}
+                          setParallel={setParallel}
+                          workers={workers}
+                          setWorkers={setWorkers}
+                          isProcessing={isProcessing}
+                          onStart={startMatching}
+                          background={background}
+                          setBackground={setBackground}
+                          useUploadedPrice={useUploadedPrice}
+                          setUseUploadedPrice={setUseUploadedPrice}
+                          priceColumn={priceColumn}
+                          setPriceColumn={setPriceColumn}
+                          useUploadedStock={useUploadedStock}
+                          setUseUploadedStock={setUseUploadedStock}
+                          stockColumn={stockColumn}
+                          setStockColumn={setStockColumn}
+                          defaultStock={defaultStock}
+                          setDefaultStock={setDefaultStock}
+                          useUploadedCode={useUploadedCode}
+                          setUseUploadedCode={setUseUploadedCode}
+                          codeColumn={codeColumn}
+                          setCodeColumn={setCodeColumn}
+                          useUploadedInternationalBarcode={useUploadedInternationalBarcode}
+                          setUseUploadedInternationalBarcode={setUseUploadedInternationalBarcode}
+                          internationalBarcodeColumn={internationalBarcodeColumn}
+                          setInternationalBarcodeColumn={setInternationalBarcodeColumn}
+                          matchWithInternationalBarcode={matchWithInternationalBarcode}
+                          setMatchWithInternationalBarcode={setMatchWithInternationalBarcode}
+                          matchInternationalBarcodeColumn={matchInternationalBarcodeColumn}
+                          setMatchInternationalBarcodeColumn={setMatchInternationalBarcodeColumn}
+                          matchWithCode={matchWithCode}
+                          setMatchWithCode={setMatchWithCode}
+                          matchPosCodeColumn={matchPosCodeColumn}
+                          setMatchPosCodeColumn={setMatchPosCodeColumn}
+                        />
                       </div>
 
-                      <div className="space-y-4">
-                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 block">
-                          Spreadsheet Preview (First 5 Rows)
-                        </span>
-
-                        {previewRows.length === 0 ? (
-                          <div className="text-center py-8 text-zinc-500 text-sm">
-                            Loading spreadsheet preview...
+                      {/* Right Column: Sheet Metadata and Data-Profiling Quick Preview */}
+                      <div className="lg:col-span-7 space-y-6">
+                        <div className="p-6 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/50 shadow-sm space-y-6">
+                          <div className="flex items-center justify-between border-b border-primary/10 pb-4">
+                            <div>
+                              <h3 className="text-md font-bold text-foreground truncate max-w-[280px]">
+                                {file.name}
+                              </h3>
+                              <p className="text-xs text-zinc-400 mt-1">
+                                {(file.size / 1024).toFixed(1)} KB • {columns.length} columns detected
+                              </p>
+                            </div>
+                            <button
+                              onClick={reset}
+                              className="px-4 py-2 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-full transition-all"
+                            >
+                              Change Sheet
+                            </button>
                           </div>
-                        ) : (
-                          <div className="overflow-x-auto border border-primary/10 rounded-xl max-h-[350px] scrollbar-thin">
-                            <table className="w-full text-left border-collapse text-xs">
-                              <thead>
-                                <tr className="bg-primary/5 text-zinc-400 font-bold uppercase border-b border-primary/10">
-                                  {columns.slice(0, 4).map((col, idx) => (
-                                    <th key={idx} className="p-3 whitespace-nowrap">
-                                      {col}
-                                    </th>
-                                  ))}
-                                  {columns.length > 4 && (
-                                    <th className="p-3 text-zinc-500 whitespace-nowrap">
-                                      +{columns.length - 4} More
-                                    </th>
-                                  )}
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {previewRows.map((row, rowIdx) => (
-                                  <tr key={rowIdx} className="border-b border-zinc-100 dark:border-zinc-800/80 last:border-0 hover:bg-primary/5 transition-colors">
-                                    {columns.slice(0, 4).map((col, colIdx) => (
-                                      <td key={colIdx} className="p-3 text-zinc-600 dark:text-zinc-300 font-medium truncate max-w-[150px]">
-                                        {row[col] !== undefined ? String(row[col]) : "---"}
-                                      </td>
+
+                          <div className="space-y-4">
+                            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 block">
+                              Spreadsheet Preview (First 5 Rows)
+                            </span>
+
+                            {previewRows.length === 0 ? (
+                              <div className="text-center py-8 text-zinc-500 text-sm">
+                                Loading spreadsheet preview...
+                              </div>
+                            ) : (
+                              <div className="overflow-x-auto border border-primary/10 rounded-xl max-h-[350px] scrollbar-thin">
+                                <table className="w-full text-left border-collapse text-xs">
+                                  <thead>
+                                    <tr className="bg-primary/5 text-zinc-400 font-bold uppercase border-b border-primary/10">
+                                      {columns.slice(0, 4).map((col, idx) => (
+                                        <th key={idx} className="p-3 whitespace-nowrap">
+                                          {col}
+                                        </th>
+                                      ))}
+                                      {columns.length > 4 && (
+                                        <th className="p-3 text-zinc-500 whitespace-nowrap">
+                                          +{columns.length - 4} More
+                                        </th>
+                                      )}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {previewRows.map((row, rowIdx) => (
+                                      <tr key={rowIdx} className="border-b border-zinc-100 dark:border-zinc-800/80 last:border-0 hover:bg-primary/5 transition-colors">
+                                        {columns.slice(0, 4).map((col, colIdx) => (
+                                          <td key={colIdx} className="p-3 text-zinc-600 dark:text-zinc-300 font-medium truncate max-w-[150px]">
+                                            {row[col] !== undefined ? String(row[col]) : "---"}
+                                          </td>
+                                        ))}
+                                        {columns.length > 4 && (
+                                          <td className="p-3 text-zinc-400 italic">
+                                            ...
+                                          </td>
+                                        )}
+                                      </tr>
                                     ))}
-                                    {columns.length > 4 && (
-                                      <td className="p-3 text-zinc-400 italic">
-                                        ...
-                                      </td>
-                                    )}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      {/* Informational Profiler Tip */}
-                      <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 animate-pulse" />
-                        <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
-                          <span className="text-primary font-bold">Data Profile Tip:</span> Ensure that you map the correct column key for pharmaceutical brand names on the left dashboard to get the highest fuzzy string sequence scores.
-                        </p>
+                          {/* Informational Profiler Tip */}
+                          <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 animate-pulse" />
+                            <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
+                              <span className="text-primary font-bold">Data Profile Tip:</span> Ensure that you map the correct column key for pharmaceutical brand names on the left dashboard to get the highest fuzzy string sequence scores.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  )}
+                </motion.div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </AnimatePresence>
 
-        {/* Right Column: Progress & Table */}
-        {(isProcessing || isComplete || results.length > 0) && (
-          <div className="space-y-6">
-            <ProgressSection progress={progress} isProcessing={isProcessing} />
+            {/* Right Column: Progress & Table */}
+            {(isProcessing || isComplete || results.length > 0) && (
+              <div className="space-y-6">
+                <ProgressSection progress={progress} isProcessing={isProcessing} />
 
-            <ResultsTable
-              results={results}
-              sortedAndFilteredResults={paginatedResults}
-              totalItems={sortedAndFilteredResults.length}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={itemsPerPage}
-              onItemsPerPageChange={setItemsPerPage}
-              searchQuery={searchQuery}
-              setSearchQuery={(q) => {
-                setSearchQuery(q);
-                setCurrentPage(1);
-              }}
-              sortConfig={sortConfig}
-              requestSort={requestSort}
-              handleApprove={handleApprove}
-              handleReject={handleReject}
-              onManualSelect={setSelectedRowForManual}
-              onViewDetails={setSelectedRowForDetails}
-            />
+                <ResultsTable
+                  results={results}
+                  sortedAndFilteredResults={paginatedResults}
+                  totalItems={sortedAndFilteredResults.length}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  searchQuery={searchQuery}
+                  setSearchQuery={(q) => {
+                    setSearchQuery(q);
+                    setCurrentPage(1);
+                  }}
+                  sortConfig={sortConfig}
+                  requestSort={requestSort}
+                  handleApprove={handleApprove}
+                  handleReject={handleReject}
+                  onManualSelect={setSelectedRowForManual}
+                  onViewDetails={setSelectedRowForDetails}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* History Drawer */}
       <AnimatePresence>

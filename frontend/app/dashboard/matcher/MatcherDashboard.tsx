@@ -44,7 +44,7 @@ export default function MatcherDashboard() {
   const handleExportClick = async (jobId: string) => {
     setExportingJobId(jobId);
     try {
-      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=10000`);
+      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
       if (response.ok) {
         const data = await response.json();
         setSelectedJobResults(data.results || []);
