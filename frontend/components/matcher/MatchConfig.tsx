@@ -48,6 +48,8 @@ interface MatchConfigProps {
   setMatchWithCode: (val: boolean) => void;
   matchPosCodeColumn: string;
   setMatchPosCodeColumn: (col: string) => void;
+  skipNormalizer: boolean;
+  setSkipNormalizer: (val: boolean) => void;
 }
 
 export const MatchConfig: React.FC<MatchConfigProps> = ({
@@ -93,6 +95,8 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
   setMatchWithCode,
   matchPosCodeColumn,
   setMatchPosCodeColumn,
+  skipNormalizer,
+  setSkipNormalizer,
 }) => {
   if (!file) return null;
 
@@ -408,6 +412,30 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Skip Normalizer */}
+      <div className="pt-4 border-t border-primary/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-neutral-gray">Skip Normalizer (Text Search)</label>
+            <span className="text-[10px] text-zinc-400">Only search by international barcode or code</span>
+          </div>
+          <button
+            onClick={() => setSkipNormalizer(!skipNormalizer)}
+            className={cn(
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+              skipNormalizer ? "bg-primary" : "bg-neutral-gray/20"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                skipNormalizer ? "translate-x-6" : "translate-x-1"
+              )}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-6">

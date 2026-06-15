@@ -89,6 +89,7 @@ export default function DrugMatcher() {
   const [matchInternationalBarcodeColumn, setMatchInternationalBarcodeColumn] = useState("");
   const [matchWithCode, setMatchWithCode] = useState(true);
   const [matchPosCodeColumn, setMatchPosCodeColumn] = useState("");
+  const [skipNormalizer, setSkipNormalizer] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -309,6 +310,7 @@ export default function DrugMatcher() {
     setMatchInternationalBarcodeColumn(job.match_international_barcode_column || "");
     setMatchWithCode(!!job.match_with_code);
     setMatchPosCodeColumn(job.match_pos_code_column || "");
+    setSkipNormalizer(!!job.skip_normalizer);
 
     try {
       if (job.status === "completed") {
@@ -458,6 +460,7 @@ export default function DrugMatcher() {
     setSortConfig(null);
     setJobStartTime(null);
     setElapsedSeconds(null);
+    setSkipNormalizer(false);
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", window.location.pathname);
     }
@@ -511,6 +514,7 @@ export default function DrugMatcher() {
     formData.append("match_international_barcode_column", matchWithInternationalBarcode ? matchInternationalBarcodeColumn : "");
     formData.append("match_with_code", matchWithCode.toString());
     formData.append("match_pos_code_column", matchWithCode ? matchPosCodeColumn : "");
+    formData.append("skip_normalizer", skipNormalizer.toString());
 
     try {
       const response = await fetch(`${API_URL}/api/matcher/run`, {
@@ -998,6 +1002,8 @@ export default function DrugMatcher() {
                           setMatchWithCode={setMatchWithCode}
                           matchPosCodeColumn={matchPosCodeColumn}
                           setMatchPosCodeColumn={setMatchPosCodeColumn}
+                          skipNormalizer={skipNormalizer}
+                          setSkipNormalizer={setSkipNormalizer}
                         />
                       </div>
 

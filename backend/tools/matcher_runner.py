@@ -223,6 +223,7 @@ def _process_single_row(
     match_code_value: Optional[str] = None,
     match_with_international_barcode: bool = False,
     match_with_code: bool = False,
+    skip_normalizer: bool = False,
 ) -> dict:
     """Core row matching computation executed inside ThreadPool or ProcessPool workers."""
     active_index = index_inst or _global_index
@@ -245,31 +246,34 @@ def _process_single_row(
             matches = _build_matches_from_entry(entry, match_threshold, review_threshold)
 
     if not matches:
-        matching_method = "normalizer"
-        for m in active_index.search(norm_name, top_k=top):
-            score = m["score"]
-            prod = m["entry"]["product"]
-            var = m["entry"]["variant"]
-            status = "matched" if score >= match_threshold else ("review" if score >= review_threshold else "no_match")
-            matches.append({
-                "score": round(score, 3),
-                "status": status,
-                "id": prod.get("id"),
-                "sku": var.get("sku"),
-                "name_en": prod.get("name_en"),
-                "price": var.get("price"),
-                "variant_id": var.get("id"),
-                "image": var.get("image") or prod.get("image"),
-                "db_normalized": m.get("db_normalized", ""),
-                "jaccard": m.get("jaccard", 0),
-                "sequence": m.get("sequence", 0),
-                "matched_tokens": m.get("matched_tokens", []),
-                "unmatched_query_tokens": m.get("unmatched_query_tokens", []),
-                "unmatched_db_tokens": m.get("unmatched_db_tokens", []),
-                "candidate_count": m.get("candidate_count", 0),
-                "product_data": enrich_product_image_status(prod),
-                "variant_data": var,
-            })
+        if skip_normalizer:
+            matching_method = "skipped"
+        else:
+            matching_method = "normalizer"
+            for m in active_index.search(norm_name, top_k=top):
+                score = m["score"]
+                prod = m["entry"]["product"]
+                var = m["entry"]["variant"]
+                status = "matched" if score >= match_threshold else ("review" if score >= review_threshold else "no_match")
+                matches.append({
+                    "score": round(score, 3),
+                    "status": status,
+                    "id": prod.get("id"),
+                    "sku": var.get("sku"),
+                    "name_en": prod.get("name_en"),
+                    "price": var.get("price"),
+                    "variant_id": var.get("id"),
+                    "image": var.get("image") or prod.get("image"),
+                    "db_normalized": m.get("db_normalized", ""),
+                    "jaccard": m.get("jaccard", 0),
+                    "sequence": m.get("sequence", 0),
+                    "matched_tokens": m.get("matched_tokens", []),
+                    "unmatched_query_tokens": m.get("unmatched_query_tokens", []),
+                    "unmatched_db_tokens": m.get("unmatched_db_tokens", []),
+                    "candidate_count": m.get("candidate_count", 0),
+                    "product_data": enrich_product_image_status(prod),
+                    "variant_data": var,
+                })
     
     return {
         "row_index": idx,
@@ -306,7 +310,8 @@ async def run_matcher_background(
     match_international_barcode_column: Optional[str] = None,
     match_with_code: bool = False,
     match_pos_code_column: Optional[str] = None,
-    index_inst: Optional[ProductIndex] = None
+    index_inst: Optional[ProductIndex] = None,
+    skip_normalizer: bool = False,
 ):
     """Asynchronous worker task managing sheet matching execution and state persistence."""
     try:
@@ -464,6 +469,7 @@ async def run_matcher_background(
                         match_code_value,
                         match_with_international_barcode,
                         match_with_code,
+                        skip_normalizer,
                     )
                     for idx, raw_name, norm_name, uploaded_price, uploaded_stock, uploaded_code, uploaded_international_barcode, match_barcode_value, match_code_value in queries
                 ]
@@ -547,6 +553,7 @@ async def run_matcher_background(
                     match_code_value,
                     match_with_international_barcode,
                     match_with_code,
+                    skip_normalizer,
                 )
                 results_list.append(result_payload)
                 

@@ -2136,6 +2136,7 @@ async def run_matcher_job(
     match_international_barcode_column: Optional[str] = Form(None),
     match_with_code: bool = Form(False),
     match_pos_code_column: Optional[str] = Form(None),
+    skip_normalizer: bool = Form(False),
 ):
     from tools.matcher_db import create_job
     from tools.matcher_runner import run_matcher_background, job_listeners
@@ -2176,6 +2177,7 @@ async def run_matcher_job(
         match_international_barcode_column=match_international_barcode_column,
         match_with_code=match_with_code,
         match_pos_code_column=match_pos_code_column,
+        skip_normalizer=skip_normalizer,
     )
 
     # 3. Schedule the worker thread execution
@@ -2203,7 +2205,8 @@ async def run_matcher_job(
             match_international_barcode_column=match_international_barcode_column,
             match_with_code=match_with_code,
             match_pos_code_column=match_pos_code_column,
-            index_inst=index
+            index_inst=index,
+            skip_normalizer=skip_normalizer,
         )
     )
 
