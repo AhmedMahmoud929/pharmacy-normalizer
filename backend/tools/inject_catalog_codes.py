@@ -124,7 +124,12 @@ def inject_codes(
 
     backup_path = catalog_path + ".bak"
     print(f"Backing up catalog to {backup_path}")
-    shutil.copy2(catalog_path, backup_path)
+    if os.path.exists(backup_path):
+        try:
+            os.remove(backup_path)
+        except OSError:
+            pass
+    shutil.copyfile(catalog_path, backup_path)
 
     print(f"Writing updated catalog ({len(products):,} products)...")
     with open(catalog_path, "w", encoding="utf-8") as f:
