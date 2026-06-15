@@ -205,6 +205,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             case "match_score":
               record["match_score"] = topMatch ? (topMatch.score * 100).toFixed(1) + "%" : "0%";
               break;
+            case "matching_method":
+              record["matching_method"] = res.matching_method || "normalizer";
+              break;
             case "jaccard":
               record["jaccard_score"] = topMatch?.jaccard != null ? (topMatch.jaccard * 100).toFixed(1) + "%" : "";
               break;

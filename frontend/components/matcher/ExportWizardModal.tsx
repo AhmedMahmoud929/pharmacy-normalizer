@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
-import { ColumnOption, columnOptions, brandColumnOptions, categoryColumnOptions } from "@/constants/columns";
+import { ColumnOption, brandColumnOptions, categoryColumnOptions, browseProductColumnOptions, MatcherColumnOption } from "@/constants/columns";
 
 interface ExportWizardModalProps {
   isOpen: boolean;
@@ -67,17 +67,17 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
         setStage(0);
         setExportType("data");
         setMediaTypes(["products", "brands"]);
-        setSelectedColumns(columnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
+        setSelectedColumns(browseProductColumnOptions.filter(o => o.defaultChecked !== false).map(o => o.key));
       }
     }
   }, [isOpen, mode]);
 
   if (!isOpen) return null;
 
-  const currentColumnOptions =
+  const currentColumnOptions: (ColumnOption | MatcherColumnOption)[] =
     mode === "brands" ? brandColumnOptions :
       mode === "categories" ? categoryColumnOptions :
-        columnOptions;
+        browseProductColumnOptions;
 
   const handleToggleColumn = (key: string) => {
     setSelectedColumns(prev =>
@@ -238,7 +238,7 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[95vh]"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
@@ -556,28 +556,88 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                    {currentColumnOptions.map(col => {
-                      const isChecked = selectedColumns.includes(col.key);
-                      return (
-                        <button
-                          key={col.key}
-                          onClick={() => handleToggleColumn(col.key)}
-                          className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
-                        >
-                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
-                            ? "bg-primary border-primary text-white"
-                            : "border-zinc-300 dark:border-zinc-700"
-                            }`}>
-                            {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                          </div>
-                          <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
-                            {col.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {mode === "products" ? (
+                    <div className="space-y-4 overflow-y-auto pr-1 max-h-[320px]">
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-violet-400/90 bg-violet-500/10 px-2 py-0.5 rounded w-fit">
+                          Custom Export Fields
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-violet-200/40 dark:border-violet-800/30">
+                          {browseProductColumnOptions.filter(col => col.group === "custom").map(col => {
+                            const isChecked = selectedColumns.includes(col.key);
+                            return (
+                              <button
+                                key={col.key}
+                                onClick={() => handleToggleColumn(col.key)}
+                                className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                              >
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                  ? "bg-violet-500 border-violet-500 text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                                  }`}>
+                                  {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                                </div>
+                                <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate font-mono text-[10px]">
+                                  {col.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400/90 bg-zinc-55 dark:bg-zinc-800/50 px-2 py-0.5 rounded w-fit">
+                          Product Fields
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                          {browseProductColumnOptions.filter(col => col.group === "product").map(col => {
+                            const isChecked = selectedColumns.includes(col.key);
+                            return (
+                              <button
+                                key={col.key}
+                                onClick={() => handleToggleColumn(col.key)}
+                                className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                              >
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                  ? "bg-primary border-primary text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                                  }`}>
+                                  {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                                </div>
+                                <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
+                                  {col.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                      {currentColumnOptions.map(col => {
+                        const isChecked = selectedColumns.includes(col.key);
+                        return (
+                          <button
+                            key={col.key}
+                            onClick={() => handleToggleColumn(col.key)}
+                            className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                          >
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                              ? "bg-primary border-primary text-white"
+                              : "border-zinc-300 dark:border-zinc-700"
+                              }`}>
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
+                              {col.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

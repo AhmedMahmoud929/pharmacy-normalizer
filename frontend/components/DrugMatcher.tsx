@@ -50,6 +50,7 @@ interface MatchResult {
   uploaded_stock?: number | null;
   uploaded_code?: string | null;
   uploaded_international_barcode?: string | null;
+  matching_method?: "international barcode" | "code" | "normalizer";
   matches: MatchCandidate[];
 }
 
@@ -82,6 +83,10 @@ export default function DrugMatcher() {
   const [codeColumn, setCodeColumn] = useState("");
   const [useUploadedInternationalBarcode, setUseUploadedInternationalBarcode] = useState(false);
   const [internationalBarcodeColumn, setInternationalBarcodeColumn] = useState("");
+  const [matchWithInternationalBarcode, setMatchWithInternationalBarcode] = useState(true);
+  const [matchInternationalBarcodeColumn, setMatchInternationalBarcodeColumn] = useState("");
+  const [matchWithCode, setMatchWithCode] = useState(true);
+  const [matchPosCodeColumn, setMatchPosCodeColumn] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [historyJobs, setHistoryJobs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -182,6 +187,12 @@ export default function DrugMatcher() {
         );
         if (foundBarcode) setInternationalBarcodeColumn(foundBarcode);
         else setInternationalBarcodeColumn(headers[0] || "");
+
+        if (foundBarcode) setMatchInternationalBarcodeColumn(foundBarcode);
+        else setMatchInternationalBarcodeColumn(headers[0] || "");
+
+        if (foundCode) setMatchPosCodeColumn(foundCode);
+        else setMatchPosCodeColumn(headers[0] || "");
       }
     };
     reader.readAsBinaryString(selectedFile);
@@ -221,6 +232,10 @@ export default function DrugMatcher() {
     setCodeColumn(job.code_column || "");
     setUseUploadedInternationalBarcode(!!job.use_uploaded_international_barcode);
     setInternationalBarcodeColumn(job.international_barcode_column || "");
+    setMatchWithInternationalBarcode(!!job.match_with_international_barcode);
+    setMatchInternationalBarcodeColumn(job.match_international_barcode_column || "");
+    setMatchWithCode(!!job.match_with_code);
+    setMatchPosCodeColumn(job.match_pos_code_column || "");
 
     if (job.status === "completed") {
       setIsProcessing(false);
@@ -381,6 +396,10 @@ export default function DrugMatcher() {
     formData.append("code_column", useUploadedCode ? codeColumn : "");
     formData.append("use_uploaded_international_barcode", useUploadedInternationalBarcode.toString());
     formData.append("international_barcode_column", useUploadedInternationalBarcode ? internationalBarcodeColumn : "");
+    formData.append("match_with_international_barcode", matchWithInternationalBarcode.toString());
+    formData.append("match_international_barcode_column", matchWithInternationalBarcode ? matchInternationalBarcodeColumn : "");
+    formData.append("match_with_code", matchWithCode.toString());
+    formData.append("match_pos_code_column", matchWithCode ? matchPosCodeColumn : "");
 
     try {
       const response = await fetch(`${API_URL}/api/matcher/run`, {
@@ -634,7 +653,8 @@ export default function DrugMatcher() {
       filtered = filtered.filter(res =>
         res.original_name.toLowerCase().includes(q) ||
         res.matches.some(m => m.name_en.toLowerCase().includes(q)) ||
-        res.matches.some(m => m.status.toLowerCase().includes(q))
+        res.matches.some(m => m.status.toLowerCase().includes(q)) ||
+        (res.matching_method || "").toLowerCase().includes(q)
       );
     }
 
@@ -649,6 +669,9 @@ export default function DrugMatcher() {
         } else if (sortConfig.key === 'status') {
           aValue = a.matches[0]?.status || '';
           bValue = b.matches[0]?.status || '';
+        } else if (sortConfig.key === 'matching_method') {
+          aValue = a.matching_method || 'normalizer';
+          bValue = b.matching_method || 'normalizer';
         } else {
           aValue = (a as any)[sortConfig.key];
           bValue = (b as any)[sortConfig.key];
@@ -814,6 +837,14 @@ export default function DrugMatcher() {
                       setUseUploadedInternationalBarcode={setUseUploadedInternationalBarcode}
                       internationalBarcodeColumn={internationalBarcodeColumn}
                       setInternationalBarcodeColumn={setInternationalBarcodeColumn}
+                      matchWithInternationalBarcode={matchWithInternationalBarcode}
+                      setMatchWithInternationalBarcode={setMatchWithInternationalBarcode}
+                      matchInternationalBarcodeColumn={matchInternationalBarcodeColumn}
+                      setMatchInternationalBarcodeColumn={setMatchInternationalBarcodeColumn}
+                      matchWithCode={matchWithCode}
+                      setMatchWithCode={setMatchWithCode}
+                      matchPosCodeColumn={matchPosCodeColumn}
+                      setMatchPosCodeColumn={setMatchPosCodeColumn}
                     />
                   </div>
 

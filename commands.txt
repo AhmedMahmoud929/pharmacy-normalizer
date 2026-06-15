@@ -25,3 +25,23 @@ python3 /var/www/pharmatcher.bya3online.com/backend/tools/export_mappings.py
 python3 /var/www/pharmatcher.bya3online.com/backend/tools/import_mappings.py
 sudo systemctl restart fastapi
 
+=== BARCODE/CODE ENRICHMENT (VPS) ===
+# sheet_with_code.xlsx is NOT in git (backend/data/input/ is gitignored).
+# Copy it manually from your local machine before running these commands:
+#
+# scp backend/data/input/sheet_with_code.xlsx \
+#   user@your-vps:/var/www/pharmatcher.bya3online.com/backend/data/input/
+#
+# Or rsync the whole input folder:
+# rsync -avz backend/data/input/ user@your-vps:/var/www/pharmatcher.bya3online.com/backend/data/input/
+#
+cd /var/www/pharmatcher.bya3online.com/backend
+source venv/bin/activate
+
+python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
+python tools/test_standard_in_sheet.py --full --skip-normalize --parallel --workers 8
+python tools/extract_matched_coverage.py
+python tools/inject_catalog_codes.py
+
+sudo systemctl restart fastapi
+

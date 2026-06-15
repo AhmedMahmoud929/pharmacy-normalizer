@@ -63,6 +63,17 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   onManualSelect,
   onViewDetails,
 }) => {
+  const getMethodBadge = (method?: string) => {
+    switch (method) {
+      case "international barcode":
+        return <span className="px-2 py-1 bg-blue-500/10 text-blue-600 text-[10px] font-bold uppercase rounded-md border border-blue-500/20">Barcode</span>;
+      case "code":
+        return <span className="px-2 py-1 bg-purple-500/10 text-purple-600 text-[10px] font-bold uppercase rounded-md border border-purple-500/20">Code</span>;
+      default:
+        return <span className="px-2 py-1 bg-zinc-500/10 text-zinc-600 text-[10px] font-bold uppercase rounded-md border border-zinc-500/20">Normalizer</span>;
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "matched":
@@ -143,6 +154,11 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     Status <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
+                <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("matching_method")}>
+                  <div className="flex items-center gap-1">
+                    Matching Method <ArrowUpDown className="w-3 h-3" />
+                  </div>
+                </th>
                 <th className="p-4 border-b border-primary/50 text-right">Actions</th>
               </tr>
             </thead>
@@ -192,6 +208,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     </div>
                   </td>
                   <td className="p-4">{getStatusBadge(res.matches[0]?.status || "no_match")}</td>
+                  <td className="p-4">{getMethodBadge(res.matching_method)}</td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
                       {res.matches[0]?.status === "review" && (

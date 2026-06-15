@@ -57,6 +57,15 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRe
 console = Console()
 error_console = Console(stderr=True)
 
+def normalize_lookup_key(val) -> str:
+    """Normalize spreadsheet/catalog lookup keys (code, barcode)."""
+    if val is None:
+        return ""
+    val_str = str(val).strip()
+    if re.match(r"^\d+\.0$", val_str):
+        val_str = val_str[:-2]
+    return val_str
+
 # ─────────────────────────────────────────────────────────────────────
 #  Constants & Config
 # ─────────────────────────────────────────────────────────────────────
@@ -252,7 +261,29 @@ class ProductIndex:
     def __init__(self, products_data: List[Dict[str, Any]]):
         self.entries = []
         self.token_map = {}
+        self.code_map: Dict[str, int] = {}
+        self.barcode_map: Dict[str, int] = {}
         self._build_index(products_data)
+
+    def _register_lookup_keys(self, idx: int, item: Dict[str, Any]) -> None:
+        code_key = normalize_lookup_key(item.get("code"))
+        barcode_key = normalize_lookup_key(item.get("international_barcode"))
+        if code_key:
+            self.code_map[code_key] = idx
+        if barcode_key:
+            self.barcode_map[barcode_key] = idx
+
+    def lookup_entry_by_code(self, code: str) -> Optional[Dict[str, Any]]:
+        idx = self.code_map.get(normalize_lookup_key(code))
+        if idx is None:
+            return None
+        return self.entries[idx]
+
+    def lookup_entry_by_barcode(self, barcode: str) -> Optional[Dict[str, Any]]:
+        idx = self.barcode_map.get(normalize_lookup_key(barcode))
+        if idx is None:
+            return None
+        return self.entries[idx]
 
     def _build_index(self, products_data: List[Dict[str, Any]]):
         for product in products_data:
@@ -264,6 +295,7 @@ class ProductIndex:
                     idx = len(self.entries)
                     tokens = set(var_norm.split())
                     self.entries.append({"normalized": var_norm, "tokens": tokens, "product": product, "variant": variant})
+                    self._register_lookup_keys(idx, product)
                     for token in tokens:
                         if token not in self.token_map: self.token_map[token] = []
                         self.token_map[token].append(idx)
@@ -326,6 +358,7 @@ class ProductIndex:
                 idx = len(self.entries)
                 tokens = set(var_norm.split())
                 self.entries.append({"normalized": var_norm, "tokens": tokens, "product": mapped_item, "variant": mapped_item})
+                self._register_lookup_keys(idx, mapped_item)
                 for token in tokens:
                     if token not in self.token_map: self.token_map[token] = []
                     self.token_map[token].append(idx)

@@ -53,7 +53,11 @@ def init_db():
         ("use_uploaded_code", "INTEGER DEFAULT 0"),
         ("code_column", "TEXT"),
         ("use_uploaded_international_barcode", "INTEGER DEFAULT 0"),
-        ("international_barcode_column", "TEXT")
+        ("international_barcode_column", "TEXT"),
+        ("match_with_international_barcode", "INTEGER DEFAULT 0"),
+        ("match_international_barcode_column", "TEXT"),
+        ("match_with_code", "INTEGER DEFAULT 0"),
+        ("match_pos_code_column", "TEXT"),
     ]:
         try:
             cursor.execute(f"ALTER TABLE matcher_jobs ADD COLUMN {col_name} {col_type}")
@@ -79,7 +83,11 @@ def create_job(
     use_uploaded_code: bool = False,
     code_column: Optional[str] = None,
     use_uploaded_international_barcode: bool = False,
-    international_barcode_column: Optional[str] = None
+    international_barcode_column: Optional[str] = None,
+    match_with_international_barcode: bool = False,
+    match_international_barcode_column: Optional[str] = None,
+    match_with_code: bool = False,
+    match_pos_code_column: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Register a new drug matcher job in the SQLite history database."""
     init_db()
@@ -92,8 +100,8 @@ def create_job(
     cursor.execute(
         """
         INSERT INTO matcher_jobs 
-        (job_id, status, pid, filename, total_rows, processed_rows, matched_count, review_count, no_match_count, column_used, match_threshold, review_threshold, output_path, results_path, error_msg, created_at, started_at, finished_at, duration, use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock, use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (job_id, status, pid, filename, total_rows, processed_rows, matched_count, review_count, no_match_count, column_used, match_threshold, review_threshold, output_path, results_path, error_msg, created_at, started_at, finished_at, duration, use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock, use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column, match_with_international_barcode, match_international_barcode_column, match_with_code, match_pos_code_column)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             job_id,
@@ -123,7 +131,11 @@ def create_job(
             1 if use_uploaded_code else 0,
             code_column,
             1 if use_uploaded_international_barcode else 0,
-            international_barcode_column
+            international_barcode_column,
+            1 if match_with_international_barcode else 0,
+            match_international_barcode_column,
+            1 if match_with_code else 0,
+            match_pos_code_column,
         )
     )
     
@@ -150,7 +162,11 @@ def create_job(
         "use_uploaded_code": use_uploaded_code,
         "code_column": code_column,
         "use_uploaded_international_barcode": use_uploaded_international_barcode,
-        "international_barcode_column": international_barcode_column
+        "international_barcode_column": international_barcode_column,
+        "match_with_international_barcode": match_with_international_barcode,
+        "match_international_barcode_column": match_international_barcode_column,
+        "match_with_code": match_with_code,
+        "match_pos_code_column": match_pos_code_column,
     }
 
 def update_job_pid(job_id: str, pid: int):
@@ -254,7 +270,8 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
                match_threshold, review_threshold, output_path, results_path, 
                error_msg, created_at, started_at, finished_at, duration,
                use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock,
-               use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column
+               use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column,
+               match_with_international_barcode, match_international_barcode_column, match_with_code, match_pos_code_column
         FROM matcher_jobs WHERE job_id = ?
         """,
         (job_id,)
@@ -293,7 +310,11 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
         "use_uploaded_code": bool(row[24]),
         "code_column": row[25],
         "use_uploaded_international_barcode": bool(row[26]),
-        "international_barcode_column": row[27]
+        "international_barcode_column": row[27],
+        "match_with_international_barcode": bool(row[28]),
+        "match_international_barcode_column": row[29],
+        "match_with_code": bool(row[30]),
+        "match_pos_code_column": row[31],
     }
 
 def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> Dict[str, Any]:
@@ -308,7 +329,8 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
                match_threshold, review_threshold, output_path, results_path, 
                error_msg, created_at, started_at, finished_at, duration,
                use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock,
-               use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column
+               use_uploaded_code, code_column, use_uploaded_international_barcode, international_barcode_column,
+               match_with_international_barcode, match_international_barcode_column, match_with_code, match_pos_code_column
         FROM matcher_jobs
     """
     count_query = "SELECT COUNT(*) FROM matcher_jobs"
@@ -359,7 +381,11 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
             "use_uploaded_code": bool(row[24]),
             "code_column": row[25],
             "use_uploaded_international_barcode": bool(row[26]),
-            "international_barcode_column": row[27]
+            "international_barcode_column": row[27],
+            "match_with_international_barcode": bool(row[28]),
+            "match_international_barcode_column": row[29],
+            "match_with_code": bool(row[30]),
+            "match_pos_code_column": row[31],
         })
         
     return {

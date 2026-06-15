@@ -62,6 +62,7 @@ export const matcherColumnOptions: MatcherColumnOption[] = [
   { key: "normalized_name", label: "Normalized Query", group: "matcher", defaultChecked: false },
   { key: "match_status", label: "Match Status", group: "matcher", defaultChecked: false },
   { key: "match_score", label: "Confidence Score", group: "matcher", defaultChecked: false },
+  { key: "matching_method", label: "Matching Method", group: "matcher", defaultChecked: true },
   { key: "jaccard", label: "Jaccard Token Overlap", group: "matcher", defaultChecked: false },
   { key: "sequence", label: "Sequence Similarity", group: "matcher", defaultChecked: false },
   { key: "matched_tokens", label: "Aligned Tokens", group: "matcher", defaultChecked: false },
@@ -108,4 +109,9 @@ export const matcherColumnOptions: MatcherColumnOption[] = [
   { key: "custom_code",                     label: "code",                     group: "custom", defaultChecked: true },
   { key: "custom_international_barcode",    label: "international_barcode",    group: "custom", defaultChecked: true }
 ];
+
+/** Product + custom export fields (same as matcher export, excluding matcher-only columns). */
+export const browseProductColumnOptions: MatcherColumnOption[] = matcherColumnOptions.filter(
+  (o) => o.group === "product" || o.group === "custom"
+);
 

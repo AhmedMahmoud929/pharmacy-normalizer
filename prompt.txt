@@ -1,5 +1,0 @@
-انا عايز اخد المنتجات اللي في الـ erreiched products احط لينكات الصور اللي فيها في الـ normalized produxts في حقل اسمه gallery
-وباقي المنتجات لو مش موجودين في الـ erreiched products اذن حط قيمة حقل الـ image في الـ gallery ك default value (single image array)
-
-
-Give me a python script that doing that cause I'll use it on the vps server too

@@ -16,6 +16,7 @@ import re
 import zipfile
 import shutil
 from tools.matcher_export import build_custom_columns
+from tools.product_export import build_product_export_record
 
 # Excel formatting helpers
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f]')
@@ -794,45 +795,21 @@ async def export_database(
     # 2. Filter columns if requested
     if columns:
         col_list = [c.strip() for c in columns.split(",") if c.strip()]
-        def filter_cols(p_item):
-            p = enrich_product_image_status(p_item)
-            res = {}
-            for col in col_list:
-                if col == "image_name" or col == "local_image_name":
-                    res[col] = p.get("local_image_name") or ""
-                    continue
-                if col == "brand_id":
-                    res[col] = get_brand_id(p)
-                    continue
-                if col == "category_id":
-                    res[col] = get_category_id(p)
-                    continue
-                if col == "brand_index_code":
-                    res[col] = get_brand_index_code(p)
-                    continue
-                if col == "category_index_code":
-                    res[col] = get_category_index_code(p)
-                    continue
-                if col == "sub_category_index_code":
-                    res[col] = get_sub_category_index_code(p)
-                    continue
-                if col == "sub_sub_category_index_code":
-                    res[col] = get_sub_sub_category_index_code(p)
-                    continue
-                if col == "sub_category_id":
-                    res[col] = get_sub_category_id(p)
-                    continue
-                if col == "sub_sub_category_id":
-                    res[col] = get_sub_sub_category_id(p)
-                    continue
-                if col in p:
-                    val = p[col]
-                    if isinstance(val, dict):
-                        res[col] = val.get("name") or val.get("title_en") or json.dumps(val)
-                    else:
-                        res[col] = val
-            return res
-        products = [filter_cols(p) for p in products]
+        ensure_index_codes()
+        index_helpers = {
+            "brand_index_code": get_brand_index_code,
+            "category_index_code": get_category_index_code,
+            "sub_category_index_code": get_sub_category_index_code,
+            "sub_sub_category_index_code": get_sub_sub_category_index_code,
+        }
+        products = [
+            build_product_export_record(
+                enrich_product_image_status(p),
+                col_list,
+                index_code_helpers=index_helpers,
+            )
+            for p in products
+        ]
     else:
         def flatten_item(p_item):
             p = enrich_product_image_status(p_item)
@@ -2154,7 +2131,11 @@ async def run_matcher_job(
     use_uploaded_code: bool = Form(False),
     code_column: Optional[str] = Form(None),
     use_uploaded_international_barcode: bool = Form(False),
-    international_barcode_column: Optional[str] = Form(None)
+    international_barcode_column: Optional[str] = Form(None),
+    match_with_international_barcode: bool = Form(False),
+    match_international_barcode_column: Optional[str] = Form(None),
+    match_with_code: bool = Form(False),
+    match_pos_code_column: Optional[str] = Form(None),
 ):
     from tools.matcher_db import create_job
     from tools.matcher_runner import run_matcher_background, job_listeners
@@ -2190,7 +2171,11 @@ async def run_matcher_job(
         use_uploaded_code=use_uploaded_code,
         code_column=code_column,
         use_uploaded_international_barcode=use_uploaded_international_barcode,
-        international_barcode_column=international_barcode_column
+        international_barcode_column=international_barcode_column,
+        match_with_international_barcode=match_with_international_barcode,
+        match_international_barcode_column=match_international_barcode_column,
+        match_with_code=match_with_code,
+        match_pos_code_column=match_pos_code_column,
     )
 
     # 3. Schedule the worker thread execution
@@ -2214,6 +2199,10 @@ async def run_matcher_job(
             code_column=code_column,
             use_uploaded_international_barcode=use_uploaded_international_barcode,
             international_barcode_column=international_barcode_column,
+            match_with_international_barcode=match_with_international_barcode,
+            match_international_barcode_column=match_international_barcode_column,
+            match_with_code=match_with_code,
+            match_pos_code_column=match_pos_code_column,
             index_inst=index
         )
     )
@@ -2463,6 +2452,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
             record = {
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
+                "matching_method": res.get("matching_method", "normalizer"),
                 "match_status": status,
                 "match_score": f"{score * 100:.1f}%",
                 "matched_product_id": p.get("id", top_match.get("id") if top_match else ""),
