@@ -2296,7 +2296,8 @@ async def get_matcher_job_results(
         "matched": matched_count,
         "review": review_count,
         "noMatch": no_match_count,
-        "accuracy": round((matched_count / total_rows) * 100, 1) if total_rows > 0 else 0
+        "accuracy": round((matched_count / total_rows) * 100, 1) if total_rows > 0 else 0,
+        "duration": job.get("duration")
     }
 
     results_path = job["results_path"]

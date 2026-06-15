@@ -107,8 +107,31 @@ export default function DrugMatcher() {
   // Server-side pagination (used for completed/failed/stopped jobs)
   const [isServerSide, setIsServerSide] = useState(false);
   const [serverTotalItems, setServerTotalItems] = useState(0);
-  const [serverStats, setServerStats] = useState<{ total: number; matched: number; review: number; noMatch: number; accuracy: number } | null>(null);
+  const [serverStats, setServerStats] = useState<{ total: number; matched: number; review: number; noMatch: number; accuracy: number; duration?: number | null } | null>(null);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
+
+  // Live timer states
+  const [jobStartTime, setJobStartTime] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number | null>(null);
+
+  // Live timer effect
+  useEffect(() => {
+    let timerId: any = null;
+    if (isProcessing && jobStartTime) {
+      const startMs = new Date(jobStartTime).getTime();
+      const updateTimer = () => {
+        const diffSecs = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+        setElapsedSeconds(diffSecs);
+      };
+      updateTimer();
+      timerId = setInterval(updateTimer, 1000);
+    } else {
+      setElapsedSeconds(null);
+    }
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [isProcessing, jobStartTime]);
 
   // Modals
   const [selectedRowForDetails, setSelectedRowForDetails] = useState<MatchResult | null>(null);
@@ -296,13 +319,15 @@ export default function DrugMatcher() {
         setCurrentPage(1);
         setSortConfig(null);
         setSearchQuery("");
+        setJobStartTime(null);
         // Stats come from job record — no need to scan 100k results
         setServerStats({
           total: job.total_rows || 0,
           matched: job.matched_count || 0,
           review: job.review_count || 0,
           noMatch: job.no_match_count || 0,
-          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0
+          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0,
+          duration: job.duration
         });
         // Fetch first page only (fast)
         await fetchPageResults(job.job_id, 1, itemsPerPage, "", null);
@@ -315,6 +340,7 @@ export default function DrugMatcher() {
         setIsComplete(false);
         setResults([]);
         setProgress({ current: job.processed_rows || 0, total: job.total_rows || 100 });
+        setJobStartTime(job.started_at || job.created_at);
 
         // Fetch already-processed results (small page only — running job may have partial data)
         try {
@@ -355,6 +381,7 @@ export default function DrugMatcher() {
           setCurrentPage(1);
           setSortConfig(null);
           setSearchQuery("");
+          setJobStartTime(null);
           eventSource.close();
           // Switch to server-side: fetch page 1 + stats
           fetchPageResults(job.job_id, 1, itemsPerPage, "", null).then(() => {
@@ -371,7 +398,8 @@ export default function DrugMatcher() {
                 noMatch: updatedJob.no_match_count || 0,
                 accuracy: updatedJob.total_rows > 0
                   ? Math.round((updatedJob.matched_count / updatedJob.total_rows) * 100 * 10) / 10
-                  : 0
+                  : 0,
+                duration: updatedJob.duration
               });
             })
             .catch(() => {/* stats fallback from fetchPageResults response is fine */});
@@ -391,12 +419,14 @@ export default function DrugMatcher() {
         setCurrentPage(1);
         setSortConfig(null);
         setSearchQuery("");
+        setJobStartTime(null);
         setServerStats({
           total: job.total_rows || 0,
           matched: job.matched_count || 0,
           review: job.review_count || 0,
           noMatch: job.no_match_count || 0,
-          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0
+          accuracy: job.total_rows > 0 ? Math.round((job.matched_count / job.total_rows) * 100 * 10) / 10 : 0,
+          duration: job.duration
         });
         await fetchPageResults(job.job_id, 1, itemsPerPage, "", null);
 
@@ -426,6 +456,8 @@ export default function DrugMatcher() {
     setServerTotalItems(0);
     setSearchQuery("");
     setSortConfig(null);
+    setJobStartTime(null);
+    setElapsedSeconds(null);
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", window.location.pathname);
     }
@@ -453,6 +485,7 @@ export default function DrugMatcher() {
     setResults([]);
     setProgress({ current: 0, total: 0 });
     setActiveJobId(null);
+    setJobStartTime(new Date().toISOString());
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -794,14 +827,26 @@ export default function DrugMatcher() {
   // Stats: use pre-computed server stats when available (completed/stopped/failed jobs).
   // For running jobs, compute from local SSE-accumulated results.
   const stats = useMemo(() => {
-    if (serverStats) return serverStats;
+    if (serverStats) {
+      return {
+        ...serverStats,
+        duration: serverStats.duration ?? elapsedSeconds
+      };
+    }
     const total = results.length;
     const matched = results.filter(r => r.matches[0]?.status === "matched").length;
     const review = results.filter(r => r.matches[0]?.status === "review").length;
     const noMatch = total - matched - review;
     const accuracy = total > 0 ? (matched / total) * 100 : 0;
-    return { total, matched, review, noMatch, accuracy };
-  }, [results, serverStats]);
+    return {
+      total,
+      matched,
+      review,
+      noMatch,
+      accuracy,
+      duration: elapsedSeconds
+    };
+  }, [results, serverStats, elapsedSeconds]);
 
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -889,7 +934,7 @@ export default function DrugMatcher() {
         <MatcherSkeleton />
       ) : (
         <>
-          <MatchStats stats={stats} isComplete={isComplete} />
+          <MatchStats stats={stats} isComplete={isComplete} isProcessing={isProcessing} />
 
           <div className={cn(
             "grid gap-8 transition-all duration-500 flex-1 w-full grid-cols-1"
