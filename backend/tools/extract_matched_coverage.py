@@ -23,7 +23,7 @@ def enrich_with_dest_fields(df: pd.DataFrame, sheet_path: str) -> pd.DataFrame:
 
     out = df.copy()
     out["dest_id"] = out["dest_id"].apply(lambda x: "" if pd.isna(x) else str(int(x)))
-    out = out.drop(columns=["dest_code"], errors="ignore")
+    out = out.drop(columns=["dest_code", "dest_international_barcode"], errors="ignore")
     out = out.join(lookup, on="dest_id", how="left")
     out = out.rename(
         columns={

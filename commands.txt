@@ -35,13 +35,14 @@ sudo systemctl restart fastapi
 # Or rsync the whole input folder:
 # rsync -avz backend/data/input/ user@your-vps:/var/www/pharmatcher.bya3online.com/backend/data/input/
 #
+# IMPORTANT: use venv python — NOT system python3
 cd /var/www/pharmatcher.bya3online.com/backend
-source venv/bin/activate
+./venv/bin/pip install tqdm pandas openpyxl rich
 
-python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
-python tools/test_standard_in_sheet.py --full --skip-normalize --parallel --workers 8
-python tools/extract_matched_coverage.py
-python tools/inject_catalog_codes.py
+./venv/bin/python tools/normalize.py --file data/input/sheet_with_code.xlsx --column "en name"
+./venv/bin/python tools/test_standard_in_sheet.py --full --skip-normalize --parallel --workers 8
+./venv/bin/python tools/extract_matched_coverage.py
+./venv/bin/python tools/inject_catalog_codes.py
 
 sudo systemctl restart fastapi
 
