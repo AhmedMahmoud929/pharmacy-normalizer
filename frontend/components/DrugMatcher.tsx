@@ -1274,7 +1274,6 @@ export default function DrugMatcher() {
         onClose={() => setIsExportDialogOpen(false)}
         jobId={activeJobId}
         jobStats={stats}
-        initialResults={results}
       />
     </div>
   );

@@ -34,28 +34,14 @@ export default function MatcherDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [selectedJobResults, setSelectedJobResults] = useState<any[]>([]);
-  const [exportingJobId, setExportingJobId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<{ id: string; filename: string } | null>(null);
 
-  const handleExportClick = async (jobId: string) => {
-    setExportingJobId(jobId);
-    try {
-      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedJobResults(data.results || []);
-        setActiveJobId(jobId);
-        setIsExportDialogOpen(true);
-      }
-    } catch (err) {
-      console.error("Failed to fetch results for export:", err);
-    } finally {
-      setExportingJobId(null);
-    }
+  const handleExportClick = (jobId: string) => {
+    setActiveJobId(jobId);
+    setIsExportDialogOpen(true);
   };
 
   const fetchJobs = useCallback(async () => {
@@ -328,15 +314,10 @@ export default function MatcherDashboard() {
                           {isSuccess && (
                             <button
                               onClick={() => handleExportClick(job.job_id)}
-                              disabled={exportingJobId !== null}
-                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all disabled:opacity-50 inline-flex items-center justify-center"
+                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
                               title="Export Catalog Spreadsheet"
                             >
-                              {exportingJobId === job.job_id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-success" />
-                              ) : (
-                                <Download className="w-4 h-4" />
-                              )}
+                              <Download className="w-4 h-4" />
                             </button>
                           )}
 
@@ -370,7 +351,15 @@ export default function MatcherDashboard() {
           setActiveJobId(null);
         }}
         jobId={activeJobId}
-        initialResults={selectedJobResults}
+        jobStats={jobs.find(j => j.job_id === activeJobId) ? (() => {
+          const j = jobs.find(j => j.job_id === activeJobId)!;
+          return {
+            matched: j.matched_count,
+            review: j.review_count,
+            noMatch: j.no_match_count,
+            total: j.total_rows
+          };
+        })() : undefined}
       />
 
       {/* Delete Campaign Modal */}

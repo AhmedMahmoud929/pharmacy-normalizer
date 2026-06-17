@@ -3,25 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Folder, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import * as XLSX from "xlsx";
 import { API_URL } from "@/lib/utils";
 import { MatcherColumnOption as ColumnOption, matcherColumnOptions as columnOptions } from "@/constants/columns";
-
-const extractImageName = (val: any): string => {
-  if (!val) return "";
-  if (Array.isArray(val)) {
-    return val.map(x => extractImageName(x)).filter(Boolean).join(", ");
-  }
-  if (typeof val === "string") {
-    if (val.includes(",")) {
-      return val.split(",").map(p => extractImageName(p.trim())).filter(Boolean).join(", ");
-    }
-    const cleanVal = val.split("?")[0];
-    const parts = cleanVal.split(/[\/\\]/);
-    return parts[parts.length - 1] || "";
-  }
-  return String(val);
-};
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -33,7 +16,6 @@ interface ExportDialogProps {
     noMatch: number;
     total: number;
   };
-  initialResults?: any[];
 }
 
 type Stage = 0 | 1 | 2;
@@ -44,8 +26,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   isOpen,
   onClose,
   jobId,
-  jobStats,
-  initialResults
+  jobStats
 }) => {
   const [stage, setStage] = useState<Stage>(0);
   const [exportType, setExportType] = useState<"data" | "media">("data");
@@ -53,15 +34,29 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [format, setFormat] = useState<ExportFormat | null>("xlsx");
   const [scope, setScope] = useState<ExportScope>("all");
 
-  const [fetchedResults, setFetchedResults] = useState<any[]>(initialResults || []);
+  const [stats, setStats] = useState<{ matched: number; review: number; noMatch: number; total: number } | null>(null);
 
   useEffect(() => {
-    if (initialResults && initialResults.length > 0) {
-      setFetchedResults(initialResults);
+    if (!isOpen || !jobId) return;
+
+    if (jobStats) {
+      setStats(jobStats);
     } else {
-      setFetchedResults([]);
+      fetch(`${API_URL}/api/matcher/job/${jobId}`)
+        .then(res => res.json())
+        .then(data => {
+          setStats({
+            matched: data.matched_count || 0,
+            review: data.review_count || 0,
+            noMatch: data.no_match_count || 0,
+            total: data.total_rows || 0
+          });
+        })
+        .catch(err => {
+          console.error("Failed to fetch job stats in ExportDialog:", err);
+        });
     }
-  }, [initialResults, isOpen]);
+  }, [isOpen, jobId, jobStats]);
 
   // Match Status Filtering State
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
@@ -83,23 +78,16 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [exportComplete, setExportComplete] = useState(false);
   const [exportStatusText, setExportStatusText] = useState("");
 
-  // Calculate status counts either from loaded results or from jobStats prop
   const counts = React.useMemo(() => {
-    if (fetchedResults && fetchedResults.length > 0) {
-      const matched = fetchedResults.filter(r => (r.matches?.[0]?.status || "no_match") === "matched").length;
-      const review = fetchedResults.filter(r => (r.matches?.[0]?.status || "no_match") === "review").length;
-      const noMatch = fetchedResults.length - matched - review;
-      return { matched, review, noMatch, total: fetchedResults.length };
-    }
     return {
-      matched: jobStats?.matched ?? 0,
-      review: jobStats?.review ?? 0,
-      noMatch: jobStats?.noMatch ?? 0,
-      total: jobStats?.total ?? 0
+      matched: stats?.matched ?? 0,
+      review: stats?.review ?? 0,
+      noMatch: stats?.noMatch ?? 0,
+      total: stats?.total ?? 0
     };
-  }, [fetchedResults, jobStats]);
+  }, [stats]);
 
-  // Calculate total filtered items based on checkboxes when we haven't fetched results yet
+  // Calculate total filtered items based on checkboxes
   const totalFilteredCount = React.useMemo(() => {
     let sum = 0;
     if (selectedStatuses.includes("matched")) sum += counts.matched;
@@ -108,24 +96,13 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     return sum;
   }, [selectedStatuses, counts]);
 
-  // Filter results dynamically based on chosen statuses (if we have results loaded)
-  const filteredResults = React.useMemo(() => {
-    return fetchedResults.filter(res => {
-      const status = res.matches?.[0]?.status || "no_match";
-      return selectedStatuses.includes(status);
-    });
-  }, [fetchedResults, selectedStatuses]);
-
-  // Set default bounds when filtered results are loaded/changed or filters change
+  // Set default bounds when totalFilteredCount changes or dialog opens
   useEffect(() => {
-    if (filteredResults && filteredResults.length > 0) {
-      setLimit(filteredResults.length);
-      setOffset(0);
-    } else {
+    if (isOpen) {
       setLimit(totalFilteredCount);
       setOffset(0);
     }
-  }, [filteredResults, totalFilteredCount, isOpen]);
+  }, [totalFilteredCount, isOpen]);
 
   if (!isOpen) return null;
 
@@ -147,264 +124,32 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     if (!format || !jobId || selectedColumns.length === 0) return;
     setIsExporting(true);
     setExportComplete(false);
-    setExportStatusText("Preparing export data...");
+    setExportStatusText("Preparing export data on backend...");
 
     try {
-      let currentResults = fetchedResults;
-
-      // If we haven't fetched results yet, fetch them now at the last step!
-      if (currentResults.length === 0) {
-        setExportStatusText("Downloading campaign results...");
-        const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
-        if (!response.ok) throw new Error("Failed to fetch results from server");
-        const data = await response.json();
-        currentResults = data.results || [];
-        setFetchedResults(currentResults);
-      }
-
-      if (currentResults.length === 0) {
-        throw new Error("No results found to export");
-      }
-
-      setExportStatusText("Compiling custom dataset...");
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Resolve Range Slicing using status-filtered results
-      const activeFiltered = currentResults.filter(res => {
-        const status = res.matches?.[0]?.status || "no_match";
-        return selectedStatuses.includes(status);
+      const params = new URLSearchParams({
+        format,
+        statuses: selectedStatuses.join(","),
+        scope,
+        offset: offset.toString(),
+        limit: limit.toString(),
+        columns: selectedColumns.join(","),
       });
 
-      let itemsToExport = [...activeFiltered].sort((a, b) => a.row_index - b.row_index);
-      if (scope === "slice") {
-        itemsToExport = itemsToExport.slice(offset, offset + limit);
-      }
+      setExportStatusText("Downloading export file...");
+      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/export?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to export on server");
 
-      // Map dynamic row values matching selected columns
-      const finalData = itemsToExport.map(res => {
-        const topMatch = res.matches?.[0];
-        const p = topMatch?.product_data || {};
-        const v = topMatch?.variant_data || {};
-
-        const record: Record<string, any> = {};
-
-        selectedColumns.forEach(fieldId => {
-          switch (fieldId) {
-            case "row_index":
-              record["row_number"] = res.row_index + 1;
-              break;
-            case "original_name":
-              record["original_name"] = res.original_name;
-              break;
-            case "normalized_name":
-              record["normalized_name"] = res.normalized_name;
-              break;
-            case "match_status":
-              record["match_status"] = topMatch?.status || "no_match";
-              break;
-            case "match_score":
-              record["match_score"] = topMatch ? (topMatch.score * 100).toFixed(1) + "%" : "0%";
-              break;
-            case "matching_method":
-              record["matching_method"] = res.matching_method || "normalizer";
-              break;
-            case "jaccard":
-              record["jaccard_score"] = topMatch?.jaccard != null ? (topMatch.jaccard * 100).toFixed(1) + "%" : "";
-              break;
-            case "sequence":
-              record["sequence_score"] = topMatch?.sequence != null ? (topMatch.sequence * 100).toFixed(1) + "%" : "";
-              break;
-            case "matched_tokens":
-              record["matched_tokens"] = Array.isArray(topMatch?.matched_tokens) ? topMatch.matched_tokens.join(", ") : "";
-              break;
-            case "id":
-              record["product_id"] = v.id || p.id || topMatch?.id || "";
-              break;
-            case "name_en":
-              record["english_name"] = topMatch?.name_en || v.name_en || p.name_en || "";
-              break;
-            case "name_ar":
-              record["arabic_name"] = v.name_ar || p.name_ar || "";
-              break;
-            case "sku":
-              record["reference_sku"] = topMatch?.sku || v.sku || "";
-              break;
-            case "brand":
-              record["brand"] = p.brand?.name || p.brand || "";
-              break;
-            case "category":
-              record["category"] = p.category?.name || p.category || "";
-              break;
-            case "price":
-              record["price"] = res.uploaded_price !== undefined && res.uploaded_price !== null ? res.uploaded_price : (v.price || p.price || 0);
-              break;
-            case "in_stock":
-              const hasStock = v.stock > 0 || p.stock > 0 || (p.in_stock !== false);
-              record["in_stock"] = hasStock ? "Yes" : "No";
-              break;
-            case "stock":
-              record["stock"] = res.uploaded_stock !== undefined && res.uploaded_stock !== null ? res.uploaded_stock : (v.stock || p.stock || 0);
-              break;
-            case "code":
-              record["code"] = res.uploaded_code ?? "";
-              break;
-            case "international_barcode":
-              record["international_barcode"] = res.uploaded_international_barcode ?? "";
-              break;
-            case "share_link":
-              const slug = p.slug || "";
-              record["share_link"] = slug ? `https://chefaa.com/product/${slug}` : "";
-              break;
-            case "image":
-              record["image"] = v.image || p.image || topMatch?.image || "";
-              break;
-            case "image_name":
-              record["image_name"] = p.image_name || p.local_image_name || topMatch?.local_image_name || "";
-              break;
-
-            // ── Custom Export Fields (spec: matcher-custom-export.md) ──────────
-            case "custom_name_en":
-              record["name[en]"] = topMatch?.name_en || p["name_en"] || p["title_en"] || "";
-              break;
-            case "custom_name_ar":
-              record["name[ar]"] = p["name_ar"] || p["title_ar"] || "";
-              break;
-            case "custom_details_en":
-              record["details[en]"] = p["description_en"] || p["meta_description_en"] || "";
-              break;
-            case "custom_details_ar":
-              record["details[ar]"] = p["description_ar"] || p["meta_description_ar"] || "";
-              break;
-            case "custom_price":
-              record["price"] = res.uploaded_price !== undefined && res.uploaded_price !== null ? res.uploaded_price : (v["price"] || p["price"] || p["final_price"] || 0);
-              break;
-            case "custom_unit":
-              record["unit"] = p["unit"] || "";
-              break;
-            case "custom_thumbnail":
-              record["thumbnail"] = extractImageName(p["image"] || v["image"] || topMatch?.image || "");
-              break;
-            case "custom_images":
-              record["images"] = extractImageName(p["image"] || v["image"] || topMatch?.image || "");
-              break;
-            case "custom_brand_name_en": {
-              const br2 = p["brands"] || p["brand"];
-              record["brand_name[en]"] = (typeof br2 === "object" && br2 !== null) ? (br2["name_en"] || br2["title_en"] || "") : (br2 || "");
-              break;
-            }
-            case "custom_brand_name_ar": {
-              const br3 = p["brands"] || p["brand"];
-              record["brand_name[ar]"] = (typeof br3 === "object" && br3 !== null) ? (br3["name_ar"] || br3["title_ar"] || "") : "";
-              break;
-            }
-            case "custom_brand_slug": {
-              const br4 = p["brands"] || p["brand"];
-              record["brand_slug"] = (typeof br4 === "object" && br4 !== null) ? (br4["slug"] || "") : "";
-              break;
-            }
-            case "custom_brand_logo": {
-              const br5 = p["brands"] || p["brand"];
-              record["brand_logo"] = extractImageName((typeof br5 === "object" && br5 !== null) ? (br5["images"] || br5["logo_url"] || br5["image"] || "") : "");
-              break;
-            }
-            case "custom_category_name_en": {
-              const cat1 = p["category"] || p["level_one_category"];
-              record["category_name[en]"] = (typeof cat1 === "object" && cat1 !== null) ? (cat1["name_en"] || cat1["name"] || cat1["title_en"] || "") : (cat1 || "");
-              break;
-            }
-            case "custom_category_name_ar": {
-              const cat1a = p["category"] || p["level_one_category"];
-              record["category_name[ar]"] = (typeof cat1a === "object" && cat1a !== null) ? (cat1a["name_ar"] || cat1a["title_ar"] || "") : "";
-              break;
-            }
-            case "custom_category_slug": {
-              const cat1s = p["category"] || p["level_one_category"];
-              record["category_slug"] = (typeof cat1s === "object" && cat1s !== null) ? (cat1s["slug"] || "") : (cat1s || "");
-              break;
-            }
-            case "custom_sub_category_name_en": {
-              const l2n = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
-              record["sub_category_name[en]"] = l2n?.["name_en"] || l2n?.["title_en"] || "";
-              break;
-            }
-            case "custom_sub_category_name_ar": {
-              const l2na = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
-              record["sub_category_name[ar]"] = l2na?.["name_ar"] || l2na?.["title_ar"] || "";
-              break;
-            }
-            case "custom_sub_category_slug": {
-              const l2s = Array.isArray(p["level_two_category"]) ? (p["level_two_category"][0] ?? {}) : (p["level_two_category"] || {});
-              record["sub_category_slug"] = l2s?.["slug"] || "";
-              break;
-            }
-            case "custom_sub_sub_category_name_en": {
-              const l3n = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
-              record["sub_sub_category_name[en]"] = l3n?.["name_en"] || l3n?.["title_en"] || "";
-              break;
-            }
-            case "custom_sub_sub_category_name_ar": {
-              const l3na = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
-              record["sub_sub_category_name[ar]"] = l3na?.["name_ar"] || l3na?.["title_ar"] || "";
-              break;
-            }
-            case "custom_sub_sub_category_slug": {
-              const l3s = Array.isArray(p["level_three_category"]) ? (p["level_three_category"][0] ?? {}) : (p["level_three_category"] || {});
-              record["sub_sub_category_slug"] = l3s?.["slug"] || "";
-              break;
-            }
-            case "custom_current_stock": {
-              record["current_stock"] = res.uploaded_stock !== undefined && res.uploaded_stock !== null ? res.uploaded_stock : 10;
-              break;
-            }
-            case "custom_code": {
-              record["code"] = res.uploaded_code ?? "";
-              break;
-            }
-            case "custom_international_barcode": {
-              record["international_barcode"] = res.uploaded_international_barcode ?? "";
-              break;
-            }
-            default:
-              break;
-          }
-        });
-
-        return record;
-      });
-
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-
-      setExportStatusText("Generating export file...");
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      if (format === 'xlsx') {
-        const worksheet = XLSX.utils.json_to_sheet(finalData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Matched Catalog");
-        XLSX.writeFile(workbook, `drug_matcher_export_${timestamp}.xlsx`);
-      } else if (format === 'json') {
-        const blob = new Blob([JSON.stringify(finalData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `drug_matcher_export_${timestamp}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } else if (format === 'txt') {
-        if (finalData.length === 0) return;
-        const headers = Object.keys(finalData[0]);
-        let txtContent = headers.join("\t") + "\n";
-        finalData.forEach(row => {
-          txtContent += headers.map(h => String(row[h] ?? "")).join("\t") + "\n";
-        });
-        const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `drug_matcher_export_${timestamp}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+      a.href = url;
+      a.download = `drug_matcher_export_${timestamp}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
       setExportStatusText("Download ready!");
       setExportComplete(true);
@@ -422,61 +167,23 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     if (!jobId) return;
     setIsExporting(true);
     setExportComplete(false);
-    setExportStatusText("Preparing media export...");
+    setExportStatusText("Preparing media export on backend...");
 
     try {
-      let currentResults = fetchedResults;
-
-      // If we haven't fetched results yet, fetch them now at the last step!
-      if (currentResults.length === 0) {
-        setExportStatusText("Downloading campaign results...");
-        const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/results?limit=100000`);
-        if (!response.ok) throw new Error("Failed to fetch results from server");
-        const data = await response.json();
-        currentResults = data.results || [];
-        setFetchedResults(currentResults);
-      }
-
-      setExportStatusText("Compiling image references...");
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const activeFiltered = currentResults.filter(res => {
-        const status = res.matches?.[0]?.status || "no_match";
-        return selectedStatuses.includes(status);
+      const params = new URLSearchParams({
+        statuses: selectedStatuses.join(","),
+        scope,
+        offset: offset.toString(),
+        limit: limit.toString(),
+        media_types: mediaTypes.join(","),
       });
 
-      let itemsToExport = [...activeFiltered].sort((a, b) => a.row_index - b.row_index);
-      if (scope === "slice") {
-        itemsToExport = itemsToExport.slice(offset, offset + limit);
-      }
-
-      const imageNames: string[] = [];
-      itemsToExport.forEach(res => {
-        const topMatch = res.matches?.[0];
-        const p = topMatch?.product_data || {};
-        const imgName = p.image_name || p.local_image_name || topMatch?.local_image_name;
-        if (imgName) {
-          imageNames.push(imgName);
-        }
-      });
-
-      setExportStatusText("Requesting ZIP archive...");
-      const response = await fetch(`${API_URL}/db/export/media`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          media_types: mediaTypes,
-          image_names: imageNames
-        })
-      });
-
+      setExportStatusText("Downloading ZIP archive...");
+      const response = await fetch(`${API_URL}/api/matcher/job/${jobId}/export_media?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to compile media zip");
       }
 
-      setExportStatusText("Downloading ZIP archive...");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -507,7 +214,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setFormat("xlsx");
     setScope("all");
     setOffset(0);
-    setLimit(fetchedResults.length || jobStats?.total || 100);
+    setLimit(100);
     setSelectedStatuses(["matched", "review", "no_match"]);
     setSelectedColumns(columnOptions.filter(o => o.defaultChecked).map(o => o.key));
     setExportComplete(false);
@@ -715,7 +422,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 </div>
 
-                {scope === "slice" && filteredResults.length > 0 && (
+                {scope === "slice" && totalFilteredCount > 0 && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -728,7 +435,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={0}
-                        max={Math.max(0, filteredResults.length - 1)}
+                        max={Math.max(0, totalFilteredCount - 1)}
                         value={offset}
                         onChange={(e) => setOffset(Math.max(0, parseInt(e.target.value) || 0))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -741,7 +448,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={1}
-                        max={filteredResults.length}
+                        max={totalFilteredCount}
                         value={limit}
                         onChange={(e) => setLimit(Math.max(1, parseInt(e.target.value) || 1))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -911,7 +618,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 </div>
 
                 {/* Slicing Controls (Only when slice is active and we have items) */}
-                {scope === "slice" && filteredResults.length > 0 && (
+                {scope === "slice" && totalFilteredCount > 0 && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -924,7 +631,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={0}
-                        max={Math.max(0, filteredResults.length - 1)}
+                        max={Math.max(0, totalFilteredCount - 1)}
                         value={offset}
                         onChange={(e) => setOffset(Math.max(0, parseInt(e.target.value) || 0))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -937,7 +644,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <input
                         type="number"
                         min={1}
-                        max={filteredResults.length}
+                        max={totalFilteredCount}
                         value={limit}
                         onChange={(e) => setLimit(Math.max(1, parseInt(e.target.value) || 1))}
                         className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -1078,7 +785,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               </button>
             ) : exportType === "media" ? (
               <button
-                disabled={isExporting || mediaTypes.length === 0 || filteredResults.length === 0}
+                disabled={isExporting || mediaTypes.length === 0 || totalFilteredCount === 0}
                 onClick={handleMediaExport}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
               >
@@ -1110,7 +817,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               </button>
             ) : (
               <button
-                disabled={isExporting || selectedColumns.length === 0 || filteredResults.length === 0}
+                disabled={isExporting || selectedColumns.length === 0 || totalFilteredCount === 0}
                 onClick={handleExport}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-success disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-success/20 hover:bg-success-dark transition-all"
               >

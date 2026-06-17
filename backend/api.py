@@ -2584,22 +2584,405 @@ async def stream_matcher_job_progress(job_id: str):
                 
     return StreamingResponse(progress_event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
+def get_column_header(field_id: str) -> str:
+    headers = {
+        "row_index": "row_number",
+        "original_name": "original_name",
+        "normalized_name": "normalized_name",
+        "match_status": "match_status",
+        "match_score": "match_score",
+        "matching_method": "matching_method",
+        "jaccard": "jaccard_score",
+        "sequence": "sequence_score",
+        "matched_tokens": "matched_tokens",
+        "id": "product_id",
+        "name_en": "english_name",
+        "name_ar": "arabic_name",
+        "sku": "reference_sku",
+        "brand": "brand",
+        "category": "category",
+        "price": "price",
+        "in_stock": "in_stock",
+        "stock": "stock",
+        "code": "code",
+        "international_barcode": "international_barcode",
+        "share_link": "share_link",
+        "image": "image",
+        "image_name": "image_name",
+        
+        # custom headers
+        "custom_name_en": "name[en]",
+        "custom_name_ar": "name[ar]",
+        "custom_details_en": "details[en]",
+        "custom_details_ar": "details[ar]",
+        "custom_price": "price",
+        "custom_unit": "unit",
+        "custom_thumbnail": "thumbnail",
+        "custom_images": "images",
+        "custom_brand_name_en": "brand_name[en]",
+        "custom_brand_name_ar": "brand_name[ar]",
+        "custom_brand_slug": "brand_slug",
+        "custom_brand_logo": "brand_logo",
+        "custom_category_name_en": "category_name[en]",
+        "custom_category_name_ar": "category_name[ar]",
+        "custom_category_slug": "category_slug",
+        "custom_sub_category_name_en": "sub_category_name[en]",
+        "custom_sub_category_name_ar": "sub_category_name[ar]",
+        "custom_sub_category_slug": "sub_category_slug",
+        "custom_sub_sub_category_name_en": "sub_sub_category_name[en]",
+        "custom_sub_sub_category_name_ar": "sub_sub_category_name[ar]",
+        "custom_sub_sub_category_slug": "sub_sub_category_slug",
+        "custom_current_stock": "current_stock",
+        "custom_code": "code",
+        "custom_international_barcode": "international_barcode"
+    }
+    return headers.get(field_id, field_id)
+
+
+def get_column_value(res: dict, field_id: str, job: dict) -> any:
+    top_match = res.get("matches", [{}])[0] if res.get("matches") else {}
+    p = top_match.get("product_data", {}) if top_match else {}
+    v = top_match.get("variant_data", {}) if top_match else {}
+    
+    uploaded_price = res.get("uploaded_price")
+    uploaded_stock = res.get("uploaded_stock")
+    default_stock_val = job.get("default_stock") if job.get("default_stock") is not None else 10
+    
+    if field_id == "row_index":
+        return res.get("row_index", 0) + 1
+    elif field_id == "original_name":
+        return res.get("original_name", "")
+    elif field_id == "normalized_name":
+        return res.get("normalized_name", "")
+    elif field_id == "match_status":
+        return top_match.get("status", "no_match")
+    elif field_id == "match_score":
+        score = top_match.get("score", 0.0)
+        return f"{score * 100:.1f}%"
+    elif field_id == "matching_method":
+        return res.get("matching_method") or "normalizer"
+    elif field_id == "jaccard":
+        jaccard = top_match.get("jaccard")
+        return f"{jaccard * 100:.1f}%" if jaccard is not None else ""
+    elif field_id == "sequence":
+        sequence = top_match.get("sequence")
+        return f"{sequence * 100:.1f}%" if sequence is not None else ""
+    elif field_id == "matched_tokens":
+        tokens = top_match.get("matched_tokens")
+        return ", ".join(tokens) if isinstance(tokens, list) else ""
+    elif field_id == "id":
+        return v.get("id") or p.get("id") or top_match.get("id") or ""
+    elif field_id == "name_en":
+        return top_match.get("name_en") or v.get("name_en") or p.get("name_en") or ""
+    elif field_id == "name_ar":
+        return v.get("name_ar") or p.get("name_ar") or ""
+    elif field_id == "sku":
+        return top_match.get("sku") or v.get("sku") or ""
+    elif field_id == "brand":
+        brand = p.get("brand")
+        if isinstance(brand, dict):
+            return brand.get("name") or ""
+        return brand or ""
+    elif field_id == "category":
+        cat = p.get("category")
+        if isinstance(cat, dict):
+            return cat.get("name") or ""
+        return cat or ""
+    elif field_id == "price":
+        if uploaded_price is not None:
+            return uploaded_price
+        return v.get("price") or p.get("price") or 0.0
+    elif field_id == "in_stock":
+        has_stock = v.get("stock", 0) > 0 or p.get("stock", 0) > 0 or (p.get("in_stock") is not False)
+        return "Yes" if has_stock else "No"
+    elif field_id == "stock":
+        if uploaded_stock is not None:
+            return uploaded_stock
+        return v.get("stock") or p.get("stock") or 0.0
+    elif field_id == "code":
+        return res.get("uploaded_code") or ""
+    elif field_id == "international_barcode":
+        return res.get("uploaded_international_barcode") or ""
+    elif field_id == "share_link":
+        slug = p.get("slug")
+        return f"https://chefaa.com/product/{slug}" if slug else ""
+    elif field_id == "image":
+        return v.get("image") or p.get("image") or top_match.get("image") or ""
+    elif field_id == "image_name":
+        return p.get("image_name") or p.get("local_image_name") or top_match.get("local_image_name") or ""
+    
+    # Custom Export Fields (prefix "custom_")
+    elif field_id.startswith("custom_"):
+        from tools.matcher_export import build_custom_columns
+        custom_cols = build_custom_columns(
+            p or None,
+            override_price=uploaded_price,
+            override_stock=uploaded_stock,
+            default_stock=default_stock_val,
+            override_code=res.get("uploaded_code"),
+            override_international_barcode=res.get("uploaded_international_barcode")
+        )
+        custom_mapping = {
+            "custom_name_en": "name[en]",
+            "custom_name_ar": "name[ar]",
+            "custom_details_en": "details[en]",
+            "custom_details_ar": "details[ar]",
+            "custom_price": "price",
+            "custom_unit": "unit",
+            "custom_thumbnail": "thumbnail",
+            "custom_images": "images",
+            "custom_brand_name_en": "brand_name[en]",
+            "custom_brand_name_ar": "brand_name[ar]",
+            "custom_brand_slug": "brand_slug",
+            "custom_brand_logo": "brand_logo",
+            "custom_category_name_en": "category_name[en]",
+            "custom_category_name_ar": "category_name[ar]",
+            "custom_category_slug": "category_slug",
+            "custom_sub_category_name_en": "sub_category_name[en]",
+            "custom_sub_category_name_ar": "sub_category_name[ar]",
+            "custom_sub_category_slug": "sub_category_slug",
+            "custom_sub_sub_category_name_en": "sub_sub_category_name[en]",
+            "custom_sub_sub_category_name_ar": "sub_sub_category_name[ar]",
+            "custom_sub_sub_category_slug": "sub_sub_category_slug",
+            "custom_current_stock": "current_stock",
+            "custom_code": "code",
+            "custom_international_barcode": "international_barcode"
+        }
+        custom_key = custom_mapping.get(field_id)
+        if custom_key:
+            return custom_cols.get(custom_key, "")
+        return ""
+    
+    return ""
+
+
 @app.get("/api/matcher/job/{job_id}/export")
-async def export_matcher_job_file(job_id: str):
+async def export_matcher_job_file(
+    job_id: str,
+    format: Optional[str] = Query(None), # xlsx, json, txt
+    statuses: Optional[str] = Query(None), # comma-separated list of statuses, e.g. "matched,review"
+    scope: str = Query("all"),
+    offset: int = Query(0, ge=0),
+    limit: Optional[int] = Query(None, ge=1),
+    columns: Optional[str] = Query(None), # comma-separated list of column keys
+    search: Optional[str] = Query(None)
+):
     from tools.matcher_db import get_job
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    # If format is not specified and no other customization is requested, return precompiled output_path
+    if not format and not statuses and not columns and scope == "all":
+        output_path = job["output_path"]
+        if not output_path or not os.path.exists(output_path):
+            raise HTTPException(status_code=404, detail="Excel sheet output not ready or not compiled yet.")
+        return FileResponse(
+            output_path,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=f"matched_{job['filename']}"
+        )
+
+    # Load results
+    results_path = job["results_path"]
+    if not results_path or not os.path.exists(results_path):
+        raise HTTPException(status_code=404, detail="Job results file not found")
         
-    output_path = job["output_path"]
-    if not output_path or not os.path.exists(output_path):
-        raise HTTPException(status_code=404, detail="Excel sheet output not ready or not compiled yet.")
+    try:
+        with open(results_path, "r", encoding="utf-8") as f:
+            all_results = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    # Filter by Search & Statuses
+    filtered_results = []
+    for item in all_results:
+        if search:
+            q_lower = search.lower()
+            orig_match = q_lower in item.get("original_name", "").lower()
+            cand_match = any(q_lower in m.get("name_en", "").lower() for m in item.get("matches", []))
+            if not (orig_match or cand_match):
+                continue
         
-    return FileResponse(
-        output_path,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename=f"matched_{job['filename']}"
-    )
+        if statuses:
+            status_list = [s.strip() for s in statuses.split(",")]
+            top_match = item["matches"][0] if item.get("matches") else None
+            status = top_match["status"] if top_match else "no_match"
+            if status not in status_list:
+                continue
+
+        filtered_results.append(item)
+
+    # Sort by row_index ascending
+    filtered_results.sort(key=lambda x: x.get("row_index", 0))
+
+    # Slice range
+    if scope == "slice":
+        slice_end = offset + limit if limit is not None else len(filtered_results)
+        items_to_export = filtered_results[offset:slice_end]
+    else:
+        items_to_export = filtered_results
+
+    # Column selection
+    selected_cols = []
+    if columns:
+        selected_cols = [c.strip() for c in columns.split(",") if c.strip()]
+    else:
+        # Default columns
+        selected_cols = ["row_index", "original_name", "normalized_name", "match_status", "match_score", "matching_method"]
+
+    # Build records
+    excel_records = []
+    for res in items_to_export:
+        record = {}
+        for field_id in selected_cols:
+            header = get_column_header(field_id)
+            val = get_column_value(res, field_id, job)
+            record[header] = val
+        excel_records.append(record)
+
+    filename_base = f"drug_matcher_export_{job_id[:8]}"
+    if format == "json":
+        json_str = json.dumps(excel_records, indent=2, ensure_ascii=False)
+        return StreamingResponse(
+            io.BytesIO(json_str.encode("utf-8")),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename={filename_base}.json"}
+        )
+    elif format == "txt":
+        # Tab-separated values
+        if not excel_records:
+            return StreamingResponse(
+                io.BytesIO(b""),
+                media_type="text/plain",
+                headers={"Content-Disposition": f"attachment; filename={filename_base}.txt"}
+            )
+        headers = list(excel_records[0].keys())
+        lines = [ "\t".join(headers) ]
+        for rec in excel_records:
+            row_vals = [str(rec.get(h, "")) for h in headers]
+            lines.append("\t".join(row_vals))
+        txt_content = "\n".join(lines)
+        return StreamingResponse(
+            io.BytesIO(txt_content.encode("utf-8")),
+            media_type="text/plain; charset=utf-8",
+            headers={"Content-Disposition": f"attachment; filename={filename_base}.txt"}
+        )
+    else: # xlsx
+        df_out = pd.DataFrame(excel_records)
+        df_out = clean_df_for_excel(df_out)
+        
+        excel_io = io.BytesIO()
+        with pd.ExcelWriter(excel_io, engine='openpyxl') as writer:
+            df_out.to_excel(writer, index=False, sheet_name="Matched Catalog")
+        excel_io.seek(0)
+        
+        return StreamingResponse(
+            excel_io,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename_base}.xlsx"}
+        )
+
+
+@app.get("/api/matcher/job/{job_id}/export_media")
+async def export_matcher_job_media(
+    job_id: str,
+    statuses: Optional[str] = Query(None), # Comma-separated list of statuses, e.g., "matched,review,no_match"
+    scope: str = Query("all"),
+    offset: int = Query(0, ge=0),
+    limit: Optional[int] = Query(None, ge=1),
+    search: Optional[str] = Query(None),
+    media_types: str = Query("products")  # Comma-separated list of media types, e.g. "products,brands"
+):
+    from tools.matcher_db import get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    results_path = job["results_path"]
+    if not results_path or not os.path.exists(results_path):
+        raise HTTPException(status_code=404, detail="Job results file not found")
+        
+    try:
+        with open(results_path, "r", encoding="utf-8") as f:
+            all_results = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    # Filter by Search & Statuses
+    filtered_results = []
+    for item in all_results:
+        if search:
+            q_lower = search.lower()
+            orig_match = q_lower in item.get("original_name", "").lower()
+            cand_match = any(q_lower in m.get("name_en", "").lower() for m in item.get("matches", []))
+            if not (orig_match or cand_match):
+                continue
+        
+        if statuses:
+            status_list = [s.strip() for s in statuses.split(",")]
+            top_match = item["matches"][0] if item.get("matches") else None
+            status = top_match["status"] if top_match else "no_match"
+            if status not in status_list:
+                continue
+
+        filtered_results.append(item)
+
+    # Sort by row_index ascending
+    filtered_results.sort(key=lambda x: x.get("row_index", 0))
+
+    # Slice range
+    if scope == "slice":
+        slice_end = offset + limit if limit is not None else len(filtered_results)
+        items_to_export = filtered_results[offset:slice_end]
+    else:
+        items_to_export = filtered_results
+
+    # Extract image names
+    image_names = []
+    for res in items_to_export:
+        top_match = res.get("matches", [{}])[0] if res.get("matches") else {}
+        p = top_match.get("product_data", {}) if top_match else {}
+        img_name = p.get("image_name") or p.get("local_image_name") or top_match.get("local_image_name")
+        if img_name:
+            image_names.append(img_name)
+
+    image_names_set = set(image_names)
+    media_types_list = [m.strip() for m in media_types.split(",")]
+
+    zip_buffer = io.BytesIO()
+    import zipfile
+    
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        if "products" in media_types_list:
+            prod_dir = os.path.join(project_root, "data", "media", "products")
+            if os.path.exists(prod_dir):
+                for filename in os.listdir(prod_dir):
+                    file_path = os.path.join(prod_dir, filename)
+                    if os.path.isfile(file_path):
+                        if filename in image_names_set:
+                            zipf.write(file_path, os.path.join("products", filename))
+                            
+        if "brands" in media_types_list:
+            brand_dir = os.path.join(project_root, "data", "media", "brands")
+            if os.path.exists(brand_dir):
+                for filename in os.listdir(brand_dir):
+                    file_path = os.path.join(brand_dir, filename)
+                    if os.path.isfile(file_path):
+                        if filename in image_names_set:
+                            zipf.write(file_path, os.path.join("brands", filename))
+                            
+        if not zipf.namelist():
+            zipf.writestr("info.txt", "No matching local images found for the export.")
+                            
+    zip_buffer.seek(0)
+    
+    filename_base = f"drug_matcher_media_{job_id[:8]}"
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename_base}.zip"',
+        "Content-Type": "application/zip"
+    }
+    return StreamingResponse(zip_buffer, headers=headers)
 
 class DeleteJobRequest(BaseModel):
     password: str
