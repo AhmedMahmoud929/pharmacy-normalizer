@@ -46,3 +46,5 @@ redeploy_backup*.sh
 *.log
 .DS_Store
 Thumbs.db
+
+/products.csv

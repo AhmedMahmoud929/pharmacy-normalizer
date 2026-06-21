@@ -523,6 +523,20 @@ export default function DrugMatcher() {
         signal: controller.signal
       });
 
+      if (!response.ok) {
+        let errMsg = "An error occurred during sheet matching processing.";
+        try {
+          const errData = await response.json();
+          errMsg = errData.detail || errMsg;
+        } catch {
+          try {
+            const errText = await response.text();
+            if (errText) errMsg = errText;
+          } catch {}
+        }
+        throw new Error(errMsg);
+      }
+
       if (background) {
         if (response.ok) {
           const data = await response.json();
@@ -656,7 +670,7 @@ export default function DrugMatcher() {
         console.error(err);
         toast({
           title: "Execution Error",
-          description: "An error occurred during sheet matching processing.",
+          description: err.message || "An error occurred during sheet matching processing.",
           type: "error"
         });
       }

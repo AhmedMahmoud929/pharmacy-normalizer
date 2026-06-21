@@ -41,6 +41,7 @@ if project_root not in sys.path:
 
 from normalizer import normalize
 from normalizer.core.pipeline import create_pipeline
+from tools.csv_helper import load_sheet_from_path_safely
 from normalizer.core.cleaner import clean, collapse_whitespace, remove_stop_words
 from normalizer.core.arabic import normalize_arabic
 from normalizer.core.mapper import map_arabic_tokens, map_abbreviations, map_arabic_number_words
@@ -451,8 +452,11 @@ def match_row_task(q_norm: str, top_k: int, w_j: float, w_s: float):
 def run_sheet(file_path: str, index: ProductIndex, args):
     import pandas as pd
     if not os.path.exists(file_path): error_console.print(f"[red]Error: {file_path} not found[/red]"); sys.exit(1)
-    ext = os.path.splitext(file_path)[1].lower()
-    df = pd.read_excel(file_path) if ext in [".xlsx", ".xls"] else pd.read_csv(file_path)
+    try:
+        df = load_sheet_from_path_safely(file_path)
+    except Exception as parse_err:
+        error_console.print(f"[red]Error parsing sheet: {parse_err}[/red]")
+        sys.exit(1)
     
     norm_col = "normalized_name"
     # v8 Force: Always re-normalize to ensure v6/v7 typo-tolerance is applied to all rows

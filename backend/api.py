@@ -35,6 +35,7 @@ if project_root not in sys.path:
 
 from normalizer import normalize
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
+from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
 
@@ -270,12 +271,9 @@ async def match_sheet(
     file_ext = os.path.splitext(file.filename)[1].lower()
     
     try:
-        if file_ext in [".xlsx", ".xls"]:
-            df = pd.read_excel(io.BytesIO(content))
-        elif file_ext == ".csv":
-            df = pd.read_csv(io.BytesIO(content))
-        else:
-            raise HTTPException(status_code=400, detail=f"Unsupported file format: {file_ext}")
+        df = load_sheet_safely(content, file_ext)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
 
@@ -2144,14 +2142,11 @@ async def run_matcher_job(
     # 1. Read sheet file
     content = await file.read()
     file_ext = os.path.splitext(file.filename)[1].lower()
-    if file_ext not in [".xlsx", ".xls", ".csv"]:
-        raise HTTPException(status_code=400, detail=f"Unsupported file format: {file_ext}")
-        
+    
     try:
-        if file_ext in [".xlsx", ".xls"]:
-            df = pd.read_excel(io.BytesIO(content))
-        else:
-            df = pd.read_csv(io.BytesIO(content))
+        df = load_sheet_safely(content, file_ext)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
 

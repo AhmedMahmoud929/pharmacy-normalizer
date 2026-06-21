@@ -23,6 +23,7 @@ from tools.matcher_export import build_custom_columns
 
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
+from tools.csv_helper import load_sheet_safely
 
 def _extract_cell_string(val) -> Optional[str]:
     """Normalize a spreadsheet cell value to a trimmed string."""
@@ -320,12 +321,7 @@ async def run_matcher_background(
         
         # 1. Parse Excel / CSV File
         try:
-            if file_ext in [".xlsx", ".xls"]:
-                df = pd.read_excel(io.BytesIO(file_bytes))
-            elif file_ext == ".csv":
-                df = pd.read_csv(io.BytesIO(file_bytes))
-            else:
-                raise ValueError(f"Unsupported extension: {file_ext}")
+            df = load_sheet_safely(file_bytes, file_ext)
         except Exception as parse_err:
             finalize_job(job_id, "failed", error_msg=f"Failed to parse sheet: {str(parse_err)}")
             return
