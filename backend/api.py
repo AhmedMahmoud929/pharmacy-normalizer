@@ -15,7 +15,13 @@ import uuid
 import re
 import zipfile
 import shutil
-from tools.matcher_export import build_custom_columns
+from tools.matcher_export import (
+    build_custom_columns,
+    load_original_sheet,
+    get_original_column_names,
+    parse_original_col_field_id,
+    get_original_cell_value,
+)
 from tools.product_export import build_product_export_record
 
 # Excel formatting helpers
@@ -2246,6 +2252,7 @@ async def get_matcher_job_details(job_id: str):
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    job["original_columns"] = get_original_column_names(job_id, job.get("filename", ""))
     return job
 
 @app.post("/api/matcher/job/{job_id}/stop")
@@ -2579,7 +2586,11 @@ async def stream_matcher_job_progress(job_id: str):
                 
     return StreamingResponse(progress_event_generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
-def get_column_header(field_id: str) -> str:
+def get_column_header(field_id: str, original_columns: Optional[List[str]] = None) -> str:
+    col_index = parse_original_col_field_id(field_id)
+    if col_index is not None and original_columns and 0 <= col_index < len(original_columns):
+        return original_columns[col_index]
+
     headers = {
         "row_index": "row_number",
         "original_name": "original_name",
@@ -2634,7 +2645,17 @@ def get_column_header(field_id: str) -> str:
     return headers.get(field_id, field_id)
 
 
-def get_column_value(res: dict, field_id: str, job: dict) -> any:
+def get_column_value(
+    res: dict,
+    field_id: str,
+    job: dict,
+    original_df=None,
+    original_columns: Optional[List[str]] = None,
+) -> any:
+    col_index = parse_original_col_field_id(field_id)
+    if col_index is not None:
+        return get_original_cell_value(original_df, res.get("row_index", 0), col_index)
+
     top_match = res.get("matches", [{}])[0] if res.get("matches") else {}
     p = top_match.get("product_data", {}) if top_match else {}
     v = top_match.get("variant_data", {}) if top_match else {}
@@ -2826,13 +2847,18 @@ async def export_matcher_job_file(
         # Default columns
         selected_cols = ["row_index", "original_name", "normalized_name", "match_status", "match_score", "matching_method"]
 
+    original_columns = get_original_column_names(job_id, job.get("filename", ""))
+    original_df = None
+    if any(parse_original_col_field_id(col) is not None for col in selected_cols):
+        original_df = load_original_sheet(job_id, job.get("filename", ""))
+
     # Build records
     excel_records = []
     for res in items_to_export:
         record = {}
         for field_id in selected_cols:
-            header = get_column_header(field_id)
-            val = get_column_value(res, field_id, job)
+            header = get_column_header(field_id, original_columns)
+            val = get_column_value(res, field_id, job, original_df, original_columns)
             record[header] = val
         excel_records.append(record)
 

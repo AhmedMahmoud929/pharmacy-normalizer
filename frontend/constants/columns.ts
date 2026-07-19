@@ -49,11 +49,11 @@ export const categoryColumnOptions: ColumnOption[] = [
 export interface MatcherColumnOption {
   key: string;
   label: string;
-  group: "matcher" | "product" | "custom";
+  group: "matcher" | "product" | "custom" | "original";
   defaultChecked?: boolean;
 }
 
-export type MatcherColumnGroup = "matcher" | "product" | "custom";
+export type MatcherColumnGroup = "matcher" | "product" | "custom" | "original";
 
 export const matcherColumnOptions: MatcherColumnOption[] = [
   // Matcher Fields
@@ -115,3 +115,12 @@ export const browseProductColumnOptions: MatcherColumnOption[] = matcherColumnOp
   (o) => o.group === "product" || o.group === "custom"
 );
 
+/** Build selectable export options for columns from the uploaded source sheet. */
+export function buildOriginalColumnOptions(columnNames: string[]): MatcherColumnOption[] {
+  return columnNames.map((name, index) => ({
+    key: `orig_col_${index}`,
+    label: name,
+    group: "original" as const,
+    defaultChecked: true,
+  }));
+}

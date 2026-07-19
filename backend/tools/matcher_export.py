@@ -4,7 +4,18 @@ matcher_export.py — Custom column builder for matcher sheet exports.
 Per spec: specs/matcher-custom-export.md
 Appended AFTER the standard matched sheet fields in the exported Excel.
 """
-from typing import Optional
+import os
+from datetime import datetime
+from typing import Optional, List, Dict, Any
+
+import pandas as pd
+
+from tools.csv_helper import load_sheet_from_path_safely
+
+_tools_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root = os.path.dirname(_tools_dir)
+
+ORIGINAL_COL_PREFIX = "orig_col_"
 
 
 # ---------------------------------------------------------------------------
@@ -133,4 +144,83 @@ def _empty_columns() -> dict:
         "current_stock", "code", "international_barcode",
     ]
     return {k: "" for k in keys}
+
+
+# ---------------------------------------------------------------------------
+# Original uploaded sheet helpers
+# ---------------------------------------------------------------------------
+
+def get_job_original_file_path(job_id: str, filename: str) -> Optional[str]:
+    ext = os.path.splitext(filename or "")[1].lower()
+    if not ext:
+        for candidate in (".xlsx", ".xls", ".csv"):
+            path = os.path.join(_project_root, "data", "matcher", "jobs", job_id, f"original{candidate}")
+            if os.path.exists(path):
+                return path
+        return None
+    path = os.path.join(_project_root, "data", "matcher", "jobs", job_id, f"original{ext}")
+    return path if os.path.exists(path) else None
+
+
+def load_original_sheet(job_id: str, filename: str) -> Optional[pd.DataFrame]:
+    path = get_job_original_file_path(job_id, filename)
+    if not path:
+        return None
+    try:
+        return load_sheet_from_path_safely(path)
+    except Exception:
+        return None
+
+
+def get_original_column_names(job_id: str, filename: str) -> List[str]:
+    df = load_original_sheet(job_id, filename)
+    if df is None:
+        return []
+    return [str(col) for col in df.columns]
+
+
+def original_col_field_id(index: int) -> str:
+    return f"{ORIGINAL_COL_PREFIX}{index}"
+
+
+def parse_original_col_field_id(field_id: str) -> Optional[int]:
+    if not field_id.startswith(ORIGINAL_COL_PREFIX):
+        return None
+    try:
+        return int(field_id[len(ORIGINAL_COL_PREFIX):])
+    except ValueError:
+        return None
+
+
+def format_original_cell_value(val: Any) -> Any:
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return ""
+    if pd.isna(val):
+        return ""
+    if isinstance(val, (pd.Timestamp, datetime)):
+        return val.isoformat()
+    return val
+
+
+def build_original_row_dict(df: Optional[pd.DataFrame], row_index: int) -> Dict[str, Any]:
+    if df is None or row_index < 0 or row_index >= len(df):
+        return {}
+    row = df.iloc[row_index]
+    return {
+        str(col): format_original_cell_value(row[col])
+        for col in df.columns
+    }
+
+
+def get_original_cell_value(
+    df: Optional[pd.DataFrame],
+    row_index: int,
+    col_index: int,
+) -> Any:
+    if df is None or col_index < 0 or col_index >= len(df.columns):
+        return ""
+    if row_index < 0 or row_index >= len(df):
+        return ""
+    col_name = df.columns[col_index]
+    return format_original_cell_value(df.iloc[row_index][col_name])
 

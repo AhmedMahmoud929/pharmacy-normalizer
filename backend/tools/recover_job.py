@@ -11,7 +11,7 @@ project_root = os.path.dirname(tools_dir)
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from tools.matcher_export import build_custom_columns
+from tools.matcher_export import build_custom_columns, build_original_row_dict, load_original_sheet
 from tools.matcher_runner import clean_df_for_excel
 
 def recover(job_id: str):
@@ -38,14 +38,20 @@ def recover(job_id: str):
     # Query database for job info to check price and stock configurations
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock FROM matcher_jobs WHERE job_id = ?", (job_id,))
+    cursor.execute(
+        "SELECT use_uploaded_price, price_column, use_uploaded_stock, stock_column, default_stock, filename FROM matcher_jobs WHERE job_id = ?",
+        (job_id,),
+    )
     row = cursor.fetchone()
     use_uploaded_price = bool(row[0]) if row else False
     price_column = row[1] if row else None
     use_uploaded_stock = bool(row[2]) if row else False
     stock_column = row[3] if row else None
     default_stock = row[4] if row else 10
+    filename = row[5] if row else ""
     conn.close()
+
+    original_df = load_original_sheet(job_id, filename)
 
     for res in results_list:
         top_match = res["matches"][0] if res["matches"] else None
@@ -64,7 +70,8 @@ def recover(job_id: str):
         if uploaded_stock is None:
             uploaded_stock = default_stock
 
-        record = {
+        record = build_original_row_dict(original_df, res["row_index"])
+        record.update({
             "original_name": res["original_name"],
             "normalized_name": res["normalized_name"],
             "match_status": status,
@@ -77,7 +84,7 @@ def recover(job_id: str):
             "brand": (p or {}).get("brand", {}).get("name") if isinstance((p or {}).get("brand"), dict) else (p or {}).get("brand", ""),
             "in_stock": "Yes" if ((v or {}).get("stock", 0) > 0 or (p or {}).get("in_stock", True)) else "No",
             "storefront_link": f"https://chefaa.com/product/{(p or {}).get('slug')}" if (p or {}).get("slug") else ""
-        }
+        })
         
         # Map up to 3 candidates
         for k in range(3):

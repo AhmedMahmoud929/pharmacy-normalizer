@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Folder, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
-import { MatcherColumnOption as ColumnOption, matcherColumnOptions as columnOptions } from "@/constants/columns";
+import { MatcherColumnOption as ColumnOption, matcherColumnOptions as staticColumnOptions, buildOriginalColumnOptions } from "@/constants/columns";
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -35,27 +35,40 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [scope, setScope] = useState<ExportScope>("all");
 
   const [stats, setStats] = useState<{ matched: number; review: number; noMatch: number; total: number } | null>(null);
+  const [originalColumnNames, setOriginalColumnNames] = useState<string[]>([]);
+
+  const columnOptions = React.useMemo(() => {
+    return [...buildOriginalColumnOptions(originalColumnNames), ...staticColumnOptions];
+  }, [originalColumnNames]);
+
+  const defaultSelectedColumns = React.useMemo(
+    () => columnOptions.filter(o => o.defaultChecked).map(o => o.key),
+    [columnOptions]
+  );
 
   useEffect(() => {
     if (!isOpen || !jobId) return;
 
     if (jobStats) {
       setStats(jobStats);
-    } else {
-      fetch(`${API_URL}/api/matcher/job/${jobId}`)
-        .then(res => res.json())
-        .then(data => {
+    }
+
+    fetch(`${API_URL}/api/matcher/job/${jobId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!jobStats) {
           setStats({
             matched: data.matched_count || 0,
             review: data.review_count || 0,
             noMatch: data.no_match_count || 0,
             total: data.total_rows || 0
           });
-        })
-        .catch(err => {
-          console.error("Failed to fetch job stats in ExportDialog:", err);
-        });
-    }
+        }
+        setOriginalColumnNames(Array.isArray(data.original_columns) ? data.original_columns : []);
+      })
+      .catch(err => {
+        console.error("Failed to fetch job details in ExportDialog:", err);
+      });
   }, [isOpen, jobId, jobStats]);
 
   // Match Status Filtering State
@@ -70,9 +83,13 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [limit, setLimit] = useState<number>(100);
 
   // Selected Columns Checklist
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    columnOptions.filter(o => o.defaultChecked).map(o => o.key)
-  );
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedColumns(defaultSelectedColumns);
+    }
+  }, [isOpen, defaultSelectedColumns]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
@@ -216,7 +233,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setOffset(0);
     setLimit(100);
     setSelectedStatuses(["matched", "review", "no_match"]);
-    setSelectedColumns(columnOptions.filter(o => o.defaultChecked).map(o => o.key));
+    setSelectedColumns(defaultSelectedColumns);
     setExportComplete(false);
     setIsExporting(false);
     setExportStatusText("");
@@ -668,6 +685,37 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
 
                   <div className="space-y-4 overflow-y-auto pr-1">
+                    {/* Original Sheet Columns Group */}
+                    {columnOptions.some(col => col.group === "original") && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500/90 bg-emerald-500/10 px-2 py-0.5 rounded w-fit">
+                          Original Sheet Columns
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 bg-zinc-50 dark:bg-black/20 p-3 rounded-2xl border border-emerald-200/40 dark:border-emerald-800/30">
+                          {columnOptions.filter(col => col.group === "original").map(col => {
+                            const isChecked = selectedColumns.includes(col.key);
+                            return (
+                              <button
+                                key={col.key}
+                                onClick={() => handleToggleColumn(col.key)}
+                                className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
+                              >
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
+                                  ? "bg-emerald-500 border-emerald-500 text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                                  }`}>
+                                  {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                                </div>
+                                <span className="text-zinc-700 dark:text-zinc-300 font-medium truncate">
+                                  {col.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Custom Export Fields Group */}
                     <div className="space-y-2">
                       <p className="text-[10px] font-extrabold uppercase tracking-wider text-violet-400/90 bg-violet-500/10 px-2 py-0.5 rounded w-fit">

@@ -19,7 +19,7 @@ if project_root not in sys.path:
 if tools_dir not in sys.path:
     sys.path.append(tools_dir)
 
-from tools.matcher_export import build_custom_columns
+from tools.matcher_export import build_custom_columns, build_original_row_dict
 
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
@@ -636,7 +636,8 @@ async def run_matcher_background(
             if uploaded_stock is None:
                 uploaded_stock = default_stock
 
-            record = {
+            record = build_original_row_dict(df, res["row_index"])
+            record.update({
                 "original_name": res["original_name"],
                 "normalized_name": res["normalized_name"],
                 "matching_method": res.get("matching_method", "normalizer"),
@@ -650,7 +651,7 @@ async def run_matcher_background(
                 "brand": (p or {}).get("brand", {}).get("name") if isinstance((p or {}).get("brand"), dict) else (p or {}).get("brand", ""),
                 "in_stock": "Yes" if ((v or {}).get("stock", 0) > 0 or (p or {}).get("in_stock", True)) else "No",
                 "storefront_link": f"https://chefaa.com/product/{(p or {}).get('slug')}" if (p or {}).get("slug") else ""
-            }
+            })
             
             # Map up to 3 candidates
             for k in range(3):
