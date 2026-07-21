@@ -121,6 +121,6 @@ export function buildOriginalColumnOptions(columnNames: string[]): MatcherColumn
     key: `orig_col_${index}`,
     label: name,
     group: "original" as const,
-    defaultChecked: true,
+    defaultChecked: false,
   }));
 }
