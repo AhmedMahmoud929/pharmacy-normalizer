@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, ChevronRight, ChevronLeft, Download, FileSpreadsheet, FileJson, FileText, Check, Loader2, Folder, Image } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
@@ -46,16 +46,33 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     [columnOptions]
   );
 
+  // Sync stats from parent when counts change (stable primitive deps — not object identity)
+  useEffect(() => {
+    if (!isOpen || !jobStats) return;
+    setStats(prev => {
+      if (
+        prev &&
+        prev.matched === jobStats.matched &&
+        prev.review === jobStats.review &&
+        prev.noMatch === jobStats.noMatch &&
+        prev.total === jobStats.total
+      ) {
+        return prev;
+      }
+      return jobStats;
+    });
+  }, [isOpen, jobStats?.matched, jobStats?.review, jobStats?.noMatch, jobStats?.total]);
+
+  // Fetch job metadata once when the dialog opens (original sheet columns)
   useEffect(() => {
     if (!isOpen || !jobId) return;
 
-    if (jobStats) {
-      setStats(jobStats);
-    }
+    let cancelled = false;
 
     fetch(`${API_URL}/api/matcher/job/${jobId}`)
       .then(res => res.json())
       .then(data => {
+        if (cancelled) return;
         if (!jobStats) {
           setStats({
             matched: data.matched_count || 0,
@@ -64,12 +81,24 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             total: data.total_rows || 0
           });
         }
-        setOriginalColumnNames(Array.isArray(data.original_columns) ? data.original_columns : []);
+        const nextColumns = Array.isArray(data.original_columns) ? data.original_columns : [];
+        setOriginalColumnNames(prev => {
+          if (prev.length === nextColumns.length && prev.every((col, i) => col === nextColumns[i])) {
+            return prev;
+          }
+          return nextColumns;
+        });
       })
       .catch(err => {
-        console.error("Failed to fetch job details in ExportDialog:", err);
+        if (!cancelled) {
+          console.error("Failed to fetch job details in ExportDialog:", err);
+        }
       });
-  }, [isOpen, jobId, jobStats]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, jobId]);
 
   // Match Status Filtering State
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
@@ -84,9 +113,14 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
   // Selected Columns Checklist
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const columnsTouchedRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
+      columnsTouchedRef.current = false;
+      return;
+    }
+    if (!columnsTouchedRef.current && defaultSelectedColumns.length > 0) {
       setSelectedColumns(defaultSelectedColumns);
     }
   }, [isOpen, defaultSelectedColumns]);
@@ -124,12 +158,14 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   if (!isOpen) return null;
 
   const handleToggleColumn = (key: string) => {
+    columnsTouchedRef.current = true;
     setSelectedColumns(prev =>
       prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
     );
   };
 
   const handleSelectAllColumns = () => {
+    columnsTouchedRef.current = true;
     if (selectedColumns.length === columnOptions.length) {
       setSelectedColumns([]);
     } else {

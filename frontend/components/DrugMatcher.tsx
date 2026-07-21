@@ -866,6 +866,13 @@ export default function DrugMatcher() {
     };
   }, [results, serverStats, elapsedSeconds]);
 
+  const exportJobStats = useMemo(() => ({
+    matched: stats.matched,
+    review: stats.review,
+    noMatch: stats.noMatch,
+    total: stats.total,
+  }), [stats.matched, stats.review, stats.noMatch, stats.total]);
+
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -1287,7 +1294,7 @@ export default function DrugMatcher() {
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
         jobId={activeJobId}
-        jobStats={stats}
+        jobStats={exportJobStats}
       />
     </div>
   );

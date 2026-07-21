@@ -60,14 +60,44 @@ export default function MatcherDashboard() {
 
   useEffect(() => {
     fetchJobs();
+  }, [fetchJobs]);
 
-    // Set up polling for active/running jobs
+  const hasActiveJobs = useMemo(
+    () => jobs.some(j => j.status === "running" || j.status === "pending"),
+    [jobs]
+  );
+
+  // Poll only while campaigns are still running — avoids hammering the API when idle
+  useEffect(() => {
+    if (!hasActiveJobs) return;
+
     const interval = setInterval(() => {
       fetchJobs();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [fetchJobs]);
+  }, [hasActiveJobs, fetchJobs]);
+
+  const activeJob = useMemo(
+    () => jobs.find(j => j.job_id === activeJobId),
+    [jobs, activeJobId]
+  );
+
+  const activeJobStats = useMemo(() => {
+    if (!activeJob) return undefined;
+    return {
+      matched: activeJob.matched_count,
+      review: activeJob.review_count,
+      noMatch: activeJob.no_match_count,
+      total: activeJob.total_rows
+    };
+  }, [
+    activeJob?.matched_count,
+    activeJob?.review_count,
+    activeJob?.no_match_count,
+    activeJob?.total_rows,
+    activeJobId
+  ]);
 
   const filteredJobs = useMemo(() => {
     if (!searchQuery) return jobs;
@@ -351,15 +381,7 @@ export default function MatcherDashboard() {
           setActiveJobId(null);
         }}
         jobId={activeJobId}
-        jobStats={jobs.find(j => j.job_id === activeJobId) ? (() => {
-          const j = jobs.find(j => j.job_id === activeJobId)!;
-          return {
-            matched: j.matched_count,
-            review: j.review_count,
-            noMatch: j.no_match_count,
-            total: j.total_rows
-          };
-        })() : undefined}
+        jobStats={activeJobStats}
       />
 
       {/* Delete Campaign Modal */}
