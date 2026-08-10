@@ -45,6 +45,7 @@ def fetch_all_products(
     *,
     on_progress: Optional[ProgressCallback] = None,
     should_cancel: Optional[Callable[[], bool]] = None,
+    max_products: Optional[int] = None,
 ) -> List[Dict[str, Any]]:
     """
     Download the full product catalog from Chefaa's Meilisearch index.
@@ -57,7 +58,13 @@ def fetch_all_products(
             on_progress(count, message)
 
     _report(0, "Connecting to Meilisearch API…")
-    hits = fetch_fn(country=country, category_slug=None, on_progress=_report, should_cancel=should_cancel)
+    hits = fetch_fn(
+        country=country,
+        category_slug=None,
+        on_progress=_report,
+        should_cancel=should_cancel,
+        max_products=max_products,
+    )
     products = [normalize_meili_hit(h) for h in hits]
     _report(len(products), f"Fetched {len(products):,} products from Meilisearch")
     return products

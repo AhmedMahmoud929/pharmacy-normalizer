@@ -778,6 +778,11 @@ def fetch_products_from_meili(country: str = "eg", category_slug: str = None, on
                 ranges_to_check.append((min_p, mid_p))
                 ranges_to_check.append((mid_p + 0.01, max_p))
 
+        if _at_limit():
+            break
+
+    if max_products is not None:
+        collected_hits = collected_hits[:max_products]
     _report_progress(f"Meilisearch fetch complete — {len(collected_hits):,} products")
     return collected_hits
 

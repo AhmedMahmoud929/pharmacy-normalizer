@@ -100,6 +100,7 @@ export default function CatalogSeederPage() {
   const [jobs, setJobs] = useState<PipelineJob[]>([]);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [activeJob, setActiveJob] = useState<PipelineJob | null>(null);
+  const [testProductLimit, setTestProductLimit] = useState("5000");
   const [isStarting, setIsStarting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
@@ -264,13 +265,21 @@ export default function CatalogSeederPage() {
     };
   }, []);
 
-  const startPipeline = async (steps: string[], label: string) => {
+  const startPipeline = async (
+    steps: string[],
+    label: string,
+    crawlOptions?: { max_products?: number }
+  ) => {
     setIsStarting(true);
     try {
       const res = await fetch(`${API_URL}/api/catalog/pipeline/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ steps, background: true }),
+        body: JSON.stringify({
+          steps,
+          background: true,
+          ...(crawlOptions ? { crawl_options: crawlOptions } : {}),
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -338,6 +347,30 @@ export default function CatalogSeederPage() {
     } finally {
       setIsReloading(false);
     }
+  };
+
+  const fullRefreshSteps = [
+    "crawl",
+    "import",
+    "normalize",
+    "seed_mappings",
+    "promote",
+    "reload_index",
+  ] as const;
+
+  const handleTestPipeline = () => {
+    const limit = parseInt(testProductLimit, 10);
+    if (!Number.isFinite(limit) || limit <= 0) {
+      toast({
+        title: "Invalid limit",
+        description: "Enter a positive number of products.",
+        type: "error",
+      });
+      return;
+    }
+    startPipeline([...fullRefreshSteps], `Test Run (${limit.toLocaleString()} products)`, {
+      max_products: limit,
+    });
   };
 
   const displaySteps = activeJob?.steps?.length
@@ -451,23 +484,43 @@ export default function CatalogSeederPage() {
               Fetches the full Egyptian catalog via Chefaa&apos;s Meilisearch API (~30K products in minutes),
               normalizes all product names, seeds brand mappings, and activates the new catalog.
             </p>
-            <Button
-              onClick={() =>
-                startPipeline(
-                  ["crawl", "import", "normalize", "seed_mappings", "promote", "reload_index"],
-                  "Full Refresh"
-                )
-              }
-              disabled={isStarting}
-              className="w-full bg-primary hover:bg-primary/90 font-bold"
-            >
-              {isStarting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Play className="w-4 h-4 mr-2" />
-              )}
-              Start Full Refresh
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                onClick={() => startPipeline([...fullRefreshSteps], "Full Refresh")}
+                disabled={isStarting}
+                className="flex-1 bg-primary hover:bg-primary/90 font-bold"
+              >
+                {isStarting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
+                )}
+                Start Full Refresh
+              </Button>
+              <div className="flex flex-1 gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={50000}
+                  value={testProductLimit}
+                  onChange={(e) => setTestProductLimit(e.target.value)}
+                  disabled={isStarting}
+                  className="w-24 px-3 rounded-lg bg-zinc-950 border border-zinc-700 text-sm font-mono text-zinc-200 focus:outline-none focus:border-primary"
+                  aria-label="Test product limit"
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleTestPipeline}
+                  disabled={isStarting}
+                  className="flex-1 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 font-semibold"
+                >
+                  Test Pipeline
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-500">
+              Test Pipeline runs the same steps but fetches only the specified number of products from Meilisearch.
+            </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">

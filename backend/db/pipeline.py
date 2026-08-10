@@ -242,11 +242,21 @@ async def _step_crawl(
     output_path = os.path.join(output_dir, "results.json")
 
     country = crawl_options.get("country", "eg")
+    max_products = crawl_options.get("max_products")
+    if max_products is not None:
+        max_products = int(max_products)
+        if max_products <= 0:
+            raise ValueError("max_products must be a positive integer")
 
     _update_crawl_progress(
         job_id,
-        message="Fetching catalog from Meilisearch API…",
+        message=(
+            f"Fetching up to {max_products:,} products from Meilisearch API…"
+            if max_products
+            else "Fetching catalog from Meilisearch API…"
+        ),
         products_found=0,
+        catalog_total=max_products,
     )
 
     def on_progress(count: int, message: str) -> None:
@@ -255,7 +265,7 @@ async def _step_crawl(
             job_id,
             message=message,
             products_found=count,
-            catalog_total=count if count > 0 else None,
+            catalog_total=max_products or (count if count > 0 else None),
         )
 
     def should_cancel() -> bool:
@@ -267,6 +277,7 @@ async def _step_crawl(
             country,
             on_progress=on_progress,
             should_cancel=should_cancel,
+            max_products=max_products,
         )
     except InterruptedError:
         raise PipelineCancelled() from None
