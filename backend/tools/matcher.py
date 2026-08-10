@@ -73,6 +73,21 @@ def normalize_lookup_key(val) -> str:
 
 DEFAULT_DB_PATH = os.path.join(project_root, "data", "normalized", "chefaa_products_eg_normalized.json")
 RAW_DB_PATH = os.path.join(project_root, "data", "extracted", "chefaa_products_eg.json")
+SQLITE_DB_PATH = os.path.join(project_root, "data", "pharmatcher.db")
+
+def load_products_data(db_path: str = None) -> List[Dict[str, Any]]:
+    """Load catalog products — prefers SQLite, falls back to legacy JSON."""
+    try:
+        from tools.catalog_service import load_catalog_index
+        index, products = load_catalog_index()
+        if products:
+            return products
+    except Exception as exc:
+        console.print(f"[yellow]SQLite catalog load failed ({exc}); falling back to JSON.[/yellow]")
+
+    resolved = resolve_db_path(db_path or DEFAULT_DB_PATH)
+    with open(resolved, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def resolve_db_path(db_path: str) -> str:
     if os.path.exists(db_path):
@@ -436,9 +451,7 @@ _global_index = None
 
 def init_worker(db_path: str):
     global _global_index
-    resolved_path = resolve_db_path(db_path)
-    with open(resolved_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    data = load_products_data(db_path)
     _global_index = ProductIndex(data)
 
 def match_row_task(q_norm: str, top_k: int, w_j: float, w_s: float):

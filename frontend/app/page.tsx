@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Activity, Table, Database, Search, FileText, ArrowRight, ShieldCheck, Zap, Sparkles } from "lucide-react";
+import { Activity, Table, Database, Search, FileText, ArrowRight, ShieldCheck, Zap, Sparkles, Sprout } from "lucide-react";
 import { motion } from "framer-motion";
 
 const features = [
@@ -13,6 +13,14 @@ const features = [
     icon: Table,
     color: "bg-blue-500",
     shadow: "shadow-blue-500/20",
+  },
+  {
+    name: "Catalog Seeder",
+    description: "Refresh the master SQLite catalog from Chefaa — crawl, normalize, seed mappings, and reload the matcher index from the UI.",
+    href: "/dashboard/catalog",
+    icon: Sprout,
+    color: "bg-teal-500",
+    shadow: "shadow-teal-500/20",
   },
   {
     name: "Database Browser",

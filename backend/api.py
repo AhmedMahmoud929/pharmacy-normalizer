@@ -41,9 +41,31 @@ if project_root not in sys.path:
 
 from normalizer import normalize
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
+from tools.catalog_service import load_catalog_index
+from catalog_api import router as catalog_router, register_reload_callback
 from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
+
+def reload_catalog_index():
+    """Reload in-memory matcher index from SQLite (or legacy JSON fallback)."""
+    global index, raw_products, brand_slug_to_code, category_slug_to_code
+    new_index, products = load_catalog_index()
+    index = new_index
+    raw_products = products
+    brand_slug_to_code = {}
+    category_slug_to_code = {}
+    if index is not None:
+        print(f"Catalog index reloaded ({len(products)} products).")
+    else:
+        print("WARNING: Catalog index is empty after reload.")
+    return {"products": len(products), "loaded": index is not None}
+
+register_reload_callback(reload_catalog_index)
+app.include_router(catalog_router)
+
+from catalog_api import set_workspace_root
+set_workspace_root(workspace_root)
 
 # Enable CORS for Next.js
 app.add_middleware(
@@ -143,31 +165,18 @@ async def get_media_file(category: str, filename: str):
 
 @app.on_event("startup")
 async def startup_event():
-    global index, raw_products
-    from tools.matcher import RAW_DB_PATH
-    
-    db_to_load = DEFAULT_DB_PATH
-    if not os.path.exists(DEFAULT_DB_PATH):
-        print(f"WARNING: Normalized database not found at {DEFAULT_DB_PATH}")
-        if os.path.exists(RAW_DB_PATH):
-            print(f"Falling back to raw database at {RAW_DB_PATH}...")
-            db_to_load = RAW_DB_PATH
-        else:
-            print(f"ERROR: No database found at all. Please ensure {RAW_DB_PATH} exists.")
-            return
-
-    try:
-        with open(db_to_load, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        index = ProductIndex(data)
-        raw_products = data
-        print(f"Database loaded successfully from {db_to_load}.")
-    except Exception as e:
-        print(f"FAILED to load database: {str(e)}")
+    reload_catalog_index()
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "database_loaded": index is not None}
+    from db import catalog_repo
+    stats = catalog_repo.get_catalog_stats()
+    return {
+        "status": "ok",
+        "database_loaded": index is not None,
+        "catalog_source": stats.get("source", "unknown"),
+        "live_products": stats.get("live_products", 0),
+    }
 
 @app.get("/match")
 async def match_single(
@@ -592,22 +601,19 @@ async def list_db_products(
 brand_slug_to_code = {}
 category_slug_to_code = {}
 
+def _ensure_raw_products_loaded():
+    global raw_products
+    if not raw_products:
+        _, products = load_catalog_index()
+        raw_products = products
+    return raw_products
+
+
 def ensure_index_codes():
-    global brand_slug_to_code, category_slug_to_code, raw_products
+    global brand_slug_to_code, category_slug_to_code
     if brand_slug_to_code and category_slug_to_code:
         return
-    if not raw_products:
-        from tools.matcher import RAW_DB_PATH
-        db_to_load = DEFAULT_DB_PATH
-        if not os.path.exists(db_to_load) and os.path.exists(RAW_DB_PATH):
-            db_to_load = RAW_DB_PATH
-        if os.path.exists(db_to_load):
-            try:
-                with open(db_to_load, "r", encoding="utf-8") as f:
-                    raw_products = json.load(f)
-            except:
-                pass
-    if not raw_products:
+    if not _ensure_raw_products_loaded():
         return
 
     # Build brands list and assign codes
@@ -930,15 +936,7 @@ async def export_media(req: MediaExportRequest):
 @app.get("/db/categories/taxonomy")
 async def get_categories_taxonomy():
     global raw_products
-    if not raw_products:
-        db_to_load = DEFAULT_DB_PATH
-        if os.path.exists(db_to_load):
-            try:
-                with open(db_to_load, "r", encoding="utf-8") as f:
-                    raw_products = json.load(f)
-            except:
-                pass
-    if not raw_products:
+    if not _ensure_raw_products_loaded():
         raise HTTPException(status_code=503, detail="Database not loaded")
     
     tree = {}
@@ -1026,15 +1024,7 @@ async def export_brands(
     columns: Optional[str] = Query(None)
 ):
     global raw_products
-    if not raw_products:
-        db_to_load = DEFAULT_DB_PATH
-        if os.path.exists(db_to_load):
-            try:
-                with open(db_to_load, "r", encoding="utf-8") as f:
-                    raw_products = json.load(f)
-            except:
-                pass
-    if not raw_products:
+    if not _ensure_raw_products_loaded():
         raise HTTPException(status_code=503, detail="Database not loaded")
 
     ensure_index_codes()
@@ -1136,15 +1126,7 @@ async def export_categories(
     columns: Optional[str] = Query(None)
 ):
     global raw_products
-    if not raw_products:
-        db_to_load = DEFAULT_DB_PATH
-        if os.path.exists(db_to_load):
-            try:
-                with open(db_to_load, "r", encoding="utf-8") as f:
-                    raw_products = json.load(f)
-            except:
-                pass
-    if not raw_products:
+    if not _ensure_raw_products_loaded():
         raise HTTPException(status_code=503, detail="Database not loaded")
 
     ensure_index_codes()
@@ -2414,7 +2396,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
     variant_data = None
     
     if index:
-        for item_entry in index.data:
+        for item_entry in index.entries:
             prod = item_entry["product"]
             var = item_entry["variant"]
             if var.get("sku") == req.matched_sku or prod.get("id") == req.product_id:

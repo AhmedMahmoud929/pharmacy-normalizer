@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Table, Search, FileText, Database, Settings, Home, Info, Terminal } from "lucide-react";
+import { Activity, Table, Search, FileText, Database, Settings, Home, Info, Terminal, Sprout } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { API_URL } from "@/lib/utils";
@@ -12,6 +12,7 @@ const showCrawler = process.env.NEXT_PUBLIC_ENABLE_CRAWLER === "true";
 
 const navItems = [
   { name: "Match Sheet", href: "/dashboard/matcher", icon: Table },
+  { name: "Catalog Seeder", href: "/dashboard/catalog", icon: Sprout },
   ...(showCrawler ? [{ name: "Campaign Crawler", href: "/dashboard/crawler", icon: Terminal }] : []),
   { name: "Browse DB", href: "/dashboard/browse", icon: Database },
   { name: "Global Search", href: "/dashboard/search", icon: Search },

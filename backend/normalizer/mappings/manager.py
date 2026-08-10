@@ -5,9 +5,14 @@ from typing import Dict, List, Tuple
 class MappingDBManager:
     def __init__(self, db_path: str = None):
         if db_path is None:
-            # Default path relative to this file
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            db_path = os.path.join(current_dir, "db", "mappings.db")
+            # Prefer unified pharmatcher.db when present
+            backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            unified_db = os.path.join(backend_root, "data", "pharmatcher.db")
+            if os.path.exists(unified_db):
+                db_path = unified_db
+            else:
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                db_path = os.path.join(current_dir, "db", "mappings.db")
         
         self.db_path = db_path
         self._initialize_db()

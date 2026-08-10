@@ -656,7 +656,7 @@ def fetch_product_details(product_url: str) -> dict:
 # MEILISEARCH CRAWLER BACKEND
 # ==========================================
 
-def fetch_products_from_meili(country: str = "eg", category_slug: str = None) -> list:
+def fetch_products_from_meili(country: str = "eg", category_slug: str = None, on_progress=None, should_cancel=None, max_products: int = None) -> list:
     """
     Fetch all products matching a category_slug from Meilisearch index.
     If category_slug is None or 'all', fetches all products.
@@ -699,8 +699,21 @@ def fetch_products_from_meili(country: str = "eg", category_slug: str = None) ->
     ranges_to_check = [(0, max_price)]
     collected_hits = []
     seen_ids = set()
+
+    def _at_limit() -> bool:
+        return max_products is not None and len(collected_hits) >= max_products
+
+    def _report_progress(message: str) -> None:
+        if should_cancel and should_cancel():
+            raise InterruptedError("Pipeline cancelled")
+        if on_progress:
+            on_progress(len(collected_hits), message)
     
     while ranges_to_check:
+        if should_cancel and should_cancel():
+            raise InterruptedError("Pipeline cancelled")
+        if _at_limit():
+            break
         min_p, max_p = ranges_to_check.pop(0)
         
         price_filter = f"price >= {min_p} AND price <= {max_p}"
@@ -728,6 +741,8 @@ def fetch_products_from_meili(country: str = "eg", category_slug: str = None) ->
             offset = 0
             limit = 250
             while True:
+                if should_cancel and should_cancel():
+                    raise InterruptedError("Pipeline cancelled")
                 data = {
                     'q': '',
                     'limit': limit,
@@ -745,9 +760,14 @@ def fetch_products_from_meili(country: str = "eg", category_slug: str = None) ->
                         if h_id not in seen_ids:
                             seen_ids.add(h_id)
                             collected_hits.append(hit)
-                    if len(hits) < limit:
+                            if _at_limit():
+                                break
+                    _report_progress(f"Fetched {len(collected_hits):,} products from Meilisearch…")
+                    if _at_limit() or len(hits) < limit:
                         break
                     offset += limit
+                if _at_limit():
+                    break
         else:
             # Split the price range to divide-and-conquer
             mid_p = round((min_p + max_p) / 2.0, 2)
@@ -757,7 +777,8 @@ def fetch_products_from_meili(country: str = "eg", category_slug: str = None) ->
             else:
                 ranges_to_check.append((min_p, mid_p))
                 ranges_to_check.append((mid_p + 0.01, max_p))
-                
+
+    _report_progress(f"Meilisearch fetch complete — {len(collected_hits):,} products")
     return collected_hits
 
 

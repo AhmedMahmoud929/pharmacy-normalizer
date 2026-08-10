@@ -45,30 +45,8 @@ def get_db_path() -> str:
 
 def _init_process_worker(db_path: str):
     global _global_index
-    from tools.matcher import ProductIndex
-    try:
-        with open(db_path, "r", encoding="utf-8") as f:
-            products_data = json.load(f)
-    except Exception:
-        # Fallback to streaming line-by-line
-        products_data = []
-        current_obj_str = []
-        in_object = False
-        with open(db_path, "r", encoding="utf-8") as f:
-            for line in f:
-                stripped = line.strip()
-                if stripped == "{":
-                    in_object = True
-                    current_obj_str = ["{"]
-                elif stripped in ("},", "}"):
-                    current_obj_str.append("}")
-                    in_object = False
-                    try:
-                        products_data.append(json.loads("".join(current_obj_str)))
-                    except Exception:
-                        pass
-                elif in_object:
-                    current_obj_str.append(line)
+    from tools.matcher import ProductIndex, load_products_data
+    products_data = load_products_data(db_path)
     _global_index = ProductIndex(products_data)
 
 # Excel formatting helpers

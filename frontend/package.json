@@ -2,11 +2,15 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3005",
-    "lint": "eslint"
+    "serve": "npm run build && npm run start",
+    "clean": "node -e \"const fs=require('fs');['.next'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\""
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
