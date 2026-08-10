@@ -2,6 +2,7 @@ import React from "react";
 import { Search, BarChart3, ArrowUpDown, Check, X, Edit2, Info, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { tablePanelClass, tableHeaderClass, tableRowClass } from "@/components/ui/stat-card";
 
 interface ResultsTableProps {
   results: any[];
@@ -102,38 +103,38 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
   };
 
   return (
-    <div ref={outerRef} className="rounded-2xl border border-primary/50 bg-white/50 dark:bg-black/50 backdrop-blur-md overflow-hidden flex flex-col h-[750px] w-full">
-      <div className="p-4 border-b border-primary/50 bg-primary/5 space-y-4">
+    <div ref={outerRef} className={cn(tablePanelClass, "flex flex-col h-[750px] w-full")}>
+      <div className="p-4 border-b border-border bg-muted/30 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-zinc-400" />
-            <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">Matching Results</span>
+            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Matching Results</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-500 font-medium">Show</span>
+              <span className="text-xs text-muted-foreground font-medium">Show</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-                className="bg-white dark:bg-zinc-900 border border-primary/20 rounded-lg text-xs p-1 outline-none focus:ring-1 focus:ring-primary"
+                className="bg-background border border-border rounded-lg text-xs p-1 outline-none focus:ring-1 focus:ring-primary"
               >
                 {[25, 50, 100, 200].map(val => (
                   <option key={val} value={val}>{val}</option>
                 ))}
               </select>
             </div>
-            <span className="text-xs text-zinc-500 font-medium">{totalItems} total filtered</span>
+            <span className="text-xs text-muted-foreground font-medium">{totalItems} total filtered</span>
           </div>
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by name or status..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-zinc-900 border border-primary/20 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
           />
         </div>
       </div>
@@ -146,42 +147,42 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10 shadow-sm">
-              <tr className="text-xs font-bold text-zinc-500 uppercase">
-                <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("row_index")}>
+            <thead className="sticky top-0 bg-card/95 backdrop-blur-md z-10">
+              <tr className={tableHeaderClass}>
+                <th className="p-4 cursor-pointer hover:bg-muted/40" onClick={() => requestSort("row_index")}>
                   <div className="flex items-center gap-1">
                     Row <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="p-4 border-b border-primary/50">Image</th>
-                <th className="p-4 border-b border-primary/50">Top Match
+                <th className="p-4 border-b border-border">Image</th>
+                <th className="p-4 border-b border-border">Top Match
                   <small className="border border-primary text-primary px-2 py-0.5 rounded-full bg-primary-dark/10 ms-2 relative bottom-0.25">Standard</small>
                 </th>
-                <th className="p-4 border-b border-primary/50">Original Name
+                <th className="p-4 border-b border-border">Original Name
                   <small className="border border-primary text-primary px-2 py-0.5 rounded-full bg-primary-dark/10 ms-2 relative bottom-0.25">Pharmacy</small>
                 </th>
-                <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("score")}>
+                <th className="p-4 border-b border-border cursor-pointer hover:bg-muted/40" onClick={() => requestSort("score")}>
                   <div className="flex items-center gap-1">
                     Score <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("status")}>
+                <th className="p-4 border-b border-border cursor-pointer hover:bg-muted/40" onClick={() => requestSort("status")}>
                   <div className="flex items-center gap-1">
                     Status <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="p-4 border-b border-primary/50 cursor-pointer hover:bg-primary/5" onClick={() => requestSort("matching_method")}>
+                <th className="p-4 border-b border-border cursor-pointer hover:bg-muted/40" onClick={() => requestSort("matching_method")}>
                   <div className="flex items-center gap-1">
                     Matching Method <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </th>
-                <th className="p-4 border-b border-primary/50 text-right">Actions</th>
+                <th className="p-4 border-b border-border text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoadingPage ? (
                 Array.from({ length: 8 }).map((_, idx) => (
-                  <tr key={idx} className="border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                  <tr key={idx} className={tableRowClass}>
                     <td className="p-4">
                       <div className="h-4 w-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
                     </td>
@@ -218,7 +219,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     key={res.row_index}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="group hover:bg-primary/5 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0"
+                    className={cn("group", tableRowClass)}
                   >
                     <td className="p-4 text-xs text-zinc-400">#{res.row_index + 1}</td>
                     <td className="p-4">
@@ -305,15 +306,15 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="p-4 border-t border-primary/20 bg-primary/5 flex items-center justify-between">
-          <p className="text-xs text-zinc-500 font-medium">
+        <div className="p-4 border-t border-border bg-muted/30 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground font-medium">
             Showing Page <span className="font-bold text-foreground">{currentPage}</span> of <span className="font-bold text-foreground">{totalPages}</span>
           </p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="p-2 bg-white dark:bg-zinc-900 border border-primary/20 rounded-lg text-zinc-500 hover:bg-primary/5 disabled:opacity-50 transition-colors"
+              className="p-2 bg-background border border-border rounded-lg text-muted-foreground hover:bg-muted/40 disabled:opacity-50 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -334,7 +335,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                       "w-8 h-8 rounded-lg text-xs font-bold transition-all",
                       currentPage === pageNum
                         ? "bg-primary text-white shadow-md shadow-primary/20"
-                        : "bg-white dark:bg-zinc-900 border border-primary/20 text-zinc-500 hover:bg-primary/5"
+                        : "bg-background border border-border text-muted-foreground hover:bg-muted/40"
                     )}
                   >
                     {pageNum}

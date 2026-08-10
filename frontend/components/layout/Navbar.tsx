@@ -1,49 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { usePathname } from "next/navigation";
-import { Table, Search, FileText, Database, Terminal, Sprout, Sun, Moon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { Sun, Moon } from "lucide-react";
+import { motion } from "framer-motion";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { API_URL } from "@/lib/utils";
-
-const showCrawler = process.env.NEXT_PUBLIC_ENABLE_CRAWLER === "true";
-
-const navItems = [
-  { name: "Match Sheet", href: "/dashboard/matcher", icon: Table },
-  { name: "Catalog Seeder", href: "/dashboard/catalog", icon: Sprout },
-  ...(showCrawler ? [{ name: "Campaign Crawler", href: "/dashboard/crawler", icon: Terminal }] : []),
-  { name: "Browse DB", href: "/dashboard/browse", icon: Database },
-  { name: "Global Search", href: "/dashboard/search", icon: Search },
-  { name: "Normalize", href: "/dashboard/normalize", icon: FileText },
-];
-
-
+import { dashboardNavItems, isNavItemActive } from "@/lib/nav-items";
+import { ApiStatusBadge } from "@/components/layout/ApiStatusBadge";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [apiStatus, setApiStatus] = useState<"loading" | "online" | "offline">("loading");
-
+  const t = useTranslations("Navigation");
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-
-    // Check API Status
-    const checkApi = async () => {
-      try {
-        const res = await fetch(`${API_URL}/health`);
-        if (res.ok) setApiStatus("online");
-        else setApiStatus("offline");
-      } catch {
-        setApiStatus("offline");
-      }
-    };
-    checkApi();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -59,18 +34,18 @@ export const Navbar: React.FC = () => {
         <Link href="/" className="flex items-center gap-2 group">
           <div className="flex flex-col">
             <span className="font-bold text-lg tracking-tight text-zinc-900 dark:text-zinc-50">
-              PHARMATCH<span className="text-primary">AI</span>
+              {t("title")}<span className="text-primary">AI</span>
             </span>
             <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest leading-none">
-              v9.0 Engine
+              {t("engine")}
             </span>
           </div>
         </Link>
 
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
+          {dashboardNavItems.map((item) => {
+            const isActive = isNavItemActive(pathname, item.href);
             return (
               <Link
                 key={item.name}
@@ -88,11 +63,12 @@ export const Navbar: React.FC = () => {
                   />
                 )}
                 <item.icon className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">{item.name}</span>
+                <span className="relative z-10">{t(item.key)}</span>
               </Link>
             );
           })}
         </div>
+
 
         {/* Actions */}
         <div className="flex items-center gap-4">
@@ -104,14 +80,7 @@ export const Navbar: React.FC = () => {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Status Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${apiStatus === 'online' ? 'bg-success' : apiStatus === 'loading' ? 'bg-warning' : 'bg-error'
-              }`} />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-              {apiStatus === 'online' ? 'System Online' : apiStatus === 'loading' ? 'Connecting...' : 'System Offline'}
-            </span>
-          </div>
+          <ApiStatusBadge />
 
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp, Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StatCard, StatCardGrid, cardSurfaceClass, tableHeaderClass, tableRowClass } from "@/components/ui/stat-card";
 import { ExportDialog } from "@/components/matcher/ExportDialog";
 import { DeleteCampaignModal } from "@/components/matcher/DeleteCampaignModal";
 
@@ -150,67 +151,50 @@ export default function MatcherDashboard() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Campaigns */}
-        <div className="p-6 rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-800/80 shadow-sm backdrop-blur-md flex items-center gap-5">
-          <div className="p-4 bg-primary/10 rounded-xl text-primary">
-            <FileSpreadsheet className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Total Campaigns</p>
-            <p className="text-2xl font-black text-zinc-800 dark:text-zinc-150 mt-1">{stats.total}</p>
-          </div>
-        </div>
-
-        {/* Avg Accuracy */}
-        <div className="p-6 rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-800/80 shadow-sm backdrop-blur-md flex items-center gap-5">
-          <div className="p-4 bg-success/10 rounded-xl text-success">
-            <TrendingUp className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Average Accuracy</p>
-            <p className="text-2xl font-black text-success mt-1">{stats.avgAccuracy.toFixed(1)}%</p>
-          </div>
-        </div>
-
-        {/* Active Runs */}
-        <div className="p-6 rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-800/80 shadow-sm backdrop-blur-md flex items-center gap-5">
-          <div className="p-4 bg-info/10 rounded-xl text-info">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Active Tasks</p>
-            <p className="text-2xl font-black text-info mt-1">{stats.active}</p>
-          </div>
-        </div>
-
-        {/* Total Processed Rows */}
-        <div className="p-6 rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-800/80 shadow-sm backdrop-blur-md flex items-center gap-5">
-          <div className="p-4 bg-warning/10 rounded-xl text-warning">
-            <CheckCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Total Rows Mapped</p>
-            <p className="text-2xl font-black text-zinc-800 dark:text-zinc-150 mt-1">{stats.totalRowsMapped.toLocaleString()}</p>
-          </div>
-        </div>
-      </div>
+      <StatCardGrid className="gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Total Campaigns"
+          value={stats.total}
+          icon={FileSpreadsheet}
+          iconClassName="text-primary"
+        />
+        <StatCard
+          label="Average Accuracy"
+          value={`${stats.avgAccuracy.toFixed(1)}%`}
+          icon={TrendingUp}
+          iconClassName="text-success"
+          valueClassName="text-success"
+        />
+        <StatCard
+          label="Active Tasks"
+          value={stats.active}
+          icon={Clock}
+          iconClassName="text-sky-400"
+          valueClassName="text-sky-400"
+        />
+        <StatCard
+          label="Total Rows Mapped"
+          value={stats.totalRowsMapped}
+          icon={CheckCircle}
+          iconClassName="text-warning"
+        />
+      </StatCardGrid>
 
       {/* Primary History Grid Card */}
-      <div className="p-6 rounded-2xl bg-white/40 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/80 shadow-sm backdrop-blur-md space-y-6">
+      <div className={cn(cardSurfaceClass, "p-6 space-y-6")}>
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800/55 pb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-border pb-6">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search campaigns by filename or mapped column..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
             />
           </div>
-          <p className="text-xs text-zinc-400 font-semibold">
+          <p className="text-xs text-muted-foreground font-semibold">
             Showing {filteredJobs.length} campaigns
           </p>
         </div>
@@ -230,10 +214,10 @@ export default function MatcherDashboard() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-zinc-200/50 dark:border-zinc-800/60">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="bg-zinc-50 dark:bg-zinc-950 text-zinc-400 font-bold border-b border-zinc-200/50 dark:border-zinc-800/60">
+                <tr className={tableHeaderClass}>
                   <th className="p-4">Filename</th>
                   <th className="p-4">Mapped Column</th>
                   <th className="p-4">Total Rows</th>
@@ -243,7 +227,7 @@ export default function MatcherDashboard() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200/40 dark:divide-zinc-800/60">
+              <tbody className="divide-y divide-border">
                 {filteredJobs.map((job) => {
                   const isRunning = job.status === "running" || job.status === "pending";
                   const isSuccess = job.status === "completed";
@@ -253,7 +237,7 @@ export default function MatcherDashboard() {
                   const accuracy = job.total_rows > 0 ? (job.matched_count / job.total_rows) * 100 : 0;
 
                   return (
-                    <tr key={job.job_id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/20 transition-colors group">
+                    <tr key={job.job_id} className={tableRowClass}>
                       {/* Filename */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">

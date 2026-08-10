@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CatalogStats {
@@ -573,47 +574,33 @@ export default function CatalogSeederPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              label: "Live Products",
-              value: stats?.live_products ?? health?.live_products ?? "—",
-              icon: Package,
-              color: "text-primary",
-            },
-            {
-              label: "Normalized",
-              value: stats?.normalized_products ?? "—",
-              icon: CheckCircle2,
-              color: "text-emerald-400",
-            },
-            {
-              label: "With Barcodes",
-              value: stats?.with_barcodes ?? "—",
-              icon: Barcode,
-              color: "text-sky-400",
-            },
-            {
-              label: "Source",
-              value: stats?.source ?? health?.catalog_source ?? "—",
-              icon: Server,
-              color: "text-amber-400",
-            },
-          ].map((card) => (
-            <div
-              key={card.label}
-              className="p-5 rounded-2xl bg-card border border-border backdrop-blur-sm"
-            >
-              <card.icon className={cn("w-5 h-5 mb-3", card.color)} />
-              <p className="text-2xl font-bold font-mono">
-                {typeof card.value === "number" ? card.value.toLocaleString() : card.value}
-              </p>
-              <p className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-semibold">
-                {card.label}
-              </p>
-            </div>
-          ))}
-        </div>
+        <StatCardGrid>
+          <StatCard
+            label="Live Products"
+            value={stats?.live_products ?? health?.live_products}
+            icon={Package}
+            iconClassName="text-primary"
+          />
+          <StatCard
+            label="Normalized"
+            value={stats?.normalized_products}
+            icon={CheckCircle2}
+            iconClassName="text-emerald-400"
+          />
+          <StatCard
+            label="With Barcodes"
+            value={stats?.with_barcodes}
+            icon={Barcode}
+            iconClassName="text-sky-400"
+          />
+          <StatCard
+            label="Source"
+            value={stats?.source ?? health?.catalog_source}
+            icon={Server}
+            iconClassName="text-amber-400"
+            valueClassName="text-lg"
+          />
+        </StatCardGrid>
 
         {stats?.last_promoted_at && (
           <p className="text-xs text-zinc-500 flex items-center gap-2">
@@ -774,33 +761,39 @@ export default function CatalogSeederPage() {
 
               {/* Live crawl telemetry */}
               {(isCrawlRunning || (crawlStep?.products_found != null && crawlStep.products_found > 0)) && (
-                <div className="mb-6 p-4 rounded-xl bg-muted border border-border grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Products Found</p>
-                    <p className="text-2xl font-bold font-mono text-primary mt-1">
-                      {(crawlStep?.products_found ?? 0).toLocaleString()}
-                    </p>
-                  </div>
+                <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatCard
+                    label="Products Found"
+                    value={crawlStep?.products_found ?? 0}
+                    icon={Package}
+                    iconClassName="text-primary"
+                    valueClassName="text-primary"
+                  />
                   {(crawlStep?.total_categories ?? 0) > 0 && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Categories</p>
-                      <p className="text-2xl font-bold font-mono text-sky-400 mt-1">
-                        {crawlStep?.processed_categories ?? 0}/{crawlStep?.total_categories}
-                      </p>
-                    </div>
+                    <StatCard
+                      label="Categories"
+                      value={`${crawlStep?.processed_categories ?? 0}/${crawlStep?.total_categories}`}
+                      icon={Database}
+                      iconClassName="text-sky-400"
+                      valueClassName="text-sky-400"
+                    />
                   )}
                   {crawlStep?.total != null && crawlStep.total > 0 && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Catalog Index</p>
-                      <p className="text-2xl font-bold font-mono text-amber-400 mt-1">
-                        ~{crawlStep.total.toLocaleString()}
-                      </p>
-                    </div>
+                    <StatCard
+                      label="Catalog Index"
+                      value={`~${crawlStep.total.toLocaleString()}`}
+                      icon={Server}
+                      iconClassName="text-amber-400"
+                      valueClassName="text-amber-400"
+                    />
                   )}
-                  <div className="col-span-2 md:col-span-1">
-                    <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Current Action</p>
-                    <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
+                  <div className="p-5 rounded-2xl bg-card border border-border backdrop-blur-sm col-span-2 md:col-span-1">
+                    <Clock className="w-5 h-5 mb-3 text-muted-foreground" />
+                    <p className="text-xs text-foreground/80 line-clamp-2">
                       {crawlStep?.message || "Fetching from Meilisearch…"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-semibold">
+                      Current Action
                     </p>
                   </div>
                 </div>

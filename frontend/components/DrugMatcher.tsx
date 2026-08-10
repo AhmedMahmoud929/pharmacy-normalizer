@@ -5,6 +5,7 @@ import { Loader2, X, ChevronDown, Square, Download, Check, Clock, Plus } from "l
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
+import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
@@ -1030,8 +1031,8 @@ export default function DrugMatcher() {
 
                       {/* Right Column: Sheet Metadata and Data-Profiling Quick Preview */}
                       <div className="lg:col-span-7 space-y-6">
-                        <div className="p-6 rounded-2xl bg-white/50 dark:bg-black/50 backdrop-blur-md border border-primary/50 shadow-sm space-y-6">
-                          <div className="flex items-center justify-between border-b border-primary/10 pb-4">
+                        <div className={cn(cardSurfaceClass, "p-6 space-y-6")}>
+                          <div className="flex items-center justify-between border-b border-border pb-4">
                             <div>
                               <h3 className="text-md font-bold text-foreground truncate max-w-[280px]">
                                 {file.name}
@@ -1058,10 +1059,10 @@ export default function DrugMatcher() {
                                 Loading spreadsheet preview...
                               </div>
                             ) : (
-                              <div className="overflow-x-auto border border-primary/10 rounded-xl max-h-[350px] scrollbar-thin">
+                              <div className="overflow-x-auto border border-border rounded-xl max-h-[350px] scrollbar-thin">
                                 <table className="w-full text-left border-collapse text-xs">
                                   <thead>
-                                    <tr className="bg-primary/5 text-zinc-400 font-bold uppercase border-b border-primary/10">
+                                    <tr className="text-muted-foreground font-bold uppercase border-b border-border bg-muted/40">
                                       {columns.slice(0, 4).map((col, idx) => (
                                         <th key={idx} className="p-3 whitespace-nowrap">
                                           {col}
@@ -1076,7 +1077,7 @@ export default function DrugMatcher() {
                                   </thead>
                                   <tbody>
                                     {previewRows.map((row, rowIdx) => (
-                                      <tr key={rowIdx} className="border-b border-zinc-100 dark:border-zinc-800/80 last:border-0 hover:bg-primary/5 transition-colors">
+                                      <tr key={rowIdx} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                                         {columns.slice(0, 4).map((col, colIdx) => (
                                           <td key={colIdx} className="p-3 text-zinc-600 dark:text-zinc-300 font-medium truncate max-w-[150px]">
                                             {row[col] !== undefined ? String(row[col]) : "---"}

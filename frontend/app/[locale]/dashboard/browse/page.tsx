@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Database, Search, ChevronLeft, ChevronRight, Loader2, Package, Tag, Layers, ExternalLink, Filter, Eye, Download, LayoutGrid, List, MoreHorizontal, Folder } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
+import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { ProductDetailModal } from "@/components/matcher/ProductDetailModal";
 import { ExportWizardModal } from "@/components/matcher/ExportWizardModal";
 
@@ -386,7 +387,7 @@ export default function BrowsePage() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className={cn(cardSurfaceClass, "overflow-hidden")}>
         {isLoading ? (
           <div className="h-[500px] flex flex-col items-center justify-center space-y-4">
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
