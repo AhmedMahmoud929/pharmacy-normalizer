@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Table, Search, FileText, Database, Settings, Home, Info, Terminal, Sprout } from "lucide-react";
+import { Table, Search, FileText, Database, Terminal, Sprout, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { API_URL } from "@/lib/utils";
@@ -23,7 +23,7 @@ const navItems = [
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const { theme } = { theme: "dark" }; // Hardcoded for now to avoid breaking existing logic
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [apiStatus, setApiStatus] = useState<"loading" | "online" | "offline">("loading");
 
@@ -96,6 +96,14 @@ export const Navbar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           {/* Status Indicator */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800">
             <div className={`w-2 h-2 rounded-full animate-pulse ${apiStatus === 'online' ? 'bg-success' : apiStatus === 'loading' ? 'bg-warning' : 'bg-error'

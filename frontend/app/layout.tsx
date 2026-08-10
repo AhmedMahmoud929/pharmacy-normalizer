@@ -32,6 +32,13 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", "transition-colors", "duration-300", inter.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('pharmatcher-theme');var t=s==='dark'||s==='light'?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans transition-colors duration-300 bg-background text-foreground">
         <ThemeProvider>
           <Navbar />

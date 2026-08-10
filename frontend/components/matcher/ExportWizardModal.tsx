@@ -444,7 +444,13 @@ export const ExportWizardModal: React.FC<ExportWizardModalProps> = ({
                     >
                       <p className="text-xs font-bold">Entire Dataset</p>
                       <p className="text-[9px] text-zinc-500 mt-0.5">
-                        {mode === "products" ? "All ~29k items" : "All reference entries"}
+                        {mode === "products"
+                          ? totalProducts > 0
+                            ? `All ${totalProducts.toLocaleString()} items`
+                            : "All catalog items"
+                          : totalProducts > 0
+                            ? `All ${totalProducts.toLocaleString()} entries`
+                            : "All reference entries"}
                       </p>
                     </button>
 

@@ -386,7 +386,7 @@ export default function CatalogSeederPage() {
   const isCrawlRunning = crawlStep?.status === "running";
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-8">
+    <div className="min-h-screen bg-background text-foreground p-6 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -398,7 +398,7 @@ export default function CatalogSeederPage() {
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
               Catalog Seeder
             </h1>
-            <p className="text-zinc-400 mt-2 max-w-xl">
+            <p className="text-muted-foreground mt-2 max-w-xl">
               Populate and refresh the master product database from Chefaa's Meilisearch API —
               normalize, seed mappings, and reload the matcher index. No web scraping.
             </p>
@@ -411,7 +411,7 @@ export default function CatalogSeederPage() {
               fetchStats();
               fetchJobs();
             }}
-            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            className="border-border text-foreground hover:bg-muted"
           >
             <RefreshCw className={cn("w-4 h-4 mr-2", statsLoading && "animate-spin")} />
             Refresh
@@ -448,7 +448,7 @@ export default function CatalogSeederPage() {
           ].map((card) => (
             <div
               key={card.label}
-              className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-sm"
+              className="p-5 rounded-2xl bg-card border border-border backdrop-blur-sm"
             >
               <card.icon className={cn("w-5 h-5 mb-3", card.color)} />
               <p className="text-2xl font-bold font-mono">
@@ -470,7 +470,7 @@ export default function CatalogSeederPage() {
 
         {/* Actions */}
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Zap className="w-5 h-5 text-primary" />
@@ -480,7 +480,7 @@ export default function CatalogSeederPage() {
                 <p className="text-xs text-zinc-500">Meilisearch API → Import → Normalize → Seed → Promote → Reload</p>
               </div>
             </div>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Fetches the full Egyptian catalog via Chefaa&apos;s Meilisearch API (~30K products in minutes),
               normalizes all product names, seeds brand mappings, and activates the new catalog.
             </p>
@@ -505,7 +505,7 @@ export default function CatalogSeederPage() {
                   value={testProductLimit}
                   onChange={(e) => setTestProductLimit(e.target.value)}
                   disabled={isStarting}
-                  className="w-24 px-3 rounded-lg bg-zinc-950 border border-zinc-700 text-sm font-mono text-zinc-200 focus:outline-none focus:border-primary"
+                  className="w-24 px-3 rounded-lg bg-background border border-input text-sm font-mono text-foreground focus:outline-none focus:border-primary"
                   aria-label="Test product limit"
                 />
                 <Button
@@ -523,10 +523,10 @@ export default function CatalogSeederPage() {
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
-                <RotateCcw className="w-5 h-5 text-zinc-300" />
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <h2 className="font-bold text-lg">Quick Actions</h2>
@@ -543,7 +543,7 @@ export default function CatalogSeederPage() {
                   )
                 }
                 disabled={isStarting}
-                className="w-full border-zinc-700 text-zinc-300 justify-between"
+                className="w-full border-border text-foreground justify-between"
               >
                 Re-normalize Existing Catalog
                 <ArrowRight className="w-4 h-4" />
@@ -552,7 +552,7 @@ export default function CatalogSeederPage() {
                 variant="outline"
                 onClick={handleReloadIndex}
                 disabled={isReloading}
-                className="w-full border-zinc-700 text-zinc-300 justify-between"
+                className="w-full border-border text-foreground justify-between"
               >
                 {isReloading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -572,7 +572,7 @@ export default function CatalogSeederPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              className="p-6 rounded-2xl bg-zinc-900/80 border border-zinc-800"
+              className="p-6 rounded-2xl bg-card border border-border"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -608,7 +608,7 @@ export default function CatalogSeederPage() {
                     activeJob.status === "running" && "bg-primary/10 text-primary",
                     activeJob.status === "failed" && "bg-rose-500/10 text-rose-400",
                     activeJob.status === "cancelled" && "bg-amber-500/10 text-amber-400",
-                    activeJob.status === "pending" && "bg-zinc-800 text-zinc-400"
+                    activeJob.status === "pending" && "bg-muted text-muted-foreground"
                   )}
                 >
                   {activeJob.status}
@@ -618,7 +618,7 @@ export default function CatalogSeederPage() {
 
               {/* Live crawl telemetry */}
               {(isCrawlRunning || (crawlStep?.products_found != null && crawlStep.products_found > 0)) && (
-                <div className="mb-6 p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="mb-6 p-4 rounded-xl bg-muted border border-border grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Products Found</p>
                     <p className="text-2xl font-bold font-mono text-primary mt-1">
@@ -643,7 +643,7 @@ export default function CatalogSeederPage() {
                   )}
                   <div className="col-span-2 md:col-span-1">
                     <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Current Action</p>
-                    <p className="text-xs text-zinc-300 mt-1 line-clamp-2">
+                    <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
                       {crawlStep?.message || "Fetching from Meilisearch…"}
                     </p>
                   </div>
@@ -664,7 +664,7 @@ export default function CatalogSeederPage() {
                           <div
                             className={cn(
                               "w-0.5 flex-1 my-1 min-h-[24px]",
-                              status === "completed" ? "bg-emerald-500/40" : "bg-zinc-800"
+                              status === "completed" ? "bg-emerald-500/40" : "bg-border"
                             )}
                           />
                         )}
@@ -711,9 +711,9 @@ export default function CatalogSeederPage() {
         </AnimatePresence>
 
         {/* Job History */}
-        <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+        <div className="p-6 rounded-2xl bg-card border border-border">
           <h2 className="font-bold text-lg flex items-center gap-2 mb-4">
-            <History className="w-5 h-5 text-zinc-400" />
+            <History className="w-5 h-5 text-muted-foreground" />
             Pipeline History
           </h2>
           {jobs.length === 0 ? (
@@ -732,11 +732,11 @@ export default function CatalogSeederPage() {
                     "w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all",
                     activeJobId === job.job_id
                       ? "border-primary/40 bg-primary/5"
-                      : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/30"
+                      : "border-border hover:border-primary/30 hover:bg-muted/50"
                   )}
                 >
                   <div>
-                    <p className="text-sm font-mono text-zinc-400">{job.job_id.slice(0, 8)}…</p>
+                    <p className="text-sm font-mono text-muted-foreground">{job.job_id.slice(0, 8)}…</p>
                     <p className="text-xs text-zinc-500 mt-0.5">{formatDate(job.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -752,7 +752,7 @@ export default function CatalogSeederPage() {
                         job.status === "running" && "bg-primary/10 text-primary",
                         job.status === "failed" && "bg-rose-500/10 text-rose-400",
                         job.status === "cancelled" && "bg-amber-500/10 text-amber-400",
-                        job.status === "pending" && "bg-zinc-800 text-zinc-400"
+                        job.status === "pending" && "bg-muted text-muted-foreground"
                       )}
                     >
                       {job.status}
