@@ -25,29 +25,29 @@ export default function CrawlerLayout({ children }: { children: React.ReactNode 
 
   return (
     <CrawlerProvider>
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-8 font-sans selection:bg-primary-dark selection:text-white">
+      <div className="min-h-screen bg-background text-foreground p-6 md:p-8 font-sans selection:bg-primary-dark selection:text-white">
         
         {/* Upper Glassmorphism Header */}
         <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl shadow-2xl gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between p-6 rounded-2xl bg-card/40 border border-border backdrop-blur-xl shadow-2xl gap-4">
             <div>
               <div className="relative flex items-center gap-2 py-2">
                 <Image src="/chefaa-logo.png" alt="chefaa pharmacy" width={50} height={80} />
                 <Image src="/chefaa-text.png" alt="chefaa pharmacy" width={150} height={130} className="brightness-300 hue-rotate-[-60deg] mb-1" />
-                <h2 className="absolute -bottom-1 left-1/2 text-nowrap mt-auto text-sm italic text-white opacity-80">
+                <h2 className="absolute -bottom-1 left-1/2 text-nowrap mt-auto text-sm italic text-foreground opacity-80">
                   Crawler Engine <small>v 2.0.1</small>
                 </h2>
               </div>
             </div>
 
             {/* Navigation Bar - Router Links */}
-            <div className="flex bg-zinc-950/80 p-1 rounded-lg border border-zinc-800/80">
+            <div className="flex bg-muted p-1 rounded-lg border border-border">
               <Link
                 href="/dashboard/crawler"
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-all duration-300 ${
                   activeTab === "orchestrate"
                     ? "bg-primary-dark text-white shadow-lg shadow-primary-deep/10"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Sliders className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default function CrawlerLayout({ children }: { children: React.ReactNode 
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-all duration-300 ${
                   activeTab === "campaigns"
                     ? "bg-primary-dark text-white shadow-lg shadow-primary-deep/10"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <History className="w-4 h-4" />
@@ -71,7 +71,7 @@ export default function CrawlerLayout({ children }: { children: React.ReactNode 
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-all duration-300 ${
                   activeTab === "explorer"
                     ? "bg-primary-dark text-white shadow-lg shadow-primary-deep/10"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Database className="w-4 h-4" />
@@ -86,9 +86,9 @@ export default function CrawlerLayout({ children }: { children: React.ReactNode 
           {children}
 
           {/* Shefaa Pharmacy attribution footer */}
-          <div className="mt-12 pt-6 border-t border-zinc-900/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 pb-8">
+          <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground pb-8">
             <div className="flex items-center gap-2">
-              <span className="text-zinc-600">Powered by</span>
+              <span className="text-muted-foreground">Powered by</span>
               <a
                 href="https://shefaa.com"
                 target="_blank"

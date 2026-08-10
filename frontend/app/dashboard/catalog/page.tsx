@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Database,
   RefreshCw,
@@ -17,6 +18,7 @@ import {
   Barcode,
   Clock,
   X,
+  Info,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
@@ -47,7 +49,7 @@ interface StepProgress {
 
 interface PipelineJob {
   job_id: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  status: "pending" | "running" | "awaiting_promotion" | "completed" | "failed" | "cancelled";
   current_step: string | null;
   steps: string[];
   progress: {
@@ -89,6 +91,90 @@ function stepStatusIcon(status: string) {
   return <div className="w-5 h-5 rounded-full border-2 border-zinc-700" />;
 }
 
+function ActionInfoTip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const [style, setStyle] = useState<React.CSSProperties>({});
+  const anchorRef = useRef<HTMLSpanElement>(null);
+
+  const updatePosition = useCallback(() => {
+    const el = anchorRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const width = Math.min(280, window.innerWidth - 24);
+    let left = rect.left + rect.width / 2 - width / 2;
+    left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+
+    const spaceAbove = rect.top - 12;
+    const placeAbove = spaceAbove >= 96;
+
+    setStyle({
+      position: "fixed",
+      left,
+      width,
+      top: placeAbove ? rect.top - 8 : rect.bottom + 8,
+      transform: placeAbove ? "translateY(-100%)" : undefined,
+      zIndex: 9999,
+    });
+  }, []);
+
+  const show = useCallback(() => {
+    updatePosition();
+    setOpen(true);
+  }, [updatePosition]);
+
+  const hide = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScroll = () => updatePosition();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open, updatePosition]);
+
+  return (
+    <>
+      <span
+        ref={anchorRef}
+        className="inline-flex shrink-0"
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={0}
+        role="img"
+        aria-label="When to use this action"
+      >
+        <Info className="w-4 h-4 text-zinc-500 hover:text-zinc-300 cursor-help" />
+      </span>
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="tooltip"
+            style={style}
+            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-xs leading-relaxed text-zinc-300 shadow-xl pointer-events-none"
+          >
+            {text}
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
+const QUICK_ACTION_NOTES = {
+  renormalize:
+    "Use when the live catalog is already up to date but normalized names or brand mappings need to be rebuilt — e.g. after changing normalizer rules. Skips Meilisearch fetch; copies live → staging, re-normalizes, then promotes.",
+  reloadIndex:
+    "Use when SQLite already has the correct catalog but search/match still returns old data — e.g. after a manual DB edit, backend restart, or if promote finished but the matcher feels stale. Refreshes the in-memory index only; no crawl or promote.",
+} as const;
+
 export default function CatalogSeederPage() {
   const { toast } = useToast();
   const [stats, setStats] = useState<CatalogStats | null>(null);
@@ -105,6 +191,11 @@ export default function CatalogSeederPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [isConfirmingPromote, setIsConfirmingPromote] = useState(false);
+  const [promotePreview, setPromotePreview] = useState<{
+    staging_products: number;
+    live_products: number;
+  } | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   const mergeStepProgress = useCallback((step: string, patch: Partial<StepProgress>) => {
@@ -210,6 +301,25 @@ export default function CatalogSeederPage() {
 
       es.addEventListener("step_complete", () => fetchJob(jobId));
 
+      es.addEventListener("promote_confirmation_required", (e) => {
+        try {
+          const data = JSON.parse((e as MessageEvent).data);
+          setPromotePreview({
+            staging_products: data.staging_products ?? 0,
+            live_products: data.live_products ?? 0,
+          });
+          mergeStepProgress("promote", {
+            status: "pending",
+            message: "Waiting for your confirmation",
+            processed: data.staging_products,
+            total: data.staging_products,
+          });
+        } catch {
+          /* ignore */
+        }
+        fetchJob(jobId);
+      });
+
       es.addEventListener("pipeline_cancelled", async () => {
         await fetchJob(jobId);
         await fetchJobs();
@@ -217,6 +327,7 @@ export default function CatalogSeederPage() {
         es.close();
         setIsStarting(false);
         setIsCancelling(false);
+        setPromotePreview(null);
       });
 
       es.addEventListener("pipeline_complete", async () => {
@@ -227,6 +338,7 @@ export default function CatalogSeederPage() {
         es.close();
         setIsStarting(false);
         setIsCancelling(false);
+        setPromotePreview(null);
       });
 
       es.addEventListener("pipeline_error", async (e) => {
@@ -243,6 +355,7 @@ export default function CatalogSeederPage() {
         es.close();
         setIsStarting(false);
         setIsCancelling(false);
+        setPromotePreview(null);
       });
 
       es.onerror = () => {
@@ -253,11 +366,23 @@ export default function CatalogSeederPage() {
   );
 
   useEffect(() => {
-    if (!activeJob || !["running", "pending"].includes(activeJob.status)) return;
-    const intervalMs = isCancelling ? 1000 : 3000;
+    if (!activeJob || !["running", "pending", "awaiting_promotion"].includes(activeJob.status)) return;
+    const intervalMs = isCancelling ? 1000 : activeJob.status === "awaiting_promotion" ? 2000 : 3000;
     const interval = setInterval(() => fetchJob(activeJob.job_id), intervalMs);
     return () => clearInterval(interval);
   }, [activeJob, fetchJob, isCancelling]);
+
+  useEffect(() => {
+    if (activeJob?.status === "awaiting_promotion") {
+      const promoteStep = activeJob.progress?.steps?.promote;
+      setPromotePreview((prev) => ({
+        staging_products: promoteStep?.processed ?? prev?.staging_products ?? stats?.staging_products ?? 0,
+        live_products: prev?.live_products ?? stats?.live_products ?? 0,
+      }));
+    } else if (!activeJob || activeJob.status === "completed" || activeJob.status === "cancelled") {
+      setPromotePreview(null);
+    }
+  }, [activeJob, stats?.live_products, stats?.staging_products]);
 
   useEffect(() => {
     return () => {
@@ -298,6 +423,35 @@ export default function CatalogSeederPage() {
         type: "error",
       });
       setIsStarting(false);
+    }
+  };
+
+  const handleConfirmPromote = async () => {
+    if (!activeJob?.job_id) return;
+    setIsConfirmingPromote(true);
+    try {
+      const res = await fetch(
+        `${API_URL}/api/catalog/pipeline/jobs/${activeJob.job_id}/confirm-promote`,
+        { method: "POST" }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || "Failed to confirm promotion");
+      }
+      setPromotePreview(null);
+      await fetchJob(activeJob.job_id);
+      toast({
+        title: "Promotion confirmed",
+        description: "Replacing the live catalog and reloading the matcher index…",
+      });
+    } catch (err: unknown) {
+      toast({
+        title: "Confirmation failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        type: "error",
+      });
+    } finally {
+      setIsConfirmingPromote(false);
     }
   };
 
@@ -523,7 +677,7 @@ export default function CatalogSeederPage() {
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-4 flex flex-col">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                 <RotateCcw className="w-5 h-5 text-muted-foreground" />
@@ -533,7 +687,7 @@ export default function CatalogSeederPage() {
                 <p className="text-xs text-zinc-500">Without re-crawling Chefaa</p>
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 grid gap-2 h-full">
               <Button
                 variant="outline"
                 onClick={() =>
@@ -543,23 +697,24 @@ export default function CatalogSeederPage() {
                   )
                 }
                 disabled={isStarting}
-                className="w-full border-border text-foreground justify-between"
+                className="w-full !h-full border-border text-foreground justify-between gap-2"
               >
-                Re-normalize Existing Catalog
-                <ArrowRight className="w-4 h-4" />
+                <span className="truncate flex-1 text-left">Re-normalize Existing Catalog</span>
+                <ActionInfoTip text={QUICK_ACTION_NOTES.renormalize} />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </Button>
               <Button
                 variant="outline"
                 onClick={handleReloadIndex}
                 disabled={isReloading}
-                className="w-full border-border text-foreground justify-between"
+                className="w-full !h-full border-border text-foreground justify-between gap-2"
               >
-                {isReloading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Reload Matcher Index"
-                )}
-                <ArrowRight className="w-4 h-4" />
+                <span className="flex items-center gap-2 min-w-0 flex-1">
+                  {isReloading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+                  <span className="truncate text-left">Reload Matcher Index</span>
+                </span>
+                {!isReloading && <ActionInfoTip text={QUICK_ACTION_NOTES.reloadIndex} />}
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </Button>
             </div>
           </div>
@@ -584,36 +739,37 @@ export default function CatalogSeederPage() {
                   </h2>
                   <p className="text-xs text-zinc-500 font-mono mt-1">{activeJob.job_id}</p>
                 </div>
-              <div className="flex items-center gap-2">
-                {activeJob.status === "running" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelPipeline}
-                    disabled={isCancelling}
-                    className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
-                  >
-                    {isCancelling ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <X className="w-4 h-4 mr-2" />
-                    )}
-                    Cancel
-                  </Button>
-                )}
-                <span
-                  className={cn(
-                    "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
-                    activeJob.status === "completed" && "bg-emerald-500/10 text-emerald-400",
-                    activeJob.status === "running" && "bg-primary/10 text-primary",
-                    activeJob.status === "failed" && "bg-rose-500/10 text-rose-400",
-                    activeJob.status === "cancelled" && "bg-amber-500/10 text-amber-400",
-                    activeJob.status === "pending" && "bg-muted text-muted-foreground"
+                <div className="flex items-center gap-2">
+                  {(activeJob.status === "running" || activeJob.status === "awaiting_promotion") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelPipeline}
+                      disabled={isCancelling || isConfirmingPromote}
+                      className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                    >
+                      {isCancelling ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <X className="w-4 h-4 mr-2" />
+                      )}
+                      Cancel
+                    </Button>
                   )}
-                >
-                  {activeJob.status}
-                </span>
-              </div>
+                  <span
+                    className={cn(
+                      "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+                      activeJob.status === "completed" && "bg-emerald-500/10 text-emerald-400",
+                      activeJob.status === "running" && "bg-primary/10 text-primary",
+                      activeJob.status === "awaiting_promotion" && "bg-amber-500/10 text-amber-400",
+                      activeJob.status === "failed" && "bg-rose-500/10 text-rose-400",
+                      activeJob.status === "cancelled" && "bg-amber-500/10 text-amber-400",
+                      activeJob.status === "pending" && "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {activeJob.status === "awaiting_promotion" ? "awaiting confirm" : activeJob.status}
+                  </span>
+                </div>
               </div>
 
               {/* Live crawl telemetry */}
@@ -657,45 +813,86 @@ export default function CatalogSeederPage() {
                   const isLast = idx === displaySteps.length - 1;
 
                   return (
-                    <div key={step} className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        {stepStatusIcon(status)}
-                        {!isLast && (
-                          <div
-                            className={cn(
-                              "w-0.5 flex-1 my-1 min-h-[24px]",
-                              status === "completed" ? "bg-emerald-500/40" : "bg-border"
-                            )}
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 pb-4">
-                        <div className="flex items-center justify-between">
-                          <p
-                            className={cn(
-                              "font-semibold text-sm",
-                              status === "running" && "text-primary",
-                              status === "completed" && "text-emerald-400",
-                              status === "pending" && "text-zinc-500"
-                            )}
-                          >
-                            {STEP_LABELS[step] || step}
-                          </p>
-                          {step === "crawl" && stepData?.products_found != null ? (
-                            <span className="text-xs font-mono text-zinc-500">
-                              {stepData.products_found.toLocaleString()} products
-                            </span>
-                          ) : stepData?.processed != null && stepData?.total != null ? (
-                            <span className="text-xs font-mono text-zinc-500">
-                              {stepData.processed.toLocaleString()} / {stepData.total.toLocaleString()}
-                            </span>
-                          ) : stepData?.processed != null ? (
-                            <span className="text-xs font-mono text-zinc-500">
-                              {stepData.processed.toLocaleString()}
-                            </span>
-                          ) : null}
+                    <div key={step}>
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          {stepStatusIcon(status)}
+                          {!isLast && (
+                            <div
+                              className={cn(
+                                "w-0.5 flex-1 my-1 min-h-[24px]",
+                                status === "completed" ? "bg-emerald-500/40" : "bg-border"
+                              )}
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 pb-4">
+                          <div className="flex items-center justify-between">
+                            <p
+                              className={cn(
+                                "font-semibold text-sm",
+                                status === "running" && "text-primary",
+                                status === "completed" && "text-emerald-400",
+                                status === "pending" && "text-zinc-500"
+                              )}
+                            >
+                              {STEP_LABELS[step] || step}
+                            </p>
+                            {step === "crawl" && stepData?.products_found != null ? (
+                              <span className="text-xs font-mono text-zinc-500">
+                                {stepData.products_found.toLocaleString()} products
+                              </span>
+                            ) : stepData?.processed != null && stepData?.total != null ? (
+                              <span className="text-xs font-mono text-zinc-500">
+                                {stepData.processed.toLocaleString()} / {stepData.total.toLocaleString()}
+                              </span>
+                            ) : stepData?.processed != null ? (
+                              <span className="text-xs font-mono text-zinc-500">
+                                {stepData.processed.toLocaleString()}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
+
+                      {step === "promote" &&
+                        activeJob.status === "awaiting_promotion" &&
+                        promotePreview && (
+                          <div className="ml-9 mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+                            <p className="font-semibold text-amber-400 text-sm">
+                              Confirm promote to live catalog
+                            </p>
+                            <p className="text-xs text-foreground/80 mt-1">
+                              Replace the current live catalog (
+                              {promotePreview.live_products.toLocaleString()} products) with the staged
+                              catalog ({promotePreview.staging_products.toLocaleString()} products).
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              <Button
+                                size="sm"
+                                onClick={handleConfirmPromote}
+                                disabled={isConfirmingPromote || isCancelling}
+                                className="bg-amber-500 hover:bg-amber-500/90 text-zinc-950 font-bold"
+                              >
+                                {isConfirmingPromote ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                                )}
+                                Promote to Live
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleCancelPipeline}
+                                disabled={isConfirmingPromote || isCancelling}
+                                className="border-border text-foreground"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                     </div>
                   );
                 })}
@@ -726,7 +923,7 @@ export default function CatalogSeederPage() {
                   onClick={() => {
                     setActiveJobId(job.job_id);
                     setActiveJob(job);
-                    if (job.status === "running") connectStream(job.job_id);
+                    if (job.status === "running" || job.status === "awaiting_promotion") connectStream(job.job_id);
                   }}
                   className={cn(
                     "w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all",
@@ -750,6 +947,7 @@ export default function CatalogSeederPage() {
                         "px-2 py-0.5 rounded text-xs font-bold uppercase",
                         job.status === "completed" && "bg-emerald-500/10 text-emerald-400",
                         job.status === "running" && "bg-primary/10 text-primary",
+                        job.status === "awaiting_promotion" && "bg-amber-500/10 text-amber-400",
                         job.status === "failed" && "bg-rose-500/10 text-rose-400",
                         job.status === "cancelled" && "bg-amber-500/10 text-amber-400",
                         job.status === "pending" && "bg-muted text-muted-foreground"

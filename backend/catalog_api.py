@@ -11,7 +11,14 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from db import catalog_repo, pipeline_repo
-from db.pipeline import DEFAULT_STEPS, FULL_STEPS, _pipeline_listeners, force_cancel_pipeline, run_pipeline
+from db.pipeline import (
+    DEFAULT_STEPS,
+    FULL_STEPS,
+    _pipeline_listeners,
+    confirm_promote,
+    force_cancel_pipeline,
+    run_pipeline,
+)
 from db.schema import init_schema
 
 router = APIRouter(prefix="/api/catalog", tags=["catalog"])
@@ -95,7 +102,7 @@ async def cancel_catalog_pipeline(job_id: str):
     job = pipeline_repo.get_pipeline_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Pipeline job not found")
-    if job["status"] not in ("pending", "running"):
+    if job["status"] not in ("pending", "running", "awaiting_promotion"):
         return {"status": job["status"], "message": f"Job is already {job['status']}."}
 
     force_cancel_pipeline(job_id)
@@ -104,6 +111,25 @@ async def cancel_catalog_pipeline(job_id: str):
         "status": job["status"] if job else "cancelled",
         "message": "Pipeline cancelled.",
     }
+
+
+@router.post("/pipeline/jobs/{job_id}/confirm-promote")
+async def confirm_promote_pipeline(job_id: str):
+    init_schema()
+    job = pipeline_repo.get_pipeline_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Pipeline job not found")
+    if job["status"] != "awaiting_promotion":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Job is not awaiting promotion confirmation (status: {job['status']}).",
+        )
+    if not confirm_promote(job_id):
+        raise HTTPException(
+            status_code=409,
+            detail="Could not confirm promotion. The pipeline may have stopped or the server restarted.",
+        )
+    return {"status": "running", "message": "Promotion confirmed. Replacing live catalog…"}
 
 
 @router.get("/pipeline/jobs/{job_id}/stream")

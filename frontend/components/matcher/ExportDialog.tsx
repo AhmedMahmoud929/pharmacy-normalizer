@@ -285,7 +285,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={resetAndClose}
-          className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md"
+          className="absolute inset-0 bg-black/40 dark:bg-zinc-950/60 backdrop-blur-md"
         />
 
         {/* Modal Window Card */}

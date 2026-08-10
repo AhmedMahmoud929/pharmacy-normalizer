@@ -33,11 +33,32 @@ _cancel_cache: Dict[str, bool] = {}
 _cancel_cache_at: Dict[str, float] = {}
 
 
+_promote_gates: Dict[str, asyncio.Event] = {}
+
+
+def confirm_promote(job_id: str) -> bool:
+    job = pipeline_repo.get_pipeline_job(job_id)
+    if not job or job["status"] != "awaiting_promotion":
+        return False
+    gate = _promote_gates.get(job_id)
+    if not gate:
+        return False
+    gate.set()
+    return True
+
+
+def _release_promote_gate(job_id: str) -> None:
+    _promote_gates.pop(job_id, None)
+
+
 def request_pipeline_cancel(job_id: str) -> None:
     _cancelled_jobs.add(job_id)
     _cancel_cache[job_id] = True
     _cancel_cache_at[job_id] = time.monotonic()
     pipeline_repo.set_cancel_requested(job_id)
+    gate = _promote_gates.get(job_id)
+    if gate and not gate.is_set():
+        gate.set()
     task = _running_tasks.get(job_id)
     if task and not task.done():
         task.cancel()
@@ -47,7 +68,7 @@ def force_cancel_pipeline(job_id: str) -> bool:
     """Stop live task (if any) and persist cancelled status immediately."""
     request_pipeline_cancel(job_id)
     job = pipeline_repo.get_pipeline_job(job_id)
-    if not job or job["status"] not in ("pending", "running"):
+    if not job or job["status"] not in ("pending", "running", "awaiting_promotion"):
         return False
     current = job.get("current_step")
     if current:
@@ -88,6 +109,45 @@ def _clear_cancel_flag(job_id: str) -> None:
 def _ensure_not_cancelled(job_id: str) -> None:
     if is_pipeline_cancelled(job_id):
         raise PipelineCancelled()
+
+
+async def _wait_for_promote_confirmation(job_id: str) -> None:
+    staging_count = catalog_repo.get_staging_count()
+    live_count = catalog_repo.get_live_count()
+    pipeline_repo.update_step_progress(
+        job_id,
+        "promote",
+        status="pending",
+        message="Waiting for your confirmation to replace the live catalog",
+        processed=staging_count,
+        total=staging_count,
+    )
+    pipeline_repo.update_pipeline_status(job_id, "awaiting_promotion", current_step="promote")
+    _emit(
+        job_id,
+        "promote_confirmation_required",
+        {
+            "staging_products": staging_count,
+            "live_products": live_count,
+        },
+    )
+
+    gate = asyncio.Event()
+    _promote_gates[job_id] = gate
+    try:
+        while not gate.is_set():
+            _ensure_not_cancelled(job_id)
+            try:
+                await asyncio.wait_for(gate.wait(), timeout=1.0)
+            except asyncio.TimeoutError:
+                continue
+        _ensure_not_cancelled(job_id)
+    finally:
+        _release_promote_gate(job_id)
+
+    pipeline_repo.update_pipeline_status(job_id, "running", current_step="promote")
+    pipeline_repo.update_step_progress(job_id, "promote", status="running")
+    _emit(job_id, "step_start", {"step": "promote"})
 
 
 def _update_crawl_progress(
@@ -175,8 +235,12 @@ async def _execute_pipeline(
     try:
         for step in steps:
             _ensure_not_cancelled(job_id)
-            pipeline_repo.update_step_progress(job_id, step, status="running")
-            _emit(job_id, "step_start", {"step": step})
+
+            if step == "promote":
+                await _wait_for_promote_confirmation(job_id)
+            else:
+                pipeline_repo.update_step_progress(job_id, step, status="running")
+                _emit(job_id, "step_start", {"step": step})
 
             if step == "crawl":
                 crawl_output_path = await _step_crawl(job_id, crawl_options, workspace_root)

@@ -70,9 +70,9 @@ export default function ExplorerPage() {
     >
 
       {/* Select Job dropdown and Filters using shadcn components */}
-      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl shadow-md grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="p-5 rounded-2xl bg-card border border-border backdrop-blur-xl shadow-md grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
-          <label className="block text-[10px] text-zinc-500 uppercase font-bold mb-1.5">Select Campaign</label>
+          <label className="block text-[10px] text-muted-foreground uppercase font-bold mb-1.5">Select Campaign</label>
           <Select
             value={selectedJobIdForBrowse || ""}
             onValueChange={(val) => {
@@ -80,21 +80,21 @@ export default function ExplorerPage() {
               setExpPage(1);
             }}
           >
-            <SelectTrigger className="w-full bg-zinc-950/50 border-zinc-800 text-zinc-100 h-9 text-xs focus:ring-primary focus:border-primary">
+            <SelectTrigger className="w-full bg-background/50 border border-border text-foreground h-9 text-xs focus:ring-primary focus:border-primary">
               <SelectValue placeholder="Choose Job Campaign" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-950 border-zinc-800 text-zinc-200">
+            <SelectContent className="bg-background border border-border text-foreground">
               {jobs.map((j) => {
                 const count = j.target === "products" || j.target === "brands"
                   ? j.progress.products_found || 0
                   : j.progress.processed_categories || 0;
                 const unit = j.target === "products" ? "products" : j.target === "brands" ? "brands" : j.target === "categories" ? "categories" : "sub-categories";
                 return (
-                  <SelectItem key={j.job_id} value={j.job_id} className="cursor-pointer focus:bg-zinc-900 focus:text-zinc-100 py-1.5">
-                    <span className="font-mono text-zinc-400 bg-zinc-900 border border-zinc-800/80 px-1 py-0.5 rounded text-[10px] mr-2">
+                  <SelectItem key={j.job_id} value={j.job_id} className="cursor-pointer focus:bg-muted dark:focus:bg-zinc-900 focus:text-foreground py-1.5">
+                    <span className="font-mono text-muted-foreground bg-zinc-100 dark:bg-zinc-900 border border-border px-1 py-0.5 rounded text-[10px] mr-2">
                       {j.job_id.slice(0, 8)}
                     </span>
-                    <span className="capitalize font-semibold text-zinc-200 mr-2">
+                    <span className="capitalize font-semibold text-foreground mr-2">
                       {j.target.replace("-", " ")}:
                     </span>
                     <span className="text-primary font-bold text-xs">
@@ -108,7 +108,7 @@ export default function ExplorerPage() {
         </div>
 
         <div>
-          <label className="block text-[10px] text-zinc-500 uppercase font-bold mb-1.5">Search SKU / ID / Name</label>
+          <label className="block text-[10px] text-muted-foreground uppercase font-bold mb-1.5">Search SKU / ID / Name</label>
           <div className="relative">
             <Input
               type="text"
@@ -118,14 +118,14 @@ export default function ExplorerPage() {
                 setExpPage(1);
               }}
               placeholder="Type query to filter..."
-              className="w-full bg-zinc-950/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 h-9 pl-9 pr-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-full bg-background/50 border border-border text-foreground placeholder:text-muted-foreground h-9 pl-9 pr-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
             />
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-2.5" />
           </div>
         </div>
 
         <div>
-          <label className="block text-[10px] text-zinc-500 uppercase font-bold mb-1.5">Category Slug</label>
+          <label className="block text-[10px] text-muted-foreground uppercase font-bold mb-1.5">Category Slug</label>
           <Input
             type="text"
             value={expCategory}
@@ -134,12 +134,12 @@ export default function ExplorerPage() {
               setExpPage(1);
             }}
             placeholder="e.g. medications"
-            className="w-full bg-zinc-950/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 h-9 px-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
+            className="w-full bg-background/50 border border-border text-foreground placeholder:text-muted-foreground h-9 px-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] text-zinc-500 uppercase font-bold mb-1.5">Brand Slug</label>
+          <label className="block text-[10px] text-muted-foreground uppercase font-bold mb-1.5">Brand Slug</label>
           <Input
             type="text"
             value={expBrand}
@@ -148,7 +148,7 @@ export default function ExplorerPage() {
               setExpPage(1);
             }}
             placeholder="e.g. gsk"
-            className="w-full bg-zinc-950/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 h-9 px-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
+            className="w-full bg-background/50 border border-border text-foreground placeholder:text-muted-foreground h-9 px-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function ExplorerPage() {
                   )}
                 </div>
 
-                <p className="text-[11px] text-zinc-400 max-w-2xl leading-relaxed">
+                <p className="text-[11px] text-muted-foreground max-w-2xl leading-relaxed">
                   {isRunning
                     ? `Our media downloader is currently fetching product images from Chefaa servers and saving them locally. Progress: ${completed} / ${total} files.`
                     : isFailed
@@ -236,7 +236,7 @@ export default function ExplorerPage() {
                       <span>Downloading Images</span>
                       <span>{percent}%</span>
                     </div>
-                    <div className="w-full bg-zinc-950 h-1.5 rounded-full overflow-hidden border border-zinc-800">
+                    <div className="w-full bg-background h-1.5 rounded-full overflow-hidden border border-border">
                       <div
                         className="bg-sky-400 h-full rounded-full transition-all duration-300"
                         style={{ width: `${percent}%` }}
@@ -281,10 +281,10 @@ export default function ExplorerPage() {
         expLoading ? (
           <div className="h-[400px] flex flex-col items-center justify-center gap-2">
             <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-            <span className="text-xs text-zinc-500">Querying crawled JSON dataset indexes...</span>
+            <span className="text-xs text-muted-foreground">Querying crawled JSON dataset indexes...</span>
           </div>
         ) : explorerProducts.length === 0 ? (
-          <div className="h-[300px] bg-zinc-900/10 border border-zinc-800/80 rounded-2xl flex items-center justify-center text-zinc-500 italic">
+          <div className="h-[300px] bg-muted/20 border border-border rounded-2xl flex items-center justify-center text-muted-foreground italic">
             No products matched current search filters in this campaign dataset.
           </div>
         ) : (
@@ -312,11 +312,11 @@ export default function ExplorerPage() {
                         setInspectItem(prod);
                         setCarouselIdx(0);
                       }}
-                      className="group p-4 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
+                      className="group p-4 rounded-xl bg-card border border-border hover:border-border transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
                     >
                       <div>
                         {/* Category Cover image container */}
-                        <div className={cn("bg-zinc-950 rounded-lg border border-zinc-800/80 overflow-hidden mb-3.5 relative flex items-center justify-center",
+                        <div className={cn("bg-background rounded-lg border border-border overflow-hidden mb-3.5 relative flex items-center justify-center",
                           jobTarget === "categories" ? "h-32" : "aspect-square"
                         )}>
                           {prod.cover_image ? (
@@ -331,10 +331,10 @@ export default function ExplorerPage() {
                           ) : (
                             <div className="flex flex-col items-center gap-1.5 p-4 text-center">
                               <ImageIcon className="w-8 h-8 text-zinc-700" />
-                              <span className="text-[10px] text-zinc-500 font-semibold italic">No Cover Scraped</span>
+                              <span className="text-[10px] text-muted-foreground font-semibold italic">No Cover Scraped</span>
                             </div>
                           )}
-                          <span className="absolute top-2 right-2 text-[9px] bg-zinc-900/90 text-zinc-400 py-0.5 px-2 rounded-full border border-zinc-800 font-bold">
+                          <span className="absolute top-2 right-2 text-[9px] bg-zinc-100 dark:bg-zinc-900/90 text-muted-foreground py-0.5 px-2 rounded-full border border-border font-bold">
                             {subCount > 0 ? `${subCount} Subcats` : "Category"}
                           </span>
                         </div>
@@ -345,22 +345,22 @@ export default function ExplorerPage() {
                         </span>
 
                         {/* Localized Category names */}
-                        <h3 className="text-xs font-bold text-zinc-200 line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                           {nameEn}
                         </h3>
                         {nameAr && (
-                          <h4 className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
+                          <h4 className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
                             {nameAr}
                           </h4>
                         )}
                       </div>
 
                       {/* Href / Slug tags at bottom */}
-                      <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                        <span className="text-[9px] bg-zinc-950 py-0.5 px-2 rounded text-zinc-500 border border-zinc-800 max-w-[80%] truncate">
+                      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                        <span className="text-[9px] bg-background py-0.5 px-2 rounded text-muted-foreground border border-border max-w-[80%] truncate">
                           slug: {cleanSlug}
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
                   );
@@ -377,11 +377,11 @@ export default function ExplorerPage() {
                         setInspectItem(prod);
                         setCarouselIdx(0);
                       }}
-                      className="group p-4 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
+                      className="group p-4 rounded-xl bg-card border border-border hover:border-border transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
                     >
                       <div>
                         {/* Brand Logo image container */}
-                        <div className="aspect-square bg-zinc-950 rounded-lg border border-zinc-800/80 overflow-hidden mb-3.5 relative flex items-center justify-center">
+                        <div className="aspect-square bg-background rounded-lg border border-border overflow-hidden mb-3.5 relative flex items-center justify-center">
                           {prod.logo_url ? (
                             <div className="w-full h-full p-4 flex items-center justify-center bg-white group-hover:scale-[1.02] transition-transform duration-300">
                               <img
@@ -396,10 +396,10 @@ export default function ExplorerPage() {
                           ) : (
                             <div className="flex flex-col items-center gap-1.5 p-4 text-center">
                               <ImageIcon className="w-8 h-8 text-zinc-700" />
-                              <span className="text-[10px] text-zinc-500 font-semibold italic">No Logo Scraped</span>
+                              <span className="text-[10px] text-muted-foreground font-semibold italic">No Logo Scraped</span>
                             </div>
                           )}
-                          <span className="absolute top-2 right-2 text-[9px] bg-zinc-900/90 text-zinc-400 py-0.5 px-2 rounded-full border border-zinc-800 font-bold">
+                          <span className="absolute top-2 right-2 text-[9px] bg-zinc-100 dark:bg-zinc-900/90 text-muted-foreground py-0.5 px-2 rounded-full border border-border font-bold">
                             Brand
                           </span>
                         </div>
@@ -410,22 +410,22 @@ export default function ExplorerPage() {
                         </span>
 
                         {/* Localized Brand names */}
-                        <h3 className="text-xs font-bold text-zinc-200 line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                           {nameEn}
                         </h3>
                         {nameAr && (
-                          <h4 className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
+                          <h4 className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
                             {nameAr}
                           </h4>
                         )}
                       </div>
 
                       {/* Href / Slug tags at bottom */}
-                      <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                        <span className="text-[9px] bg-zinc-950 py-0.5 px-2 rounded text-zinc-500 border border-zinc-800 max-w-[80%] truncate">
+                      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                        <span className="text-[9px] bg-background py-0.5 px-2 rounded text-muted-foreground border border-border max-w-[80%] truncate">
                           slug: {cleanSlug}
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
                   );
@@ -438,11 +438,11 @@ export default function ExplorerPage() {
                       setInspectItem(prod);
                       setCarouselIdx(0);
                     }}
-                    className="group p-4 rounded-xl bg-zinc-900/30 border border-zinc-800 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
+                    className="group p-4 rounded-xl bg-card border border-border hover:border-border transition-all hover:shadow-lg cursor-pointer flex flex-col justify-between"
                   >
                     <div>
                       {/* Product Thumbnail image */}
-                      <div className="aspect-square bg-zinc-950 rounded-lg border border-zinc-800/80 overflow-hidden mb-3.5 relative flex items-center justify-center">
+                      <div className="aspect-square bg-background rounded-lg border border-border overflow-hidden mb-3.5 relative flex items-center justify-center">
                         {prod.featured_image ? (
                           <img
                             src={prod.featured_image}
@@ -455,33 +455,33 @@ export default function ExplorerPage() {
                         ) : (
                           <ImageIcon className="w-8 h-8 text-zinc-800" />
                         )}
-                        <span className="absolute top-2 right-2 text-[9px] bg-zinc-900/90 text-zinc-400 py-0.5 px-2 rounded-full border border-zinc-800 font-bold">
+                        <span className="absolute top-2 right-2 text-[9px] bg-zinc-100 dark:bg-zinc-900/90 text-muted-foreground py-0.5 px-2 rounded-full border border-border font-bold">
                           {prod.price} {prod.currency || "EGP"}
                         </span>
                       </div>
 
                       {/* Brand */}
-                      <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold block mb-1">
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-1">
                         {brandName}
                       </span>
 
                       {/* Localized Product names */}
-                      <h3 className="text-xs font-bold text-zinc-200 line-clamp-1 group-hover:text-primary transition-colors">
+                      <h3 className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                         {nameEn}
                       </h3>
                       {nameAr && (
-                        <h4 className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
+                        <h4 className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5 font-sans text-right direction-rtl">
                           {nameAr}
                         </h4>
                       )}
                     </div>
 
                     {/* Tags summary at bottom */}
-                    <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                      <span className="text-[9px] bg-zinc-950 py-0.5 px-2 rounded text-zinc-500 border border-zinc-800">
+                    <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                      <span className="text-[9px] bg-background py-0.5 px-2 rounded text-muted-foreground border border-border">
                         {categoryName}
                       </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                     </div>
                   </div>
                 );
@@ -489,9 +489,9 @@ export default function ExplorerPage() {
             </div>
 
             {/* Pagination using shadcn buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-zinc-800/80">
-              <span className="text-xs text-zinc-500">
-                Showing <strong className="text-zinc-300">{(expPage - 1) * 24 + 1} - {Math.min(expPage * 24, expTotal)}</strong> of <strong className="text-zinc-300">{expTotal}</strong> products
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <span className="text-xs text-muted-foreground">
+                Showing <strong className="text-zinc-700 dark:text-zinc-300">{(expPage - 1) * 24 + 1} - {Math.min(expPage * 24, expTotal)}</strong> of <strong className="text-zinc-700 dark:text-zinc-300">{expTotal}</strong> products
               </span>
 
               <div className="inline-flex gap-2">
@@ -500,11 +500,11 @@ export default function ExplorerPage() {
                   size="icon"
                   onClick={() => setExpPage((p) => Math.max(1, p - 1))}
                   disabled={expPage === 1}
-                  className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 disabled:opacity-30 transition-all cursor-pointer h-9 w-9"
+                  className="bg-zinc-100 dark:bg-zinc-900 border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 transition-all cursor-pointer h-9 w-9"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="px-3.5 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-bold font-mono h-9 flex items-center justify-center">
+                <span className="px-3.5 py-2 rounded-lg bg-background border border-border text-xs font-bold font-mono h-9 flex items-center justify-center">
                   {expPage}
                 </span>
                 <Button
@@ -512,7 +512,7 @@ export default function ExplorerPage() {
                   size="icon"
                   onClick={() => setExpPage((p) => Math.min(Math.ceil(expTotal / 24), p + 1))}
                   disabled={expPage >= Math.ceil(expTotal / 24)}
-                  className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 disabled:opacity-30 transition-all cursor-pointer h-9 w-9"
+                  className="bg-zinc-100 dark:bg-zinc-900 border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 transition-all cursor-pointer h-9 w-9"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -521,7 +521,7 @@ export default function ExplorerPage() {
           </div>
         )
       ) : (
-        <div className="h-[250px] bg-zinc-900/10 border border-zinc-800/80 rounded-2xl flex items-center justify-center text-zinc-500 italic">
+        <div className="h-[250px] bg-muted/20 border border-border rounded-2xl flex items-center justify-center text-muted-foreground italic">
           Select a historical campaign job from the dropdown menu to inspect its collected catalog items.
         </div>
       )}
@@ -554,11 +554,11 @@ export default function ExplorerPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 md:p-8 z-10 backdrop-blur-2xl"
+                className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-card border border-border rounded-2xl shadow-2xl p-6 md:p-8 z-10"
               >
                 <button
                   onClick={() => setInspectItem(null)}
-                  className="absolute top-4 right-4 p-1.5 bg-zinc-950 rounded-lg border border-zinc-800 hover:text-rose-400 transition-colors cursor-pointer"
+                  className="absolute top-4 right-4 p-1.5 bg-background rounded-lg border border-border hover:text-rose-400 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -567,7 +567,7 @@ export default function ExplorerPage() {
 
                   {/* Images Gallery Panel */}
                   <div>
-                    <div className="aspect-square bg-zinc-950 rounded-xl border border-zinc-800/80 overflow-hidden flex items-center justify-center relative mb-4">
+                    <div className="aspect-square bg-background rounded-xl border border-border overflow-hidden flex items-center justify-center relative mb-4">
                       {jobTarget === "categories" || jobTarget === "sub-categories" ? (
                         inspectItem.cover_image ? (
                           <img
@@ -578,7 +578,7 @@ export default function ExplorerPage() {
                         ) : (
                           <div className="flex flex-col items-center gap-1.5 p-4 text-center">
                             <ImageIcon className="w-12 h-12 text-zinc-800" />
-                            <span className="text-xs text-zinc-500 font-semibold italic">No Cover Scraped</span>
+                            <span className="text-xs text-muted-foreground font-semibold italic">No Cover Scraped</span>
                           </div>
                         )
                       ) : jobTarget === "brands" ? (
@@ -593,7 +593,7 @@ export default function ExplorerPage() {
                         ) : (
                           <div className="flex flex-col items-center gap-1.5 p-4 text-center">
                             <ImageIcon className="w-12 h-12 text-zinc-800" />
-                            <span className="text-xs text-zinc-500 font-semibold italic">No Logo Scraped</span>
+                            <span className="text-xs text-muted-foreground font-semibold italic">No Logo Scraped</span>
                           </div>
                         )
                       ) : inspectItem.images && inspectItem.images.length > 0 ? (
@@ -620,7 +620,7 @@ export default function ExplorerPage() {
                           <button
                             key={i}
                             onClick={() => setCarouselIdx(i)}
-                            className={`w-12 h-12 rounded border bg-zinc-950 p-0.5 overflow-hidden flex-shrink-0 cursor-pointer transition-all ${carouselIdx === i ? "border-primary scale-[1.03]" : "border-zinc-800"
+                            className={`w-12 h-12 rounded border bg-background p-0.5 overflow-hidden flex-shrink-0 cursor-pointer transition-all ${carouselIdx === i ? "border-primary scale-[1.03]" : "border-border"
                               }`}
                           >
                             <img src={img} alt="thumbnail" className="object-contain w-full h-full" />
@@ -634,7 +634,7 @@ export default function ExplorerPage() {
                   <div className="flex flex-col justify-between">
                     <div>
                       {/* Category Path info */}
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
                         {jobTarget === "categories" || jobTarget === "sub-categories"
                           ? (jobTarget === "categories" ? "Main Category" : "Nested Sub-category")
                           : jobTarget === "brands"
@@ -644,16 +644,16 @@ export default function ExplorerPage() {
                       </span>
 
                       {/* Localized Name Tabs */}
-                      <div className="flex border-b border-zinc-800 mb-4 text-xs font-semibold gap-4">
+                      <div className="flex border-b border-border mb-4 text-xs font-semibold gap-4">
                         <button
                           onClick={() => setActiveLangTab("en")}
-                          className={`pb-2 border-b-2 transition-all ${activeLangTab === "en" ? "border-primary text-primary font-bold" : "border-transparent text-zinc-400 hover:text-zinc-100"}`}
+                          className={`pb-2 border-b-2 transition-all ${activeLangTab === "en" ? "border-primary text-primary font-bold" : "border-transparent text-muted-foreground hover:text-foreground"}`}
                         >
                           English Details
                         </button>
                         <button
                           onClick={() => setActiveLangTab("ar")}
-                          className={`pb-2 border-b-2 transition-all ${activeLangTab === "ar" ? "border-primary text-primary font-bold" : "border-transparent text-zinc-400 hover:text-zinc-100"}`}
+                          className={`pb-2 border-b-2 transition-all ${activeLangTab === "ar" ? "border-primary text-primary font-bold" : "border-transparent text-muted-foreground hover:text-foreground"}`}
                         >
                           تفاصيل باللغة العربية
                         </button>
@@ -661,10 +661,10 @@ export default function ExplorerPage() {
 
                       {activeLangTab === "en" ? (
                         <div>
-                          <h2 className="text-xl font-extrabold text-zinc-100 mb-1">
+                          <h2 className="text-xl font-extrabold text-foreground mb-1">
                             {nameEn}
                           </h2>
-                          <span className="text-xs text-zinc-400 italic block mb-4">
+                          <span className="text-xs text-muted-foreground italic block mb-4">
                             {jobTarget === "categories" || jobTarget === "sub-categories"
                               ? `Slug Key: ${cleanSlug}`
                               : jobTarget === "brands"
@@ -674,12 +674,12 @@ export default function ExplorerPage() {
 
                           {jobTarget === "products" ? (
                             <>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center gap-1.5">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
                                 <FileText className="w-3.5 h-3.5 text-primary" />
                                 Overview
                               </h4>
                               <div
-                                className="text-xs leading-relaxed text-zinc-300 bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 max-h-[140px] overflow-y-auto"
+                                className="text-xs leading-relaxed text-zinc-700 dark:text-zinc-300 bg-background p-4 rounded-xl border border-border max-h-[140px] overflow-y-auto"
                                 dangerouslySetInnerHTML={{
                                   __html: sanitizeHtml(
                                     (typeof inspectItem.overview === "object" && inspectItem.overview?.en) ||
@@ -692,31 +692,31 @@ export default function ExplorerPage() {
                             </>
                           ) : jobTarget === "categories" || jobTarget === "sub-categories" ? (
                             <div>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                                 <Layers className="w-3.5 h-3.5 text-primary" />
                                 Nested Sub-Categories ({inspectItem.sub_categories?.length ?? 0})
                               </h4>
-                              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 max-h-[160px] overflow-y-auto">
+                              <div className="bg-background p-4 rounded-xl border border-border max-h-[160px] overflow-y-auto">
                                 {inspectItem.sub_categories && inspectItem.sub_categories.length > 0 ? (
                                   <div className="flex flex-wrap gap-2">
                                     {inspectItem.sub_categories.map((sub: any, idx: number) => (
-                                      <span key={idx} className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 py-1 px-2.5 rounded-md font-medium">
+                                      <span key={idx} className="text-[10px] bg-zinc-100 dark:bg-zinc-900 border border-border text-zinc-700 dark:text-zinc-300 py-1 px-2.5 rounded-md font-medium">
                                         {sub.names?.en || sub.name || sub.slug}
                                       </span>
                                     ))}
                                   </div>
                                 ) : (
-                                  <span className="text-xs text-zinc-500 italic">No nested sub-categories listed.</span>
+                                  <span className="text-xs text-muted-foreground italic">No nested sub-categories listed.</span>
                                 )}
                               </div>
                             </div>
                           ) : (
                             <div>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                                 <Database className="w-3.5 h-3.5 text-primary" />
                                 Storefront Href Link
                               </h4>
-                              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 font-mono text-[10px] text-zinc-400 break-all select-all">
+                              <div className="bg-background p-4 rounded-xl border border-border font-mono text-[10px] text-muted-foreground break-all select-all">
                                 {inspectItem.href_slug || inspectItem.href || `https://chefaa.com/brands/${cleanSlug}`}
                               </div>
                             </div>
@@ -724,10 +724,10 @@ export default function ExplorerPage() {
                         </div>
                       ) : (
                         <div className="direction-rtl text-right">
-                          <h2 className="text-xl font-extrabold text-zinc-100 mb-1 font-sans">
+                          <h2 className="text-xl font-extrabold text-foreground mb-1 font-sans">
                             {nameAr || nameEn}
                           </h2>
-                          <span className="text-xs text-zinc-400 italic block mb-4 font-sans font-medium">
+                          <span className="text-xs text-muted-foreground italic block mb-4 font-sans font-medium">
                             {jobTarget === "categories" || jobTarget === "sub-categories"
                               ? `مفتاح المعرّف (Slug): ${cleanSlug}`
                               : jobTarget === "brands"
@@ -737,12 +737,12 @@ export default function ExplorerPage() {
 
                           {jobTarget === "products" ? (
                             <>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center gap-1.5 justify-end font-sans">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5 justify-end font-sans">
                                 <FileText className="w-3.5 h-3.5 text-primary" />
                                 نظرة عامة
                               </h4>
                               <div
-                                className="text-xs leading-relaxed text-zinc-300 bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 max-h-[140px] overflow-y-auto font-sans"
+                                className="text-xs leading-relaxed text-zinc-700 dark:text-zinc-300 bg-background p-4 rounded-xl border border-border max-h-[140px] overflow-y-auto font-sans"
                                 dangerouslySetInnerHTML={{
                                   __html: sanitizeHtml(
                                     (typeof inspectItem.overview === "object" && inspectItem.overview?.ar) ||
@@ -754,31 +754,31 @@ export default function ExplorerPage() {
                             </>
                           ) : jobTarget === "categories" || jobTarget === "sub-categories" ? (
                             <div>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5 justify-end font-sans">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5 justify-end font-sans">
                                 <Layers className="w-3.5 h-3.5 text-primary" />
                                 الفئات الفرعية ({inspectItem.sub_categories?.length ?? 0})
                               </h4>
-                              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 max-h-[160px] overflow-y-auto font-sans text-right">
+                              <div className="bg-background p-4 rounded-xl border border-border max-h-[160px] overflow-y-auto font-sans text-right">
                                 {inspectItem.sub_categories && inspectItem.sub_categories.length > 0 ? (
                                   <div className="flex flex-wrap gap-2 justify-start">
                                     {inspectItem.sub_categories.map((sub: any, idx: number) => (
-                                      <span key={idx} className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 py-1 px-2.5 rounded-md font-medium">
+                                      <span key={idx} className="text-[10px] bg-zinc-100 dark:bg-zinc-900 border border-border text-zinc-700 dark:text-zinc-300 py-1 px-2.5 rounded-md font-medium">
                                         {sub.names?.ar || sub.names?.en || sub.name || sub.slug}
                                       </span>
                                     ))}
                                   </div>
                                 ) : (
-                                  <span className="text-xs text-zinc-500 italic font-sans">لا توجد فئات فرعية مدرجة.</span>
+                                  <span className="text-xs text-muted-foreground italic font-sans">لا توجد فئات فرعية مدرجة.</span>
                                 )}
                               </div>
                             </div>
                           ) : (
                             <div>
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-1.5 justify-end font-sans">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5 justify-end font-sans">
                                 <Database className="w-3.5 h-3.5 text-primary" />
                                 رابط المتجر الإلكتروني
                               </h4>
-                              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 font-mono text-[10px] text-zinc-400 break-all select-all text-left">
+                              <div className="bg-background p-4 rounded-xl border border-border font-mono text-[10px] text-muted-foreground break-all select-all text-left">
                                 {inspectItem.href_slug || inspectItem.href || `https://chefaa.com/brands/${cleanSlug}`}
                               </div>
                             </div>
@@ -807,7 +807,7 @@ export default function ExplorerPage() {
                               <span className="font-bold block mb-0.5">
                                 {mediaStatus === "running" ? "Fetching Media Locally..." : "Chefaa CDN Media Source"}
                               </span>
-                              <p className="text-[10px] text-zinc-400 leading-normal">
+                              <p className="text-[10px] text-muted-foreground leading-normal">
                                 {mediaStatus === "running"
                                   ? "The local image downloading process is currently running for this campaign."
                                   : "These product gallery images are loaded live from the Chefaa CDN network. Media files are not stored locally."}
@@ -835,30 +835,30 @@ export default function ExplorerPage() {
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         {jobTarget === "products" ? (
                           <>
-                            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80">
-                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Price Listing</span>
+                            <div className="p-3 bg-background rounded-xl border border-border">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold block mb-0.5">Price Listing</span>
                               <span className="text-sm font-extrabold text-primary">
                                 {inspectItem.price} {inspectItem.currency || "EGP"}
                               </span>
                             </div>
-                            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80">
-                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">SKU slug</span>
-                              <span className="text-xs font-mono font-bold text-zinc-300 truncate block">
+                            <div className="p-3 bg-background rounded-xl border border-border">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold block mb-0.5">SKU slug</span>
+                              <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 truncate block">
                                 {inspectItem.id}
                               </span>
                             </div>
                           </>
                         ) : (
                           <>
-                            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80">
-                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Storefront Slug</span>
-                              <span className="text-xs font-mono font-bold text-zinc-300 truncate block">
+                            <div className="p-3 bg-background rounded-xl border border-border">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold block mb-0.5">Storefront Slug</span>
+                              <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 truncate block">
                                 {cleanSlug}
                               </span>
                             </div>
-                            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800/80">
-                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Scraped Link Route</span>
-                              <span className="text-xs font-mono font-bold text-zinc-300 truncate block">
+                            <div className="p-3 bg-background rounded-xl border border-border">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold block mb-0.5">Scraped Link Route</span>
+                              <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 truncate block">
                                 {inspectItem.href || inspectItem.href_slug || "N/A"}
                               </span>
                             </div>
@@ -869,12 +869,12 @@ export default function ExplorerPage() {
                       {/* Specification specs key-value table */}
                       {jobTarget === "products" && inspectItem.specification && Object.keys(inspectItem.specification).length > 0 && (
                         <div>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Specifications</h4>
-                          <div className="bg-zinc-950 rounded-xl border border-zinc-800/80 overflow-hidden text-[11px]">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Specifications</h4>
+                          <div className="bg-background rounded-xl border border-border overflow-hidden text-[11px]">
                             {Object.entries(inspectItem.specification).map(([key, val], idx) => (
-                              <div key={key} className={`flex justify-between p-2.5 ${idx % 2 === 0 ? "bg-zinc-900/35" : ""} border-b border-zinc-900/50`}>
-                                <span className="font-semibold text-zinc-400">{key}</span>
-                                <span className="text-zinc-200">{val}</span>
+                              <div key={key} className={`flex justify-between p-2.5 ${idx % 2 === 0 ? "bg-muted/50" : ""} border-b border-border`}>
+                                <span className="font-semibold text-muted-foreground">{key}</span>
+                                <span className="text-foreground">{val}</span>
                               </div>
                             ))}
                           </div>
