@@ -334,7 +334,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({
                     className={cn(
                       "w-8 h-8 rounded-lg text-xs font-bold transition-all",
                       currentPage === pageNum
-                        ? "bg-primary text-white shadow-md shadow-primary/20"
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                         : "bg-background border border-border text-muted-foreground hover:bg-muted/40"
                     )}
                   >

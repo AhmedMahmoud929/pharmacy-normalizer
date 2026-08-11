@@ -38,10 +38,12 @@ export const StatCard: React.FC<StatCardProps> = ({
   className,
 }) => {
   return (
-    <div className={cn(cardSurfaceClass, "p-5", className)}>
+    <div className={cn(cardSurfaceClass, "p-5 md:p-6 min-w-0", className)}>
       <Icon className={cn("w-5 h-5 mb-3", iconClassName ?? "text-primary")} />
-      <p className={cn("text-2xl font-bold font-mono", valueClassName)}>{formatStatValue(value)}</p>
-      <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-semibold">
+      <p className={cn("text-2xl font-bold font-mono text-start", valueClassName)}>
+        {formatStatValue(value)}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-semibold text-start">
         {label}
       </p>
     </div>

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { StatCard, StatCardGrid, cardSurfaceClass, tableHeaderClass, tableRowClass } from "@/components/ui/stat-card";
 import { ExportDialog } from "@/components/matcher/ExportDialog";
 import { DeleteCampaignModal } from "@/components/matcher/DeleteCampaignModal";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -33,6 +34,7 @@ interface MatchJob {
 export default function MatcherDashboard() {
   const [jobs, setJobs] = useState<MatchJob[]>([]);
   const t = useTranslations("Matcher");
+  const tDash = useTranslations("Dashboard");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -132,10 +134,11 @@ export default function MatcherDashboard() {
   }, [jobs]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8 p-6">
+    <div className="w-full min-w-0 space-y-8">
       {/* Dashboard Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
+          <FeatureBadge icon={FileSpreadsheet} label={tDash("badge_matcher")} />
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("title")} <span className="text-primary">{t("highlight")}</span>
           </h1>
@@ -145,7 +148,7 @@ export default function MatcherDashboard() {
         </div>
         <Link
           href="/dashboard/matcher/new"
-          className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-full font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 text-sm"
+          className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 text-sm"
         >
           <Plus className="w-4 h-4" />
           {t("btn_new_match")}
@@ -320,7 +323,7 @@ export default function MatcherDashboard() {
                           {/* Inspect Results */}
                           <Link
                             href={`/dashboard/matcher/new?job_id=${job.job_id}`}
-                            className="p-2 cursor-pointer rounded-lg bg-zinc-850 hover:bg-primary hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
+                            className="p-2 cursor-pointer rounded-lg bg-zinc-850 hover:bg-primary hover:text-primary-foreground text-zinc-600 dark:text-zinc-300 transition-all"
                             title={t("tip_inspect")}
                           >
                             <ArrowRight className="w-4 h-4 rtl:rotate-180" />

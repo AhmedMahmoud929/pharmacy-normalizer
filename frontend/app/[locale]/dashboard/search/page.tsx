@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Search, Loader2, Sparkles, Filter, ArrowRight, Package, Tag, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -12,6 +13,7 @@ export default function SearchPage() {
   const [normalized, setNormalized] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations("Search");
+  const tDash = useTranslations("Dashboard");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +34,9 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-6 py-12 space-y-12">
+    <div className="w-full min-w-0 space-y-12">
       <div className="text-center space-y-4">
+        <FeatureBadge icon={Search} label={tDash("badge_search")} className="mb-0" />
         <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
           {t("title")} <span className="text-primary">{t("highlight")}</span>
         </h1>
@@ -42,7 +45,7 @@ export default function SearchPage() {
         </p>
       </div>
 
-      <div className="relative w-full max-w-4xl mx-auto">
+      <div className="relative w-full">
         <form onSubmit={handleSearch} className="w-full relative group">
           <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
           <div className="w-full relative flex items-center p-2 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl focus-within:border-primary transition-all shadow-xl">
@@ -57,7 +60,7 @@ export default function SearchPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="px-8 py-3 bg-primary text-white font-bold rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50"
+              className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("button_search")}
             </button>
@@ -68,7 +71,7 @@ export default function SearchPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute top-full left-6 rtl:left-auto rtl:right-6 mt-4 flex items-center gap-2 text-xs font-bold text-zinc-400"
+            className="absolute top-full start-6 mt-4 flex items-center gap-2 text-xs font-bold text-zinc-400"
           >
             <Sparkles className="w-3 h-3 text-primary" />
             {t("normalized_prefix")} <span className="text-primary italic">"{normalized}"</span>

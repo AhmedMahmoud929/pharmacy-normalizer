@@ -348,7 +348,7 @@ export default function OrchestratePage() {
                     }}
                     className={`w-full py-2.5 font-bold rounded-xl border transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer text-xs uppercase tracking-wider ${isRunning
                       ? "bg-background/80 border border-border text-muted-foreground hover:text-foreground hover:border-border"
-                      : "bg-primary-dark text-white border-transparent hover:bg-primary-dark/90 shadow-lg shadow-primary/10"
+                      : "bg-primary-dark text-primary-foreground border-transparent hover:bg-primary-dark/90 shadow-lg shadow-primary/10"
                       }`}
                   >
                     <Sliders className="w-4 h-4" />
@@ -1067,7 +1067,7 @@ export default function OrchestratePage() {
           <Button
             onClick={onSubmitStartCampaign}
             disabled={isCrawlLoading}
-            className="w-full py-5 rounded-xl text-white font-bold text-xs bg-primary-dark hover:bg-primary-deep active:scale-[0.98] shadow-lg shadow-primary-dark/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider h-11"
+            className="w-full py-5 rounded-xl text-primary-foreground font-bold text-xs bg-primary-dark hover:bg-primary-deep active:scale-[0.98] shadow-lg shadow-primary-dark/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider h-11"
           >
             <Play className="w-4 h-4 fill-white" />
             Initiate Campaign Scrape

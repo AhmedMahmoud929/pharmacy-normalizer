@@ -224,7 +224,7 @@ export default function HowItWorks() {
                   <button 
                     onClick={handleDemo}
                     disabled={loading}
-                    className="absolute right-3 rtl:right-auto rtl:left-3 top-3 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:bg-primary-dark active:scale-95 transition-all disabled:opacity-50"
+                    className="absolute end-3 top-3 w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center hover:bg-primary-dark active:scale-95 transition-all disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5 animate-spin" />}
                   </button>
@@ -266,7 +266,7 @@ export default function HowItWorks() {
                     className="space-y-6"
                   >
                     {/* Top Result Card */}
-                    <div className="p-8 bg-primary rounded-3xl text-white shadow-2xl shadow-primary/30 relative overflow-hidden">
+                    <div className="p-8 bg-primary rounded-3xl text-primary-foreground shadow-2xl shadow-primary/30 relative overflow-hidden">
                       <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-white/10 rounded-full blur-3xl pointer-events-none" />
                       
                       <div className="flex items-center justify-between mb-6 relative z-10">
@@ -414,7 +414,7 @@ export default function HowItWorks() {
              <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full -z-10 animate-pulse" />
              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[40px] border border-zinc-200 dark:border-zinc-800 shadow-2xl relative overflow-hidden">
                 <div className="flex items-center gap-4 mb-8 pb-8 border-b border-zinc-100 dark:border-zinc-800">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white">
+                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground">
                     <Info className="w-6 h-6" />
                   </div>
                   <div>
@@ -454,7 +454,7 @@ export default function HowItWorks() {
           <div className="flex justify-center gap-4">
             <Link 
               href="/dashboard/matcher"
-              className="px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all shadow-lg shadow-primary/20"
+              className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all shadow-lg shadow-primary/20"
             >
               {t("cta_btn_matcher")}
             </Link>

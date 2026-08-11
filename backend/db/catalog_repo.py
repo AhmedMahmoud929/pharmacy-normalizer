@@ -387,3 +387,63 @@ def set_meta(key: str, value: str) -> None:
             "INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)",
             (key, value),
         )
+
+
+def get_live_product(product_id: str) -> Optional[Dict[str, Any]]:
+    """Return a live catalog product row by id, or None."""
+    with get_connection() as conn:
+        cur = conn.execute(
+            "SELECT * FROM catalog_products WHERE id = ?",
+            (str(product_id),),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def update_product_codes(
+    product_id: str,
+    *,
+    international_barcode: Optional[str] = None,
+    code: Optional[str] = None,
+) -> bool:
+    """
+    Patch live catalog product barcode/code columns and mirror into raw_json.
+    Returns True if a row was updated.
+    """
+    product_id = str(product_id)
+    row = get_live_product(product_id)
+    if not row:
+        return False
+
+    new_barcode = row.get("international_barcode") or ""
+    new_code = row.get("code") or ""
+    if international_barcode is not None:
+        new_barcode = international_barcode.strip()
+    if code is not None and code.strip():
+        new_code = code.strip()
+
+    raw = {}
+    if row.get("raw_json"):
+        try:
+            raw = json.loads(row["raw_json"])
+            if not isinstance(raw, dict):
+                raw = {}
+        except (json.JSONDecodeError, TypeError):
+            raw = {}
+
+    raw["international_barcode"] = new_barcode
+    raw["code"] = new_code
+
+    with get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE catalog_products
+            SET international_barcode = ?,
+                code = ?,
+                raw_json = ?,
+                updated_at = ?
+            WHERE id = ?
+            """,
+            (new_barcode, new_code, json.dumps(raw, ensure_ascii=False), _now_iso(), product_id),
+        )
+    return True

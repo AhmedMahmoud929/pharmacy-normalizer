@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist } from "next/font/google";
+import { Inter, Geist, Cairo } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -17,6 +17,12 @@ const inter = Inter({
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -42,13 +48,20 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-  const dir = locale === "ar" ? "rtl" : "ltr";
+  const isRtl = locale === "ar";
+  const dir = isRtl ? "rtl" : "ltr";
 
   return (
     <html
       lang={locale}
       dir={dir}
-      className={cn("h-full", "antialiased", "transition-colors", "duration-300", inter.variable, "font-sans", geist.variable)}
+      className={cn(
+        "h-full antialiased transition-colors duration-300",
+        inter.variable,
+        geist.variable,
+        cairo.variable,
+        isRtl ? "font-arabic" : "font-sans"
+      )}
       suppressHydrationWarning
     >
       <head>
@@ -58,7 +71,12 @@ export default async function LocaleLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col font-sans transition-colors duration-300 bg-background text-foreground">
+      <body
+        className={cn(
+          "min-h-full flex flex-col transition-colors duration-300 bg-background text-foreground",
+          isRtl ? "font-arabic" : "font-sans"
+        )}
+      >
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider>
             {children}

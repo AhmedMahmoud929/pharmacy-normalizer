@@ -5,12 +5,14 @@ import { useTranslations } from "next-intl";
 import { FileText, Play, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "@/lib/utils";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 export default function NormalizePage() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations("Normalize");
+  const tDash = useTranslations("Dashboard");
 
   const handleNormalize = async () => {
     if (!input) return;
@@ -27,8 +29,9 @@ export default function NormalizePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 pt-12 pb-32 space-y-12">
-      <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-12">
+      <div className="space-y-4 text-start">
+        <FeatureBadge icon={FileText} label={tDash("badge_normalize")} />
         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           {t("title")} <span className="text-primary">{t("lab")}</span>
         </h1>
@@ -50,7 +53,7 @@ export default function NormalizePage() {
             <button
               disabled={isLoading || !input}
               onClick={handleNormalize}
-              className="absolute bottom-4 right-4 rtl:right-auto rtl:left-4 flex items-center gap-2 px-6 py-2 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-50"
+              className="absolute bottom-4 end-4 flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-4 h-4 fill-current rtl:rotate-180" />}
               {isLoading ? t("button_processing") : t("button_normalize")}

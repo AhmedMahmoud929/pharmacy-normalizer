@@ -362,13 +362,15 @@ class ProductIndex:
                     "price": product.get("final_price") or product.get("price") or 0,
                     "in_stock": product.get("in_stock", True),
                     "stock": 10 if product.get("in_stock", True) else 0,
-                    "share_link": product.get("full_url") or product.get("url") or "",
+                    "share_link": product.get("full_url") or product.get("url") or product.get("share_link") or "",
                     "image": product.get("image") or "",
                     "description_en": product.get("description_en") or product.get("meta_description_en") or "",
                     "description_ar": product.get("description_ar") or product.get("meta_description_ar") or "",
                     "unit": product.get("unit") or "",
                     "code": product.get("code") or "",
                     "international_barcode": product.get("international_barcode") or "",
+                    "need_prescription": bool(product.get("need_prescription")),
+                    "source": product.get("source") or "chefaa",
                 }
                 
                 idx = len(self.entries)

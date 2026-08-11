@@ -5,6 +5,7 @@ import {
   Database,
   Terminal,
   Sprout,
+  Barcode,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ export interface NavItem {
 
 export const dashboardNavItems: NavItem[] = [
   { name: "Match Sheet", key: "match_sheet", href: "/dashboard/matcher", icon: Table },
+  { name: "Barcode Enrichment", key: "barcode_enrichment", href: "/dashboard/enrichment", icon: Barcode },
   { name: "Catalog Seeder", key: "catalog_seeder", href: "/dashboard/catalog", icon: Sprout },
   ...(showCrawler
     ? [{ name: "Campaign Crawler", key: "campaign_crawler", href: "/dashboard/crawler", icon: Terminal }]

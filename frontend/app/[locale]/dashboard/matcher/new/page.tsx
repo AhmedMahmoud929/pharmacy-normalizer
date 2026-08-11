@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function NewMatcherPage() {
   return (
-    <main className="min-h-screen bg-background py-4">
+    <div className="w-full min-w-0">
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
@@ -16,6 +16,6 @@ export default function NewMatcherPage() {
       }>
         <DrugMatcher />
       </Suspense>
-    </main>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
     "title": "PHARMATCH",
     "engine": "v9.0 Engine",
     "match_sheet": "Match Sheet",
+    "barcode_enrichment": "Barcode Enrichment",
     "catalog_seeder": "Catalog Seeder",
     "campaign_crawler": "Campaign Crawler",
     "browse_db": "Browse DB",
@@ -24,7 +25,32 @@
     "open_menu": "Open navigation menu",
     "toggle_theme_light": "Switch to light mode",
     "toggle_theme_dark": "Switch to dark mode",
-    "language_switch": "العربية"
+    "language_switch": "العربية",
+    "badge_matcher": "Match Campaigns",
+    "badge_matcher_new": "Drug Matcher",
+    "badge_enrichment": "Barcode Enrichment",
+    "badge_catalog": "SQLite Catalog",
+    "badge_browse": "Reference Database",
+    "badge_search": "Fuzzy Search",
+    "badge_normalize": "Normalization Lab",
+    "badge_crawler": "Campaign Crawler"
+  },
+  "sidebar": {
+    "navigationMenu": "Navigation menu",
+    "workspace": "Workspace",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard"
+  },
+  "userMenu": {
+    "menu": "App menu",
+    "subtitle": "v9.0 Engine",
+    "home": "Home Page"
+  },
+  "sheet": {
+    "close": "Close"
   },
   "Normalize": {
     "title": "Normalization",

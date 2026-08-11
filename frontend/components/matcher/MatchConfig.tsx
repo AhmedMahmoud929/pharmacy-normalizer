@@ -539,7 +539,7 @@ export const MatchConfig: React.FC<MatchConfigProps> = ({
       <button
         disabled={isProcessing || !selectedColumn}
         onClick={onStart}
-        className="w-full py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+        className="w-full py-4 bg-primary hover:bg-primary-dark text-primary-foreground rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
       >
         {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
         {isProcessing ? "Processing Rows..." : "Start Matching"}

@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { Database, Search, ChevronLeft, ChevronRight, Loader2, Package, Tag, Layers, ExternalLink, Filter, Eye, Download, LayoutGrid, List, MoreHorizontal, Folder } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
 import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { ProductDetailModal } from "@/components/matcher/ProductDetailModal";
 import { ExportWizardModal } from "@/components/matcher/ExportWizardModal";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 type TabType = "products" | "brands" | "categories";
 
@@ -42,6 +45,15 @@ interface Product {
   share_link: string;
   brand?: Brand;
   category?: Category;
+  description_en?: string;
+  description_ar?: string;
+  unit?: string;
+  code?: string;
+  international_barcode?: string;
+  level_two_category?: { slug?: string; title_en?: string; title_ar?: string; name?: string };
+  level_three_category?: { slug?: string; title_en?: string; title_ar?: string; name?: string };
+  need_prescription?: boolean;
+  source?: string;
 }
 
 // Collapsible Categories Tree accordion view
@@ -78,14 +90,14 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
             <button
               onClick={() => toggleL1(l1.slug)}
               className={cn(
-                "w-full flex items-center justify-between p-6 text-left transition-colors cursor-pointer",
+                "w-full flex items-center justify-between p-6 text-start transition-colors cursor-pointer",
                 isL1Expanded ? "bg-zinc-50 dark:bg-zinc-950/45 border-b border-zinc-100 dark:border-zinc-800/80" : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
               )}
             >
               <div className="flex items-center gap-4">
                 <div className={cn(
                   "p-3 rounded-2xl transition-all",
-                  isL1Expanded ? "bg-primary text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 group-hover:text-primary"
+                  isL1Expanded ? "bg-primary text-primary-foreground" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 group-hover:text-primary"
                 )}>
                   <Layers className="w-5 h-5" />
                 </div>
@@ -123,7 +135,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                   transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="overflow-hidden bg-zinc-50/40 dark:bg-black/10"
                 >
-                  <div className="px-6 py-4 space-y-3 pl-12 sm:pl-16 rtl:pl-6 rtl:pr-12 sm:rtl:pr-16 border-b border-zinc-100 dark:border-zinc-800/50">
+                  <div className="px-6 py-4 space-y-3 ps-12 sm:ps-16 border-b border-zinc-100 dark:border-zinc-800/50">
                     {l1.children?.map((l2: any) => {
                       const isL2Expanded = !!expandedL2[l2.slug];
                       const hasL3 = l2.children && l2.children.length > 0;
@@ -134,7 +146,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                           <button
                             onClick={() => toggleL2(l2.slug)}
                             className={cn(
-                              "w-full flex items-center justify-between p-4 text-left transition-colors cursor-pointer",
+                              "w-full flex items-center justify-between p-4 text-start transition-colors cursor-pointer",
                               isL2Expanded ? "bg-zinc-50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800/50" : "hover:bg-zinc-50/40 dark:hover:bg-zinc-800/20"
                             )}
                           >
@@ -179,7 +191,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                                 transition={{ duration: 0.2, ease: "easeInOut" }}
                                 className="overflow-hidden bg-zinc-50/20 dark:bg-black/5"
                               >
-                                <div className="p-4 pl-8 sm:pl-10 rtl:pl-4 rtl:pr-8 sm:rtl:pr-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="p-4 ps-8 sm:ps-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   {l2.children.map((l3: any) => (
                                     <div
                                       key={l3.slug}
@@ -220,7 +232,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
   );
 };
 
-export default function BrowsePage() {
+function BrowsePageContent() {
   const [activeTab, setActiveTab] = useState<TabType>("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -233,12 +245,84 @@ export default function BrowsePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations("Browse");
+  const tDash = useTranslations("Dashboard");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const productIdFromUrl = searchParams.get("product");
 
   // Detail & Export Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+
+  const setProductInUrl = useCallback(
+    (productId: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (productId) params.set("product", productId);
+      else params.delete("product");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const openProductDetail = useCallback(
+    (product: Product) => {
+      setSelectedProduct(product);
+      setIsDetailOpen(true);
+      setProductInUrl(String(product.id));
+    },
+    [setProductInUrl]
+  );
+
+  const closeProductDetail = useCallback(() => {
+    setIsDetailOpen(false);
+    setSelectedProduct(null);
+    setProductInUrl(null);
+  }, [setProductInUrl]);
+
+  // Keep dialog in sync with ?product= in the URL (open, deep-link, back/forward)
+  useEffect(() => {
+    if (!productIdFromUrl) {
+      setIsDetailOpen(false);
+      setSelectedProduct(null);
+      return;
+    }
+
+    if (selectedProduct && String(selectedProduct.id) === productIdFromUrl && isDetailOpen) {
+      return;
+    }
+
+    const fromList = products.find((p) => String(p.id) === productIdFromUrl);
+    if (fromList) {
+      setSelectedProduct(fromList);
+      setIsDetailOpen(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/db/products/${encodeURIComponent(productIdFromUrl)}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) {
+          setSelectedProduct(data);
+          setIsDetailOpen(true);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // intentionally omit selectedProduct/isDetailOpen to avoid reset loops; URL is source of truth
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productIdFromUrl, products]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -300,10 +384,11 @@ export default function BrowsePage() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 py-12 space-y-8">
+    <div className="w-full min-w-0 space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0 text-start">
           <div className="space-y-2">
+            <FeatureBadge icon={Database} label={tDash("badge_browse")} />
             <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
               {t("title")} <span className="text-primary">{t("highlight")}</span>
             </h1>
@@ -342,13 +427,13 @@ export default function BrowsePage() {
           {activeTab === "products" && (
             <>
               <form onSubmit={handleSearch} className="relative w-full sm:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t("placeholder")}
-                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
+                  className="w-full ps-11 pe-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
                 />
               </form>
               
@@ -385,7 +470,7 @@ export default function BrowsePage() {
           
           <button
             onClick={() => setIsExportOpen(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer whitespace-nowrap"
           >
             <Download className="w-4 h-4" />
             {activeTab === "products" ? t("export_products") : activeTab === "brands" ? t("export_brands") : t("export_categories")}
@@ -408,7 +493,7 @@ export default function BrowsePage() {
             <p className="text-zinc-500 max-w-md">{error}</p>
             <button
               onClick={() => fetchData()}
-              className="px-6 py-2 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+              className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
             >
               Retry Connection
             </button>
@@ -452,7 +537,7 @@ export default function BrowsePage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="w-full text-left border-collapse"
+                    className="w-full text-start border-collapse"
                   >
                     <thead>
                       <tr className="bg-zinc-50 dark:bg-black/50 border-b border-zinc-200 dark:border-zinc-800">
@@ -520,10 +605,7 @@ export default function BrowsePage() {
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-4">
                               <button
-                                onClick={() => {
-                                  setSelectedProduct(p);
-                                  setIsDetailOpen(true);
-                                }}
+                                onClick={() => openProductDetail(p)}
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-primary transition-colors cursor-pointer font-sans border-none bg-transparent outline-none"
                               >
                                 <Eye className="w-3.5 h-3.5" />
@@ -566,7 +648,7 @@ export default function BrowsePage() {
                           />
                           
                           {/* Floating Status Badge */}
-                          <div className="absolute top-2 right-2">
+                          <div className="absolute top-2 end-2">
                             <span className={cn(
                               "text-[8px] font-bold px-1.5 py-0.5 rounded border shadow-sm backdrop-blur-md uppercase tracking-wider whitespace-nowrap",
                               p.is_local_image
@@ -616,52 +698,51 @@ export default function BrowsePage() {
                           </div>
 
                           {/* Price & Actions */}
-                          <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5 flex-shrink-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-extrabold text-xs text-zinc-900 dark:text-zinc-50 leading-none">
+                          <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800 flex-shrink-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="font-extrabold text-xs text-zinc-900 dark:text-zinc-50 leading-none truncate">
                                 {p.price} <span className="text-[9px] font-medium text-zinc-500">EGP</span>
                               </p>
-                            </div>
 
-                            <div className="relative">
-                              <button
-                                type="button"
-                                onClick={() => setActiveDropdownId(activeDropdownId === p.id ? null : p.id)}
-                                className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-350 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none outline-none"
-                              >
-                                <MoreHorizontal className="w-3.5 h-3.5" />
-                                {t("actions_dropdown")}
-                              </button>
+                              <div className="relative shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveDropdownId(activeDropdownId === p.id ? null : p.id)}
+                                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-zinc-900 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none outline-none"
+                                >
+                                  <MoreHorizontal className="w-3.5 h-3.5" />
+                                  {t("actions_dropdown")}
+                                </button>
 
-                              {activeDropdownId === p.id && (
-                                <>
-                                  <div className="fixed inset-0 z-40" onClick={() => setActiveDropdownId(null)} />
-                                  <div className="absolute right-0 bottom-full mb-1.5 w-32 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden py-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedProduct(p);
-                                        setIsDetailOpen(true);
-                                        setActiveDropdownId(null);
-                                      }}
-                                      className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border-none outline-none bg-transparent cursor-pointer"
-                                    >
-                                      <Eye className="w-3.5 h-3.5 text-zinc-400" />
-                                      {t("details_btn")}
-                                    </button>
-                                    <a
-                                      href={p.share_link}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={() => setActiveDropdownId(null)}
-                                      className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-                                    >
-                                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                                      {t("store_btn")}
-                                    </a>
-                                  </div>
-                                </>
-                              )}
+                                {activeDropdownId === p.id && (
+                                  <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setActiveDropdownId(null)} />
+                                    <div className="absolute end-0 bottom-full mb-1.5 w-32 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden py-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          openProductDetail(p);
+                                          setActiveDropdownId(null);
+                                        }}
+                                        className="flex items-center gap-2 w-full px-3 py-2 text-start text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border-none outline-none bg-transparent cursor-pointer"
+                                      >
+                                        <Eye className="w-3.5 h-3.5 text-zinc-400" />
+                                        {t("details_btn")}
+                                      </button>
+                                      <a
+                                        href={p.share_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => setActiveDropdownId(null)}
+                                        className="flex items-center gap-2 w-full px-3 py-2 text-start text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                                        {t("store_btn")}
+                                      </a>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -769,7 +850,7 @@ export default function BrowsePage() {
 
       <ProductDetailModal
         isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
+        onClose={closeProductDetail}
         product={selectedProduct}
       />
 
@@ -781,5 +862,19 @@ export default function BrowsePage() {
         mode={activeTab === "products" ? "products" : activeTab === "brands" ? "brands" : "categories"}
       />
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-24 text-zinc-400">
+          <Loader2 className="w-6 h-6 animate-spin" />
+        </div>
+      }
+    >
+      <BrowsePageContent />
+    </Suspense>
   );
 }

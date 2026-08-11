@@ -26,6 +26,7 @@ import { cn, API_URL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { useToast } from "@/components/ui/use-toast";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 interface CatalogStats {
   live_products: number;
@@ -180,6 +181,7 @@ const QUICK_ACTION_NOTES = {
 export default function CatalogSeederPage() {
   const { toast } = useToast();
   const t = useTranslations("Catalog");
+  const tDash = useTranslations("Dashboard");
   const [stats, setStats] = useState<CatalogStats | null>(null);
   const [health, setHealth] = useState<{
     database_loaded?: boolean;
@@ -543,19 +545,15 @@ export default function CatalogSeederPage() {
   const isCrawlRunning = crawlStep?.status === "running";
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="w-full min-w-0 space-y-6 md:space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-4">
-              <Database className="w-3 h-3" />
-              SQLite Catalog
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+          <div className="min-w-0 flex-1">
+            <FeatureBadge icon={Database} label={tDash("badge_catalog")} />
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-start">
               {t("title")}
             </h1>
-            <p className="text-muted-foreground mt-2 max-w-xl">
+            <p className="text-muted-foreground mt-2 max-w-2xl text-start">
               {t("subtitle")}
             </p>
           </div>
@@ -567,9 +565,9 @@ export default function CatalogSeederPage() {
               fetchStats();
               fetchJobs();
             }}
-            className="border-border text-foreground hover:bg-muted"
+            className="shrink-0 border-border text-foreground hover:bg-muted self-start md:self-auto"
           >
-            <RefreshCw className={cn("w-4 h-4 mr-2", statsLoading && "animate-spin")} />
+            <RefreshCw className={cn("w-4 h-4 me-2", statsLoading && "animate-spin")} />
             {t("btn_refresh")}
           </Button>
         </div>
@@ -611,18 +609,18 @@ export default function CatalogSeederPage() {
         )}
 
         {/* Actions */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-3 p-5 md:p-6 rounded-2xl bg-card border border-border space-y-4 min-w-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Zap className="w-5 h-5 text-primary" />
               </div>
-              <div>
-                <h2 className="font-bold text-lg">{t("refresh_chefaa_title")}</h2>
-                <p className="text-xs text-zinc-500">{t("refresh_chefaa_sub")}</p>
+              <div className="min-w-0">
+                <h2 className="font-bold text-lg text-start">{t("refresh_chefaa_title")}</h2>
+                <p className="text-xs text-zinc-500 text-start break-words">{t("refresh_chefaa_sub")}</p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-start">
               {t("refresh_chefaa_desc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -632,13 +630,13 @@ export default function CatalogSeederPage() {
                 className="flex-1 bg-primary hover:bg-primary/90 font-bold"
               >
                 {isStarting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 me-2 animate-spin" />
                 ) : (
-                  <Play className="w-4 h-4 mr-2 rtl:rotate-180" />
+                  <Play className="w-4 h-4 me-2 rtl:rotate-180" />
                 )}
                 {t("btn_start_refresh")}
               </Button>
-              <div className="flex flex-1 gap-2">
+              <div className="flex flex-1 gap-2 min-w-0">
                 <input
                   type="number"
                   min={1}
@@ -646,35 +644,35 @@ export default function CatalogSeederPage() {
                   value={testProductLimit}
                   onChange={(e) => setTestProductLimit(e.target.value)}
                   disabled={isStarting}
-                  className="w-24 px-3 rounded-lg bg-background border border-input text-sm font-mono text-foreground focus:outline-none focus:border-primary"
+                  className="w-24 shrink-0 px-3 rounded-lg bg-background border border-input text-sm font-mono text-foreground focus:outline-none focus:border-primary"
                   aria-label="Test product limit"
                 />
                 <Button
                   variant="outline"
                   onClick={handleTestPipeline}
                   disabled={isStarting}
-                  className="flex-1 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 font-semibold"
+                  className="flex-1 min-w-0 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 font-semibold"
                 >
                   {t("btn_test_pipeline")}
                 </Button>
               </div>
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-500 text-start">
               {t("test_pipeline_note")}
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-card border border-border space-y-4 flex flex-col">
+          <div className="lg:col-span-2 p-5 md:p-6 rounded-2xl bg-card border border-border space-y-4 flex flex-col min-w-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-muted flex items-center justify-center">
                 <RotateCcw className="w-5 h-5 text-muted-foreground" />
               </div>
-              <div>
-                <h2 className="font-bold text-lg">{t("quick_actions")}</h2>
-                <p className="text-xs text-zinc-500">{t("quick_actions_sub")}</p>
+              <div className="min-w-0">
+                <h2 className="font-bold text-lg text-start">{t("quick_actions")}</h2>
+                <p className="text-xs text-zinc-500 text-start">{t("quick_actions_sub")}</p>
               </div>
             </div>
-            <div className="space-y-2 grid gap-2 h-full">
+            <div className="grid gap-2 flex-1">
               <Button
                 variant="outline"
                 onClick={() =>
@@ -684,9 +682,9 @@ export default function CatalogSeederPage() {
                   )
                 }
                 disabled={isStarting}
-                className="w-full !h-full border-border text-foreground justify-between gap-2"
+                className="w-full h-auto min-h-11 border-border text-foreground justify-start gap-2 px-3 py-2.5"
               >
-                <span className="truncate flex-1 text-left rtl:text-right">{t("btn_normalize_existing")}</span>
+                <span className="truncate flex-1 text-start">{t("btn_normalize_existing")}</span>
                 <ActionInfoTip text={t("note_renormalize")} />
                 <ArrowRight className="w-4 h-4 shrink-0 rtl:rotate-180" />
               </Button>
@@ -694,11 +692,11 @@ export default function CatalogSeederPage() {
                 variant="outline"
                 onClick={handleReloadIndex}
                 disabled={isReloading}
-                className="w-full !h-full border-border text-foreground justify-between gap-2"
+                className="w-full h-auto min-h-11 border-border text-foreground justify-start gap-2 px-3 py-2.5"
               >
                 <span className="flex items-center gap-2 min-w-0 flex-1">
                   {isReloading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
-                  <span className="truncate text-left rtl:text-right">{t("btn_reload_index")}</span>
+                  <span className="truncate text-start">{t("btn_reload_index")}</span>
                 </span>
                 {!isReloading && <ActionInfoTip text={t("note_reloadIndex")} />}
                 <ArrowRight className="w-4 h-4 shrink-0 rtl:rotate-180" />
@@ -736,9 +734,9 @@ export default function CatalogSeederPage() {
                       className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
                     >
                       {isCancelling ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <X className="w-4 h-4 mr-2" />
+<Loader2 className="w-4 h-4 me-2 animate-spin" />
+                        ) : (
+                        <X className="w-4 h-4 me-2" />
                       )}
                       {t("btn_cancel")}
                     </Button>
@@ -851,7 +849,7 @@ export default function CatalogSeederPage() {
                       {step === "promote" &&
                         activeJob.status === "awaiting_promotion" &&
                         promotePreview && (
-                          <div className="ml-9 mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+                          <div className="ms-9 mb-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
                             <p className="font-semibold text-amber-400 text-sm">
                               Confirm promote to live catalog
                             </p>
@@ -868,9 +866,9 @@ export default function CatalogSeederPage() {
                                 className="bg-amber-500 hover:bg-amber-500/90 text-zinc-950 font-bold"
                               >
                                 {isConfirmingPromote ? (
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  <Loader2 className="w-4 h-4 me-2 animate-spin" />
                                 ) : (
-                                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                                  <CheckCircle2 className="w-4 h-4 me-2" />
                                 )}
                                 Promote to Live
                               </Button>
@@ -919,7 +917,7 @@ export default function CatalogSeederPage() {
                     if (job.status === "running" || job.status === "awaiting_promotion") connectStream(job.job_id);
                   }}
                   className={cn(
-                    "w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all",
+                    "w-full flex items-center justify-between p-4 rounded-xl border text-start transition-all",
                     activeJobId === job.job_id
                       ? "border-primary/40 bg-primary/5"
                       : "border-border hover:border-primary/30 hover:bg-muted/50"
@@ -954,7 +952,6 @@ export default function CatalogSeederPage() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

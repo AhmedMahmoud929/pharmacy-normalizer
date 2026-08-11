@@ -13,6 +13,7 @@
     "clean": "node -e \"const fs=require('fs');['.next'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\""
   },
   "dependencies": {
+    "@iconify/react": "^6.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",

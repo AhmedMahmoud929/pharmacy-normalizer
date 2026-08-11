@@ -100,7 +100,7 @@ export default function Home() {
             >
               <Link
                 href="/dashboard/matcher"
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all active:scale-95"
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all active:scale-95"
               >
                 <Table className="w-5 h-5" />
                 {t("btn_start")}

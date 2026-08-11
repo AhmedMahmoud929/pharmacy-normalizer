@@ -43,6 +43,7 @@ from normalizer import normalize
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
 from tools.catalog_service import load_catalog_index
 from catalog_api import router as catalog_router, register_reload_callback
+from enrichment_api import router as enrichment_router, register_enrichment_deps
 from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
@@ -63,6 +64,8 @@ def reload_catalog_index():
 
 register_reload_callback(reload_catalog_index)
 app.include_router(catalog_router)
+register_enrichment_deps(lambda: index, reload_catalog_index)
+app.include_router(enrichment_router)
 
 from catalog_api import set_workspace_root
 set_workspace_root(workspace_root)
@@ -598,6 +601,21 @@ async def list_db_products(
         "offset": offset,
         "products": paged
     }
+
+
+@app.get("/db/products/{product_id}")
+async def get_db_product(product_id: str):
+    if index is None:
+        raise HTTPException(status_code=503, detail="Database not loaded")
+
+    for entry in index.entries:
+        p = entry.get("product") or {}
+        if str(p.get("id")) == str(product_id):
+            return enrich_product_image_status(p)
+
+    raise HTTPException(status_code=404, detail="Product not found")
+
+
 brand_slug_to_code = {}
 category_slug_to_code = {}
 

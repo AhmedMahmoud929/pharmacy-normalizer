@@ -7,8 +7,8 @@ export const metadata = {
 
 export default function MatcherPage() {
   return (
-    <main className="min-h-screen bg-background py-4">
+    <div className="w-full min-w-0">
       <MatcherDashboard />
-    </main>
+    </div>
   );
 }

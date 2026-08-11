@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from "react";
-import { Loader2, X, ChevronDown, Square, Download, Check, Clock, Plus } from "lucide-react";
+import { Loader2, X, ChevronDown, Square, Download, Check, Clock, Plus, Table } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,8 @@ import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
+import { useTranslations } from "next-intl";
+import { FeatureBadge } from "@/components/shared/FeatureBadge";
 
 // Sub-components
 import { UploadZone } from "./matcher/UploadZone";
@@ -63,6 +65,7 @@ interface ProgressState {
 
 export default function DrugMatcher() {
   const { toast } = useToast();
+  const tDash = useTranslations("Dashboard");
   // --- State ---
   const [file, setFile] = useState<File | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
@@ -888,10 +891,11 @@ export default function DrugMatcher() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8 p-6">
+    <div className="w-full min-w-0 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
+          <FeatureBadge icon={Table} label={tDash("badge_matcher_new")} />
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Drug <span className="text-primary">Matcher</span>
           </h1>
@@ -933,7 +937,7 @@ export default function DrugMatcher() {
               {isComplete && (
                 <button
                   onClick={() => setIsExportDialogOpen(true)}
-                  className="flex items-center gap-2 px-5 py-2 bg-primary text-white hover:bg-primary/90 rounded-full transition-all font-bold shadow-lg shadow-primary/20"
+                  className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-all font-bold shadow-lg shadow-primary/20"
                   title="Export Results"
                 >
                   <Download className="w-4 h-4" />
@@ -944,7 +948,7 @@ export default function DrugMatcher() {
               {(isComplete || activeJobId) && (
                 <button
                   onClick={reset}
-                  className="flex items-center gap-2 px-6 py-2 bg-primary text-white hover:bg-primary-dark rounded-full transition-all font-bold shadow-lg shadow-primary/20"
+                  className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground hover:bg-primary-dark rounded-full transition-all font-bold shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4" />
                   New Match

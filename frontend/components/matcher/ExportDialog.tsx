@@ -393,7 +393,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                         >
                           <div className="flex items-center justify-between">
                             <p className="font-bold text-sm">{typeOpt.label}</p>
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary text-white" : "border-zinc-300 dark:border-zinc-700"
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary text-primary-foreground" : "border-zinc-300 dark:border-zinc-700"
                               }`}>
                               {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
@@ -796,7 +796,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                             >
                               <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
-                                ? "bg-primary border-primary text-white"
+                                ? "bg-primary border-primary text-primary-foreground"
                                 : "border-zinc-300 dark:border-zinc-700"
                                 }`}>
                                 {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -825,7 +825,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               className="flex items-center gap-2 text-left hover:opacity-85 text-xs py-1"
                             >
                               <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isChecked
-                                ? "bg-primary border-primary text-white"
+                                ? "bg-primary border-primary text-primary-foreground"
                                 : "border-zinc-300 dark:border-zinc-700"
                                 }`}>
                                 {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -862,7 +862,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             {stage === 0 ? (
               <button
                 onClick={() => setStage(1)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
               >
                 Continue
                 <ChevronRight className="w-4 h-4" />
@@ -894,7 +894,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <button
                 disabled={!format}
                 onClick={() => setStage(2)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary disabled:opacity-50 text-primary-foreground text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all"
               >
                 Configure Scope
                 <ChevronRight className="w-4 h-4" />

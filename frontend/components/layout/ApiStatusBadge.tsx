@@ -2,7 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { API_URL } from "@/lib/utils";
+import { Icon } from "@iconify/react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { API_URL, cn } from "@/lib/utils";
 
 type ApiStatus = "loading" | "online" | "offline";
 
@@ -22,25 +29,57 @@ export const ApiStatusBadge: React.FC = () => {
     checkApi();
   }, []);
 
+  const label =
+    apiStatus === "online"
+      ? t("api_status_online")
+      : apiStatus === "loading"
+        ? t("api_status_connecting")
+        : t("api_status_offline");
+
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-sidebar-accent rounded-lg border border-sidebar-border">
-      <div
-        className={`w-2 h-2 rounded-full animate-pulse ${
-          apiStatus === "online"
-            ? "bg-success"
-            : apiStatus === "loading"
-              ? "bg-warning"
-              : "bg-error"
-        }`}
-      />
-      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-sans">
-        {apiStatus === "online"
-          ? t("api_status_online")
-          : apiStatus === "loading"
-            ? t("api_status_connecting")
-            : t("api_status_offline")}
-      </span>
-    </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label={`API ${label}`}
+          className="relative"
+        >
+          <Icon icon="solar:server-linear" className="size-4.5 shrink-0" />
+          <span
+            className={cn(
+              "absolute top-1.5 end-1.5 size-2 rounded-full",
+              apiStatus === "online"
+                ? "bg-success"
+                : apiStatus === "loading"
+                  ? "bg-warning"
+                  : "bg-error"
+            )}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        className="w-44 p-3 bg-popover border border-border rounded-2xl shadow-xl"
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "size-2 rounded-full animate-pulse",
+              apiStatus === "online"
+                ? "bg-success"
+                : apiStatus === "loading"
+                  ? "bg-warning"
+                  : "bg-error"
+            )}
+          />
+          <span className="text-12 font-semibold uppercase tracking-wider text-muted-foreground">
+            {label}
+          </span>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
-
