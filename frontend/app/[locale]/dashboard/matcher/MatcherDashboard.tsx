@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import {
   Clock, Plus, FileSpreadsheet, Download, Loader2,
   CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp, Trash2
@@ -31,6 +32,7 @@ interface MatchJob {
 
 export default function MatcherDashboard() {
   const [jobs, setJobs] = useState<MatchJob[]>([]);
+  const t = useTranslations("Matcher");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -135,10 +137,10 @@ export default function MatcherDashboard() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Drug Matcher <span className="text-primary">Campaigns</span>
+            {t("title")} <span className="text-primary">{t("highlight")}</span>
           </h1>
           <p className="mt-2 text-zinc-500 font-medium">
-            Manage pharmacy inventory mapping campaigns, view historical stats, and export sheets.
+            {t("subtitle")}
           </p>
         </div>
         <Link
@@ -146,34 +148,34 @@ export default function MatcherDashboard() {
           className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-full font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 text-sm"
         >
           <Plus className="w-4 h-4" />
-          New Match
+          {t("btn_new_match")}
         </Link>
       </div>
 
       {/* Summary KPI Cards */}
       <StatCardGrid className="gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Total Campaigns"
+          label={t("stat_total_campaigns")}
           value={stats.total}
           icon={FileSpreadsheet}
           iconClassName="text-primary"
         />
         <StatCard
-          label="Average Accuracy"
+          label={t("stat_avg_accuracy")}
           value={`${stats.avgAccuracy.toFixed(1)}%`}
           icon={TrendingUp}
           iconClassName="text-success"
           valueClassName="text-success"
         />
         <StatCard
-          label="Active Tasks"
+          label={t("stat_active_tasks")}
           value={stats.active}
           icon={Clock}
           iconClassName="text-sky-400"
           valueClassName="text-sky-400"
         />
         <StatCard
-          label="Total Rows Mapped"
+          label={t("stat_total_rows_mapped")}
           value={stats.totalRowsMapped}
           icon={CheckCircle}
           iconClassName="text-warning"
@@ -188,14 +190,14 @@ export default function MatcherDashboard() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search campaigns by filename or mapped column..."
+              placeholder={t("filter_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
             />
           </div>
           <p className="text-xs text-muted-foreground font-semibold">
-            Showing {filteredJobs.length} campaigns
+            {t("filter_showing", { count: filteredJobs.length })}
           </p>
         </div>
 
@@ -208,9 +210,9 @@ export default function MatcherDashboard() {
         ) : filteredJobs.length === 0 ? (
           <div className="text-center py-20 space-y-4">
             <FileSpreadsheet className="w-16 h-16 text-zinc-300 dark:text-zinc-700 mx-auto" />
-            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-250">No campaigns found</h3>
+            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-250">{t("empty_title")}</h3>
             <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-              Ready to map your first pharmacy sheet? Click "New Match" above to start the wizard.
+              {t("empty_desc")}
             </p>
           </div>
         ) : (
@@ -218,13 +220,13 @@ export default function MatcherDashboard() {
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className={tableHeaderClass}>
-                  <th className="p-4">Filename</th>
-                  <th className="p-4">Mapped Column</th>
-                  <th className="p-4">Total Rows</th>
-                  <th className="p-4">Matches / Rate</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Uploaded At</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="p-4">{t("table_filename")}</th>
+                  <th className="p-4">{t("table_mapped_column")}</th>
+                  <th className="p-4">{t("table_total_rows")}</th>
+                  <th className="p-4">{t("table_matches_rate")}</th>
+                  <th className="p-4">{t("table_status")}</th>
+                  <th className="p-4">{t("table_uploaded_at")}</th>
+                  <th className="p-4 text-right">{t("table_actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -319,9 +321,9 @@ export default function MatcherDashboard() {
                           <Link
                             href={`/dashboard/matcher/new?job_id=${job.job_id}`}
                             className="p-2 cursor-pointer rounded-lg bg-zinc-850 hover:bg-primary hover:text-white text-zinc-600 dark:text-zinc-300 transition-all"
-                            title="Inspect & Override Results"
+                            title={t("tip_inspect")}
                           >
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                           </Link>
 
                           {/* Export Compiled Excel */}
@@ -329,7 +331,7 @@ export default function MatcherDashboard() {
                             <button
                               onClick={() => handleExportClick(job.job_id)}
                               className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
-                              title="Export Catalog Spreadsheet"
+                              title={t("tip_export")}
                             >
                               <Download className="w-4 h-4" />
                             </button>
@@ -342,7 +344,7 @@ export default function MatcherDashboard() {
                               setIsDeleteOpen(true);
                             }}
                             className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-error hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
-                            title="Delete Campaign"
+                            title={t("tip_delete")}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

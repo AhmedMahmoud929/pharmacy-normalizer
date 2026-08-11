@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import {
   Database,
   RefreshCw,
@@ -178,6 +179,7 @@ const QUICK_ACTION_NOTES = {
 
 export default function CatalogSeederPage() {
   const { toast } = useToast();
+  const t = useTranslations("Catalog");
   const [stats, setStats] = useState<CatalogStats | null>(null);
   const [health, setHealth] = useState<{
     database_loaded?: boolean;
@@ -551,11 +553,10 @@ export default function CatalogSeederPage() {
               SQLite Catalog
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-              Catalog Seeder
+              {t("title")}
             </h1>
             <p className="text-muted-foreground mt-2 max-w-xl">
-              Populate and refresh the master product database from Chefaa's Meilisearch API —
-              normalize, seed mappings, and reload the matcher index. No web scraping.
+              {t("subtitle")}
             </p>
           </div>
           <Button
@@ -569,32 +570,32 @@ export default function CatalogSeederPage() {
             className="border-border text-foreground hover:bg-muted"
           >
             <RefreshCw className={cn("w-4 h-4 mr-2", statsLoading && "animate-spin")} />
-            Refresh
+            {t("btn_refresh")}
           </Button>
         </div>
 
         {/* Stats Grid */}
         <StatCardGrid>
           <StatCard
-            label="Live Products"
+            label={t("stat_live_products")}
             value={stats?.live_products ?? health?.live_products}
             icon={Package}
             iconClassName="text-primary"
           />
           <StatCard
-            label="Normalized"
+            label={t("stat_normalized")}
             value={stats?.normalized_products}
             icon={CheckCircle2}
             iconClassName="text-emerald-400"
           />
           <StatCard
-            label="With Barcodes"
+            label={t("stat_with_barcodes")}
             value={stats?.with_barcodes}
             icon={Barcode}
             iconClassName="text-sky-400"
           />
           <StatCard
-            label="Source"
+            label={t("stat_source")}
             value={stats?.source ?? health?.catalog_source}
             icon={Server}
             iconClassName="text-amber-400"
@@ -605,7 +606,7 @@ export default function CatalogSeederPage() {
         {stats?.last_promoted_at && (
           <p className="text-xs text-zinc-500 flex items-center gap-2">
             <Clock className="w-3 h-3" />
-            Last promoted: {formatDate(stats.last_promoted_at)}
+            {t("last_promoted", { date: formatDate(stats.last_promoted_at) })}
           </p>
         )}
 
@@ -617,13 +618,12 @@ export default function CatalogSeederPage() {
                 <Zap className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-bold text-lg">Full Refresh from Chefaa</h2>
-                <p className="text-xs text-zinc-500">Meilisearch API → Import → Normalize → Seed → Promote → Reload</p>
+                <h2 className="font-bold text-lg">{t("refresh_chefaa_title")}</h2>
+                <p className="text-xs text-zinc-500">{t("refresh_chefaa_sub")}</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Fetches the full Egyptian catalog via Chefaa&apos;s Meilisearch API (~30K products in minutes),
-              normalizes all product names, seeds brand mappings, and activates the new catalog.
+              {t("refresh_chefaa_desc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
@@ -634,9 +634,9 @@ export default function CatalogSeederPage() {
                 {isStarting ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="w-4 h-4 mr-2 rtl:rotate-180" />
                 )}
-                Start Full Refresh
+                {t("btn_start_refresh")}
               </Button>
               <div className="flex flex-1 gap-2">
                 <input
@@ -655,12 +655,12 @@ export default function CatalogSeederPage() {
                   disabled={isStarting}
                   className="flex-1 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 font-semibold"
                 >
-                  Test Pipeline
+                  {t("btn_test_pipeline")}
                 </Button>
               </div>
             </div>
             <p className="text-xs text-zinc-500">
-              Test Pipeline runs the same steps but fetches only the specified number of products from Meilisearch.
+              {t("test_pipeline_note")}
             </p>
           </div>
 
@@ -670,8 +670,8 @@ export default function CatalogSeederPage() {
                 <RotateCcw className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="font-bold text-lg">Quick Actions</h2>
-                <p className="text-xs text-zinc-500">Without re-crawling Chefaa</p>
+                <h2 className="font-bold text-lg">{t("quick_actions")}</h2>
+                <p className="text-xs text-zinc-500">{t("quick_actions_sub")}</p>
               </div>
             </div>
             <div className="space-y-2 grid gap-2 h-full">
@@ -686,9 +686,9 @@ export default function CatalogSeederPage() {
                 disabled={isStarting}
                 className="w-full !h-full border-border text-foreground justify-between gap-2"
               >
-                <span className="truncate flex-1 text-left">Re-normalize Existing Catalog</span>
-                <ActionInfoTip text={QUICK_ACTION_NOTES.renormalize} />
-                <ArrowRight className="w-4 h-4 shrink-0" />
+                <span className="truncate flex-1 text-left rtl:text-right">{t("btn_normalize_existing")}</span>
+                <ActionInfoTip text={t("note_renormalize")} />
+                <ArrowRight className="w-4 h-4 shrink-0 rtl:rotate-180" />
               </Button>
               <Button
                 variant="outline"
@@ -698,10 +698,10 @@ export default function CatalogSeederPage() {
               >
                 <span className="flex items-center gap-2 min-w-0 flex-1">
                   {isReloading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
-                  <span className="truncate text-left">Reload Matcher Index</span>
+                  <span className="truncate text-left rtl:text-right">{t("btn_reload_index")}</span>
                 </span>
-                {!isReloading && <ActionInfoTip text={QUICK_ACTION_NOTES.reloadIndex} />}
-                <ArrowRight className="w-4 h-4 shrink-0" />
+                {!isReloading && <ActionInfoTip text={t("note_reloadIndex")} />}
+                <ArrowRight className="w-4 h-4 shrink-0 rtl:rotate-180" />
               </Button>
             </div>
           </div>
@@ -722,7 +722,7 @@ export default function CatalogSeederPage() {
                     {activeJob.status === "running" && (
                       <Loader2 className="w-4 h-4 text-primary animate-spin" />
                     )}
-                    Pipeline Progress
+                    {t("pipeline_progress")}
                   </h2>
                   <p className="text-xs text-zinc-500 font-mono mt-1">{activeJob.job_id}</p>
                 </div>
@@ -740,7 +740,7 @@ export default function CatalogSeederPage() {
                       ) : (
                         <X className="w-4 h-4 mr-2" />
                       )}
-                      Cancel
+                      {t("btn_cancel")}
                     </Button>
                   )}
                   <span
@@ -754,7 +754,7 @@ export default function CatalogSeederPage() {
                       activeJob.status === "pending" && "bg-muted text-muted-foreground"
                     )}
                   >
-                    {activeJob.status === "awaiting_promotion" ? "awaiting confirm" : activeJob.status}
+                    {activeJob.status === "awaiting_promotion" ? t("waiting_confirm") : activeJob.status}
                   </span>
                 </div>
               </div>
@@ -829,7 +829,7 @@ export default function CatalogSeederPage() {
                                 status === "pending" && "text-zinc-500"
                               )}
                             >
-                              {STEP_LABELS[step] || step}
+                              {t("step_" + step, { defaultValue: STEP_LABELS[step] ?? step })}
                             </p>
                             {step === "crawl" && stepData?.products_found != null ? (
                               <span className="text-xs font-mono text-zinc-500">
@@ -932,7 +932,7 @@ export default function CatalogSeederPage() {
                   <div className="flex items-center gap-3">
                     {job.current_step && (
                       <span className="text-xs text-zinc-500 hidden sm:block">
-                        {STEP_LABELS[job.current_step] || job.current_step}
+                        {t("step_" + job.current_step, { defaultValue: STEP_LABELS[job.current_step] ?? job.current_step })}
                       </span>
                     )}
                     <span

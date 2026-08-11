@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, 
@@ -18,7 +20,6 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
-import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { API_URL } from "@/lib/utils";
@@ -34,16 +35,6 @@ interface MatchStep {
   description: string;
   icon: React.ElementType;
   details: string[];
-}
-
-interface ScoringBreakdown {
-  jaccard: number;
-  sequence: number;
-  final: number;
-  matched_tokens: string[];
-  unmatched_query: string[];
-  unmatched_db: string[];
-  db_normalized: string;
 }
 
 // --- Components ---
@@ -86,6 +77,7 @@ const StepCard = ({ step, index }: { step: MatchStep; index: number }) => {
 };
 
 export default function HowItWorks() {
+  const t = useTranslations("HowItWorks");
   const [query, setQuery] = useState("Panadol 500mg Extra");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -93,34 +85,34 @@ export default function HowItWorks() {
 
   const steps: MatchStep[] = [
     {
-      title: "Text Normalization",
-      description: "We clean and standardize the raw product name. This involves converting Arabic to English, handling special characters, and normalizing units (e.g., '500 mg' vs '500mg').",
+      title: t("step_1_title"),
+      description: t("step_1_desc"),
       icon: TextQuote,
-      details: ["Arabic Mapping", "Unit Standardization", "Typo Correction"]
+      details: [t("step_1_detail_1"), t("step_1_detail_2"), t("step_1_detail_3")]
     },
     {
-      title: "Tokenization & Filtering",
-      description: "The string is broken into meaningful tokens. We identify high-weight tokens like brands and doses, while filtering out low-information words like 'plus' or 'film coated'.",
+      title: t("step_2_title"),
+      description: t("step_2_desc"),
       icon: Binary,
-      details: ["Weight Assignment", "Stopword Removal", "Token Reordering"]
+      details: [t("step_2_detail_1"), t("step_2_detail_2"), t("step_2_detail_3")]
     },
     {
-      title: "Inverted Index Candidate Lookup",
-      description: "Instead of comparing with the whole database, we use an inverted index to instantly find products sharing at least one token with your query.",
+      title: t("step_3_title"),
+      description: t("step_3_desc"),
       icon: Database,
-      details: ["Fast Lookup", "Candidate Ranking", "Performance Optimization"]
+      details: [t("step_3_detail_1"), t("step_3_detail_2"), t("step_3_detail_3")]
     },
     {
-      title: "Scoring Engine (Turbo v8)",
-      description: "Candidates are scored using a dual-algorithm approach: Weighted Jaccard for token overlap (70%) and Sequence Matcher for literal string similarity (30%).",
+      title: t("step_4_title"),
+      description: t("step_4_desc"),
       icon: Cpu,
-      details: ["Weighted Jaccard", "Sequence Similarity", "Dose Validation"]
+      details: [t("step_4_detail_1"), t("step_4_detail_2"), t("step_4_detail_3")]
     },
     {
-      title: "Validation & Confidence Selection",
-      description: "The engine applies final penalties or bonuses based on dose matches and brand exactness, selecting the highest confidence match for your data.",
+      title: t("step_5_title"),
+      description: t("step_5_desc"),
       icon: CheckCircle2,
-      details: ["Confidence Thresholds", "Final Selection", "Metadata Enrichment"]
+      details: [t("step_5_detail_1"), t("step_5_detail_2"), t("step_5_detail_3")]
     }
   ];
 
@@ -161,16 +153,16 @@ export default function HowItWorks() {
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider"
           >
             <Zap className="w-3 h-3" />
-            Inside Turbo v8
+            {t("badge")}
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50"
+            className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight"
           >
-            How PharmMatcher <span className="text-primary text-glow">Works</span>
+            {t("title_main")} <span className="text-primary text-glow">{t("title_highlight")}</span>
           </motion.h1>
 
           <motion.p
@@ -179,7 +171,7 @@ export default function HowItWorks() {
             transition={{ delay: 0.2 }}
             className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed"
           >
-            Go behind the scenes of our high-performance matching engine. Learn how we transform inconsistent pharmacy data into perfectly mapped records with 99%+ accuracy.
+            {t("subtitle")}
           </motion.p>
         </div>
       </section>
@@ -190,10 +182,10 @@ export default function HowItWorks() {
           <div className="mb-16">
             <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-3">
               <Layers className="w-8 h-8 text-primary" />
-              The Matching Pipeline
+              {t("pipeline_title")}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400">
-              A 5-step technical walkthrough of the data transformation process.
+              {t("pipeline_subtitle")}
             </p>
           </div>
 
@@ -209,8 +201,8 @@ export default function HowItWorks() {
       <section className="py-24 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Interactive Scoring Demo</h2>
-            <p className="text-zinc-500 dark:text-zinc-400">Test any query to see the real-time scoring breakdown and token mapping.</p>
+            <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{t("demo_title")}</h2>
+            <p className="text-zinc-500 dark:text-zinc-400">{t("demo_subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
@@ -218,23 +210,23 @@ export default function HowItWorks() {
             <div className="space-y-8 bg-zinc-50 dark:bg-zinc-900 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/50">
               <div className="space-y-4">
                 <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest px-1">
-                  Input Product Name
+                  {t("demo_input_label")}
                 </label>
-                <div className="relative group">
+                <div className="relative group flex items-center">
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleDemo()}
-                    placeholder="e.g. Panadol 500mg Extra"
-                    className="w-full h-16 pl-6 pr-16 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-lg font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                    placeholder={t("demo_placeholder")}
+                    className="w-full h-16 pl-6 pr-16 rtl:pl-16 rtl:pr-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-lg font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
                   />
                   <button 
                     onClick={handleDemo}
                     disabled={loading}
-                    className="absolute right-3 top-3 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:bg-primary-dark active:scale-95 transition-all disabled:opacity-50"
+                    className="absolute right-3 rtl:right-auto rtl:left-3 top-3 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:bg-primary-dark active:scale-95 transition-all disabled:opacity-50"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5 animate-spin" />}
                   </button>
                 </div>
               </div>
@@ -242,15 +234,15 @@ export default function HowItWorks() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button 
                   onClick={() => { setQuery("بانادول ٥٠٠ مجم"); handleDemo(); }}
-                  className="px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-primary/50 transition-colors text-left"
+                  className="px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-primary/50 transition-colors text-left rtl:text-right"
                 >
-                  Try Arabic: بانادول ٥٠٠ مجم
+                  {t("demo_try_ar")}
                 </button>
                 <button 
                   onClick={() => { setQuery("Augmentin 1gm tab"); handleDemo(); }}
-                  className="px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-primary/50 transition-colors text-left"
+                  className="px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-primary/50 transition-colors text-left rtl:text-right"
                 >
-                  Try Common: Augmentin 1gm tab
+                  {t("demo_try_en")}
                 </button>
               </div>
 
@@ -278,9 +270,9 @@ export default function HowItWorks() {
                       <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-white/10 rounded-full blur-3xl pointer-events-none" />
                       
                       <div className="flex items-center justify-between mb-6 relative z-10">
-                        <span className="text-xs font-bold uppercase tracking-widest opacity-80">Highest Confidence Match</span>
+                        <span className="text-xs font-bold uppercase tracking-widest opacity-80">{t("demo_confidence")}</span>
                         <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-tighter">
-                          {result.results?.[0]?.status === 'matched' ? 'Verified Match' : 'Manual Review'}
+                          {result.results?.[0]?.status === 'matched' ? t("demo_verified") : t("demo_manual")}
                         </div>
                       </div>
 
@@ -290,17 +282,17 @@ export default function HowItWorks() {
                         </h4>
                         <p className="text-white/70 font-medium text-sm flex items-center gap-2">
                           <Database className="w-4 h-4" />
-                          DB Normalized: {result.results?.[0]?.db_normalized || "N/A"}
+                          {t("demo_db_normalized")} {result.results?.[0]?.db_normalized || "N/A"}
                         </p>
                       </div>
 
                       <div className="mt-8 pt-8 border-t border-white/20 flex items-center gap-12 relative z-10">
                         <div className="space-y-1">
-                          <span className="block text-xs font-bold uppercase tracking-widest opacity-70">Final Score</span>
+                          <span className="block text-xs font-bold uppercase tracking-widest opacity-70">{t("demo_score")}</span>
                           <span className="text-4xl font-black">{Math.round((result.results?.[0]?.score || 0) * 100)}%</span>
                         </div>
                         <div className="space-y-1">
-                          <span className="block text-xs font-bold uppercase tracking-widest opacity-70">Candidates</span>
+                          <span className="block text-xs font-bold uppercase tracking-widest opacity-70">{t("demo_candidates")}</span>
                           <span className="text-4xl font-black">{result.results?.[0]?.candidate_count || 0}</span>
                         </div>
                       </div>
@@ -310,14 +302,14 @@ export default function HowItWorks() {
                     <div className="p-8 bg-zinc-50 dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 space-y-8 shadow-sm">
                       <div className="flex items-center gap-3 mb-2">
                         <BarChart3 className="w-5 h-5 text-primary" />
-                        <h5 className="font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest text-xs">Scoring Breakdown</h5>
+                        <h5 className="font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest text-xs">{t("breakdown_title")}</h5>
                       </div>
 
                       <div className="space-y-6">
                         {/* Jaccard */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-end">
-                            <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">Weighted Jaccard (70%)</span>
+                            <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">{t("breakdown_jaccard")}</span>
                             <span className="text-sm font-black text-zinc-900 dark:text-zinc-50">{Math.round((result.results?.[0]?.jaccard || 0) * 100)}%</span>
                           </div>
                           <div className="h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -327,13 +319,13 @@ export default function HowItWorks() {
                               className="h-full bg-primary"
                             />
                           </div>
-                          <p className="text-[10px] text-zinc-400 font-medium">Measures token overlap and keyword importance.</p>
+                          <p className="text-[10px] text-zinc-400 font-medium">{t("breakdown_jaccard_desc")}</p>
                         </div>
 
                         {/* Sequence */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-end">
-                            <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">Sequence Matcher (30%)</span>
+                            <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">{t("breakdown_sequence")}</span>
                             <span className="text-sm font-black text-zinc-900 dark:text-zinc-50">{Math.round((result.results?.[0]?.sequence || 0) * 100)}%</span>
                           </div>
                           <div className="h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -343,43 +335,43 @@ export default function HowItWorks() {
                               className="h-full bg-blue-500"
                             />
                           </div>
-                          <p className="text-[10px] text-zinc-400 font-medium">Measures character sequence similarity and typos.</p>
+                          <p className="text-[10px] text-zinc-400 font-medium">{t("breakdown_sequence_desc")}</p>
                         </div>
                       </div>
 
                       {/* Tokens */}
                       <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Matched Tokens</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("breakdown_matched")}</span>
                           <div className="flex flex-wrap gap-2">
                             {result.results?.[0]?.matched_tokens?.map((t: string, i: number) => (
                               <span key={i} className="px-2 py-1 bg-success/10 text-success text-[11px] font-bold rounded-md border border-success/20 uppercase tracking-wider">
                                 {t}
                               </span>
-                            )) || <span className="text-zinc-500 text-xs italic">None</span>}
+                            )) || <span className="text-zinc-500 text-xs italic">{t("breakdown_none")}</span>}
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Unmatched (Query)</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("breakdown_unmatched")}</span>
                           <div className="flex flex-wrap gap-2">
                             {result.results?.[0]?.unmatched_query_tokens?.map((t: string, i: number) => (
                               <span key={i} className="px-2 py-1 bg-error/10 text-error text-[11px] font-bold rounded-md border border-error/20 uppercase tracking-wider">
                                 {t}
                               </span>
-                            )) || <span className="text-zinc-500 text-xs italic">None</span>}
+                            )) || <span className="text-zinc-500 text-xs italic">{t("breakdown_none")}</span>}
                           </div>
                         </div>
                       </div>
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center p-8 bg-zinc-50/50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl">
+                  <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center p-8 bg-zinc-50/50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl animate-pulse">
                     <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 mb-4">
                       <Sparkles className="w-8 h-8" />
                     </div>
-                    <h5 className="text-lg font-bold text-zinc-400">Ready to Match</h5>
-                    <p className="text-sm text-zinc-500 max-w-[240px]">Type a product name on the left to see the AI analysis in action.</p>
+                    <h5 className="text-lg font-bold text-zinc-400">{t("ready_title")}</h5>
+                    <p className="text-sm text-zinc-500 max-w-[240px]">{t("ready_desc")}</p>
                   </div>
                 )}
               </AnimatePresence>
@@ -393,17 +385,17 @@ export default function HowItWorks() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-24 items-center">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h2 className="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">The "Black Box" Problem</h2>
+              <h2 className="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">{t("blackbox_title")}</h2>
               <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Most AI systems are opaque. When they fail, you don't know why. PharmMatcher's "Turbo v8" engine is designed for **transparency**.
+                {t("blackbox_desc")}
               </p>
             </div>
 
             <div className="space-y-6">
               {[
-                { title: "Deterministic Logic", desc: "No random hallucinations. The scoring is based on fixed mathematical models." },
-                { title: "Empowerment", desc: "By seeing why a match failed, you can improve your source data or add missing variants." },
-                { title: "Auditability", desc: "Every decision can be traced back to specific tokens and similarity metrics." }
+                { title: t("blackbox_item1_title"), desc: t("blackbox_item1_desc") },
+                { title: t("blackbox_item2_title"), desc: t("blackbox_item2_desc") },
+                { title: t("blackbox_item3_title"), desc: t("blackbox_item3_desc") }
               ].map((item, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 mt-1">
@@ -426,24 +418,24 @@ export default function HowItWorks() {
                     <Info className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-zinc-900 dark:text-zinc-50">Did you know?</h4>
-                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">System Stat</p>
+                    <h4 className="font-bold text-zinc-900 dark:text-zinc-50">{t("didyouknow_title")}</h4>
+                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">{t("didyouknow_subtitle")}</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   <div className="text-center p-6 bg-zinc-50 dark:bg-zinc-950 rounded-2xl">
                     <span className="text-5xl font-black text-primary">v9.0</span>
-                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">Current Engine Version</p>
+                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">{t("didyouknow_stat")}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl">
                       <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">70%</span>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Jaccard Weight</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("didyouknow_jaccard")}</p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl">
                       <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">30%</span>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Seq. Weight</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("didyouknow_seq")}</p>
                     </div>
                   </div>
                 </div>
@@ -455,22 +447,22 @@ export default function HowItWorks() {
       {/* CTA Section */}
       <section className="py-24 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
-          <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">Ready to see it in action?</h2>
+          <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">{t("cta_title")}</h2>
           <p className="text-zinc-500 dark:text-zinc-400">
-            Start matching your pharmacy catalog with the full power of Turbo v8.
+            {t("cta_subtitle")}
           </p>
           <div className="flex justify-center gap-4">
             <Link 
               href="/dashboard/matcher"
               className="px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all shadow-lg shadow-primary/20"
             >
-              Go to Matcher
+              {t("cta_btn_matcher")}
             </Link>
             <Link 
               href="/dashboard/search"
               className="px-8 py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all"
             >
-              Test Smart Search
+              {t("cta_btn_search")}
             </Link>
           </div>
         </div>

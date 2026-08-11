@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Database, Search, ChevronLeft, ChevronRight, Loader2, Package, Tag, Layers, ExternalLink, Filter, Eye, Download, LayoutGrid, List, MoreHorizontal, Folder } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
@@ -47,6 +48,7 @@ interface Product {
 const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
   const [expandedL1, setExpandedL1] = useState<Record<string, boolean>>({});
   const [expandedL2, setExpandedL2] = useState<Record<string, boolean>>({});
+  const t = useTranslations("Browse");
 
   const toggleL1 = (slug: string) => {
     setExpandedL1(prev => ({ ...prev, [slug]: !prev[slug] }));
@@ -59,7 +61,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
   if (!taxonomy || taxonomy.length === 0) {
     return (
       <div className="p-12 text-center text-zinc-500">
-        No taxonomy categories discovered in database.
+        {t("taxonomy_empty")}
       </div>
     );
   }
@@ -90,23 +92,23 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                 <div>
                   <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-sm sm:text-base flex items-center gap-2">
                     {l1.name}
-                    <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 uppercase tracking-widest text-[8px]">Level 1</span>
+                    <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 uppercase tracking-widest text-[8px]">{t("level_prefix")} 1</span>
                   </h3>
-                  <p className="text-xs text-zinc-400 font-medium mt-0.5">{l1.count} products direct & nested</p>
+                  <p className="text-xs text-zinc-400 font-medium mt-0.5">{t("items_count", { count: l1.count ?? 0 })}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
                 {hasL2 && l1.children && (
                   <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold bg-zinc-100 dark:bg-zinc-800/50 px-3 py-1 rounded-xl">
-                    {l1.children.length} subcategories
+                    {t("subcategories_count", { count: l1.children.length })}
                   </span>
                 )}
                 <motion.div
                   animate={{ rotate: isL1Expanded ? 90 : 0 }}
                   className="p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </motion.div>
               </div>
             </button>
@@ -121,7 +123,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                   transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="overflow-hidden bg-zinc-50/40 dark:bg-black/10"
                 >
-                  <div className="px-6 py-4 space-y-3 pl-12 sm:pl-16 border-b border-zinc-100 dark:border-zinc-800/50">
+                  <div className="px-6 py-4 space-y-3 pl-12 sm:pl-16 rtl:pl-6 rtl:pr-12 sm:rtl:pr-16 border-b border-zinc-100 dark:border-zinc-800/50">
                     {l1.children?.map((l2: any) => {
                       const isL2Expanded = !!expandedL2[l2.slug];
                       const hasL3 = l2.children && l2.children.length > 0;
@@ -146,23 +148,23 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                               <div>
                                 <h4 className="font-bold text-zinc-850 dark:text-zinc-200 text-xs sm:text-sm flex items-center gap-1.5">
                                   {l2.name}
-                                  <span className="text-[8px] font-extrabold px-1.5 py-0.2 bg-zinc-150 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Level 2</span>
+                                  <span className="text-[8px] font-extrabold px-1.5 py-0.2 bg-zinc-150 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">{t("level_prefix")} 2</span>
                                 </h4>
-                                <p className="text-[10px] text-zinc-400 font-medium mt-0.5">{l2.count} products</p>
+                                <p className="text-[10px] text-zinc-400 font-medium mt-0.5">{t("items_count", { count: l2.count ?? 0 })}</p>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-2">
                               {hasL3 && (
                                 <span className="text-[9px] text-zinc-400 dark:text-zinc-550 font-bold bg-zinc-100 dark:bg-zinc-800/50 px-2.5 py-0.5 rounded-lg">
-                                  {l2.children.length} leaves
+                                  {t("leaves_count", { count: l2.children.length })}
                                 </span>
                               )}
                               <motion.div
                                 animate={{ rotate: isL2Expanded ? 90 : 0 }}
                                 className="p-1 rounded-full bg-zinc-50 dark:bg-zinc-800/40 text-zinc-400"
                               >
-                                <ChevronRight className="w-3.5 h-3.5" />
+                                <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                               </motion.div>
                             </div>
                           </button>
@@ -177,7 +179,7 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                                 transition={{ duration: 0.2, ease: "easeInOut" }}
                                 className="overflow-hidden bg-zinc-50/20 dark:bg-black/5"
                               >
-                                <div className="p-4 pl-8 sm:pl-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="p-4 pl-8 sm:pl-10 rtl:pl-4 rtl:pr-8 sm:rtl:pr-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   {l2.children.map((l3: any) => (
                                     <div
                                       key={l3.slug}
@@ -190,13 +192,13 @@ const TaxonomyTreeView = ({ taxonomy }: { taxonomy: Category[] }) => {
                                         <div className="min-w-0">
                                           <p className="font-bold text-zinc-700 dark:text-zinc-300 text-xs truncate flex items-center gap-1.5">
                                             {l3.name}
-                                            <span className="text-[7px] font-extrabold px-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Level 3</span>
+                                            <span className="text-[7px] font-extrabold px-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">{t("level_prefix")} 3</span>
                                           </p>
                                         </div>
                                       </div>
                                       
                                       <span className="text-[9px] font-bold text-zinc-400 bg-zinc-50 dark:bg-zinc-950 px-2 py-0.5 rounded border border-zinc-100/50 dark:border-zinc-850 flex-shrink-0">
-                                        {l3.count} items
+                                        {t("items_count", { count: l3.count ?? 0 })}
                                       </span>
                                     </div>
                                   ))}
@@ -230,6 +232,7 @@ export default function BrowsePage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("Browse");
 
   // Detail & Export Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -291,9 +294,9 @@ export default function BrowsePage() {
   };
 
   const tabs = [
-    { id: "products", label: "Products", icon: Package },
-    { id: "brands", label: "Brands", icon: Tag },
-    { id: "categories", label: "Categories", icon: Layers },
+    { id: "products", label: t("tab_products"), icon: Package },
+    { id: "brands", label: t("tab_brands"), icon: Tag },
+    { id: "categories", label: t("tab_categories"), icon: Layers },
   ];
 
   return (
@@ -302,10 +305,13 @@ export default function BrowsePage() {
         <div className="space-y-4">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Database <span className="text-primary">Browser</span>
+              {t("title")} <span className="text-primary">{t("highlight")}</span>
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400">
-              Exploring {total?.toLocaleString() ?? 0} {activeTab} in the master reference catalog.
+              {t("subtitle", {
+                count: total?.toLocaleString() ?? 0,
+                tab: activeTab === "products" ? t("tab_products") : activeTab === "brands" ? t("tab_brands") : t("tab_categories")
+              })}
             </p>
           </div>
 
@@ -341,7 +347,7 @@ export default function BrowsePage() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search products, brands, SKUs..."
+                  placeholder={t("placeholder")}
                   className="w-full pl-11 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
                 />
               </form>
@@ -356,7 +362,7 @@ export default function BrowsePage() {
                       ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                   )}
-                  title="List View"
+                  title={t("list_view")}
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -369,7 +375,7 @@ export default function BrowsePage() {
                       ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                   )}
-                  title="Grid View"
+                  title={t("grid_view")}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -382,7 +388,7 @@ export default function BrowsePage() {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all cursor-pointer whitespace-nowrap"
           >
             <Download className="w-4 h-4" />
-            {activeTab === "products" ? "Export Catalog" : activeTab === "brands" ? "Export Brands" : "Export Categories"}
+            {activeTab === "products" ? t("export_products") : activeTab === "brands" ? t("export_brands") : t("export_categories")}
           </button>
         </div>
       </div>
@@ -423,11 +429,9 @@ export default function BrowsePage() {
                       <Search className="w-8 h-8 opacity-60" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">No products found</h3>
+                      <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{t("empty_title")}</h3>
                       <p className="text-sm text-zinc-500 max-w-sm">
-                        {search 
-                          ? `We couldn't find any products matching "${search}". Try checking for spelling errors or using more general terms.` 
-                          : "There are no products available in the database catalog."}
+                        {t("empty_desc")}
                       </p>
                     </div>
                     {search && (
@@ -438,7 +442,7 @@ export default function BrowsePage() {
                         }}
                         className="px-5 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-350 text-xs font-bold rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all cursor-pointer border-none outline-none"
                       >
-                        Clear Search
+                        {t("clear_search")}
                       </button>
                     )}
                   </motion.div>
@@ -452,11 +456,11 @@ export default function BrowsePage() {
                   >
                     <thead>
                       <tr className="bg-zinc-50 dark:bg-black/50 border-b border-zinc-200 dark:border-zinc-800">
-                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Product Info</th>
-                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Categorization</th>
-                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 whitespace-nowrap">Image Status</th>
-                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Inventory</th>
-                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">Links</th>
+                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t("th_info")}</th>
+                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t("th_categorization")}</th>
+                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 whitespace-nowrap">{t("th_image_status")}</th>
+                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t("th_inventory")}</th>
+                        <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">{t("th_links")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -483,13 +487,13 @@ export default function BrowsePage() {
                               <div className="flex items-center gap-2 px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md w-fit border border-zinc-200/50 dark:border-zinc-700/50">
                                 <Tag className="w-3 h-3 text-zinc-400" />
                                 <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-600 dark:text-zinc-300">
-                                  {p.brand?.name || "No Brand"}
+                                  {p.brand?.name || t("no_brand")}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md w-fit border border-zinc-200/50 dark:border-zinc-700/50">
                                 <Layers className="w-3 h-3 text-zinc-400" />
                                 <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-600 dark:text-zinc-300">
-                                  {p.category?.name || "Uncategorized"}
+                                  {p.category?.name || t("uncategorized")}
                                 </span>
                               </div>
                             </div>
@@ -501,7 +505,7 @@ export default function BrowsePage() {
                                 ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400"
                                 : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400"
                             )}>
-                              {p.is_local_image ? "Local Image" : "CDN Image"}
+                              {p.is_local_image ? t("image_local") : t("image_cdn")}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -509,7 +513,7 @@ export default function BrowsePage() {
                               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{p.price} EGP</p>
                               <div className={`text-[10px] font-bold uppercase flex items-center gap-1 ${p.in_stock ? 'text-success' : 'text-error'}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${p.in_stock ? 'bg-success' : 'bg-error'}`} />
-                                {p.in_stock ? `${p.stock} in stock` : 'Out of stock'}
+                                {p.in_stock ? `${p.stock} ${t("in_stock")}` : t("out_of_stock")}
                               </div>
                             </div>
                           </td>
@@ -523,7 +527,7 @@ export default function BrowsePage() {
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-primary transition-colors cursor-pointer font-sans border-none bg-transparent outline-none"
                               >
                                 <Eye className="w-3.5 h-3.5" />
-                                View Details
+                                {t("view_details")}
                               </button>
                               <a
                                 href={p.share_link}
@@ -531,8 +535,8 @@ export default function BrowsePage() {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-primary transition-colors group/link"
                               >
-                                View Store
-                                <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                                {t("view_store")}
+                                <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform rtl:-scale-x-100" />
                               </a>
                             </div>
                           </td>
@@ -580,11 +584,11 @@ export default function BrowsePage() {
                             {/* Categorization Pills & Inventory status combined */}
                             <div className="flex items-center justify-between gap-1.5">
                               <div className="flex items-center gap-1 overflow-hidden">
-                                <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded uppercase tracking-tight truncate max-w-[60px]" title={p.brand?.name || "No Brand"}>
-                                  {p.brand?.name || "No Brand"}
+                                <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded uppercase tracking-tight truncate max-w-[60px]" title={p.brand?.name || t("no_brand")}>
+                                  {p.brand?.name || t("no_brand")}
                                 </span>
-                                <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded uppercase tracking-tight truncate max-w-[60px]" title={p.category?.name || "Uncategorized"}>
-                                  {p.category?.name || "Uncategorized"}
+                                <span className="text-[8px] font-extrabold px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded uppercase tracking-tight truncate max-w-[60px]" title={p.category?.name || t("uncategorized")}>
+                                  {p.category?.name || t("uncategorized")}
                                 </span>
                               </div>
                               <span className={cn(
@@ -593,7 +597,7 @@ export default function BrowsePage() {
                                   ? "bg-emerald-500/10 text-success border border-emerald-500/20"
                                   : "bg-red-500/10 text-error border border-red-500/20"
                               )}>
-                                {p.in_stock ? "In Stock" : "Out of Stock"}
+                                {p.in_stock ? t("in_stock") : t("out_of_stock")}
                               </span>
                             </div>
 
@@ -623,10 +627,10 @@ export default function BrowsePage() {
                               <button
                                 type="button"
                                 onClick={() => setActiveDropdownId(activeDropdownId === p.id ? null : p.id)}
-                                className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none outline-none"
+                                className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-350 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none outline-none"
                               >
                                 <MoreHorizontal className="w-3.5 h-3.5" />
-                                Actions
+                                {t("actions_dropdown")}
                               </button>
 
                               {activeDropdownId === p.id && (
@@ -643,7 +647,7 @@ export default function BrowsePage() {
                                       className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border-none outline-none bg-transparent cursor-pointer"
                                     >
                                       <Eye className="w-3.5 h-3.5 text-zinc-400" />
-                                      Details
+                                      {t("details_btn")}
                                     </button>
                                     <a
                                       href={p.share_link}
@@ -653,7 +657,7 @@ export default function BrowsePage() {
                                       className="flex items-center gap-2 w-full px-3 py-2 text-left text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                                     >
                                       <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                                      Store
+                                      {t("store_btn")}
                                     </a>
                                   </div>
                                 </>
@@ -690,7 +694,7 @@ export default function BrowsePage() {
                       </div>
                       <div className="space-y-1">
                         <h3 className="font-bold text-zinc-900 dark:text-zinc-50">{brand.name}</h3>
-                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">{brand.count} Products</p>
+                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">{t("items_count", { count: brand.count ?? 0 })}</p>
                       </div>
                     </div>
                   ))}
@@ -716,10 +720,14 @@ export default function BrowsePage() {
           <div className="px-6 py-4 bg-zinc-50 dark:bg-black/50 border-t border-zinc-150 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-6 flex-wrap">
               <p className="text-xs text-zinc-500 font-medium">
-                Showing {total > 0 ? page * limit + 1 : 0} to {Math.min((page + 1) * limit, total || 0)} of {total?.toLocaleString() ?? 0}
+                {t("showing_page", {
+                  start: total > 0 ? page * limit + 1 : 0,
+                  end: Math.min((page + 1) * limit, total || 0),
+                  total: total?.toLocaleString() ?? 0
+                })}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400 font-medium">Show:</span>
+                <span className="text-xs text-zinc-400 font-medium">{t("show_limit")}</span>
                 <select
                   value={limit}
                   onChange={(e) => {
@@ -741,17 +749,17 @@ export default function BrowsePage() {
                 <button
                   disabled={page === 0 || isLoading}
                   onClick={() => setPage(p => p - 1)}
-                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none"
+                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none rtl:rotate-180"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
                 </button>
-                <span className="text-xs font-bold px-4 text-zinc-700 dark:text-zinc-300">Page {page + 1}</span>
+                <span className="text-xs font-bold px-4 text-zinc-700 dark:text-zinc-300">{t("page_prefix")} {page + 1}</span>
                 <button
                   disabled={(page + 1) * limit >= total || isLoading}
                   onClick={() => setPage(p => p + 1)}
-                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none"
+                  className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-500 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer border-none outline-none rtl:rotate-180"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </button>
               </div>
             )}

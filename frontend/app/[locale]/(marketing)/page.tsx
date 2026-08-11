@@ -1,54 +1,57 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Activity, Table, Database, Search, FileText, ArrowRight, ShieldCheck, Zap, Sparkles, Sprout } from "lucide-react";
 import { motion } from "framer-motion";
 
-const features = [
-  {
-    name: "Batch Drug Matcher",
-    description: "Upload pharmacy catalog sheets and map them to the master database with multi-core parallel processing.",
-    href: "/dashboard/matcher",
-    icon: Table,
-    color: "bg-blue-500",
-    shadow: "shadow-blue-500/20",
-  },
-  {
-    name: "Catalog Seeder",
-    description: "Refresh the master SQLite catalog from Chefaa — crawl, normalize, seed mappings, and reload the matcher index from the UI.",
-    href: "/dashboard/catalog",
-    icon: Sprout,
-    color: "bg-teal-500",
-    shadow: "shadow-teal-500/20",
-  },
-  {
-    name: "Database Browser",
-    description: "Explore the complete master database of products, SKUs, brands, and categories with detailed variant views.",
-    href: "/dashboard/browse",
-    icon: Database,
-    color: "bg-purple-500",
-    shadow: "shadow-purple-500/20",
-  },
-  {
-    name: "Global Smart Search",
-    description: "Instantly lookup any product using our high-performance fuzzy matching and normalization engine.",
-    href: "/dashboard/search",
-    icon: Search,
-    color: "bg-emerald-500",
-    shadow: "shadow-emerald-500/20",
-  },
-  {
-    name: "Normalization Lab",
-    description: "Test and debug the normalization pipeline. See how raw product names are translated and cleaned.",
-    href: "/dashboard/normalize",
-    icon: FileText,
-    color: "bg-orange-500",
-    shadow: "shadow-orange-500/20",
-  },
-];
-
 export default function Home() {
+  const t = useTranslations("Marketing");
+
+  const features = [
+    {
+      name: t("feat_matcher_title"),
+      description: t("feat_matcher_desc"),
+      href: "/dashboard/matcher",
+      icon: Table,
+      color: "bg-blue-500",
+      shadow: "shadow-blue-500/20",
+    },
+    {
+      name: t("feat_seeder_title"),
+      description: t("feat_seeder_desc"),
+      href: "/dashboard/catalog",
+      icon: Sprout,
+      color: "bg-teal-500",
+      shadow: "shadow-teal-500/20",
+    },
+    {
+      name: t("feat_browser_title"),
+      description: t("feat_browser_desc"),
+      href: "/dashboard/browse",
+      icon: Database,
+      color: "bg-purple-500",
+      shadow: "shadow-purple-500/20",
+    },
+    {
+      name: t("feat_search_title"),
+      description: t("feat_search_desc"),
+      href: "/dashboard/search",
+      icon: Search,
+      color: "bg-emerald-500",
+      shadow: "shadow-emerald-500/20",
+    },
+    {
+      name: t("feat_normalize_title"),
+      description: t("feat_normalize_desc"),
+      href: "/dashboard/normalize",
+      icon: FileText,
+      color: "bg-orange-500",
+      shadow: "shadow-orange-500/20",
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -68,16 +71,16 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider"
             >
               <Sparkles className="w-3 h-3" />
-              Engine v9.0-Turbo Active
+              {t("tagline")}
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-5xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 max-w-4xl"
+              className="text-5xl md:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 max-w-4xl leading-tight"
             >
-              Master Your <span className="text-primary">Pharmacy Data</span> with Intelligence
+              {t("hero_title")}
             </motion.h1>
 
             <motion.p
@@ -86,8 +89,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg md:text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed"
             >
-              The advanced AI-powered platform for pharmacy catalog normalization, mapping, and database management.
-              Built for speed, accuracy, and enterprise-scale operations.
+              {t("hero_subtitle")}
             </motion.p>
 
             <motion.div
@@ -101,14 +103,14 @@ export default function Home() {
                 className="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-dark hover:scale-105 transition-all active:scale-95"
               >
                 <Table className="w-5 h-5" />
-                Start Matching
+                {t("btn_start")}
               </Link>
               <Link
                 href="/dashboard/browse"
                 className="flex items-center justify-center gap-2 px-8 py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all"
               >
-                Browse Database
-                <ArrowRight className="w-5 h-5" />
+                {t("btn_browse")}
+                <ArrowRight className="w-5 h-5 rtl:rotate-180" />
               </Link>
             </motion.div>
 
@@ -121,15 +123,15 @@ export default function Home() {
             >
               <div className="flex items-center gap-2 font-bold text-zinc-400">
                 <ShieldCheck className="w-5 h-5" />
-                Enterprise Validated
+                {t("badge_validated")}
               </div>
               <div className="flex items-center gap-2 font-bold text-zinc-400">
                 <Zap className="w-5 h-5" />
-                Turbo Processing
+                {t("badge_turbo")}
               </div>
               <div className="flex items-center gap-2 font-bold text-zinc-400">
                 <Activity className="w-5 h-5" />
-                99.9% Up-time
+                {t("badge_uptime")}
               </div>
             </motion.div>
           </div>
@@ -140,8 +142,8 @@ export default function Home() {
       <section className="py-24 bg-zinc-50 dark:bg-zinc-950">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Comprehensive Toolset</h2>
-            <p className="text-zinc-500 dark:text-zinc-400">Everything you need to handle complex medical product datasets.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{t("features_title")}</h2>
+            <p className="text-zinc-500 dark:text-zinc-400">{t("features_subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -168,7 +170,7 @@ export default function Home() {
                   </p>
                   <div className="flex items-center gap-2 text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                     Open Module
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </div>
                 </Link>
               </motion.div>
