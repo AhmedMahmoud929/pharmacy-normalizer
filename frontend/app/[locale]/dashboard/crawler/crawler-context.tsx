@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { API_URL } from "@/lib/utils";
+import { authEventSourceUrl } from "@/lib/auth";
 
 // Types
 export interface Job {
@@ -292,7 +293,7 @@ export const CrawlerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (sseRef.current) sseRef.current.close();
     setLogs([]);
 
-    const es = new EventSource(`${API_URL}/api/crawler/jobs/${jobId}/stream`);
+    const es = new EventSource(authEventSourceUrl(`/api/crawler/jobs/${jobId}/stream`));
     sseRef.current = es;
 
     es.addEventListener("log", (event) => {

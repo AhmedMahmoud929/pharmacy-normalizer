@@ -10,6 +10,7 @@
     "media_gallery": "Media Gallery",
     "global_search": "Global Search",
     "normalize": "Normalize",
+    "user_management": "User Management",
     "home_page": "Home Page",
     "new_campaign": "New Campaign",
     "campaigns": "Campaigns",
@@ -35,11 +36,51 @@
     "badge_search": "Fuzzy Search",
     "badge_normalize": "Normalization Lab",
     "badge_crawler": "Campaign Crawler",
-    "badge_gallery": "Local Media"
+    "badge_gallery": "Local Media",
+    "badge_users": "User Management"
+  },
+  "Login": {
+    "title": "Sign in to Pharmatch",
+    "subtitle": "Enter your credentials to access the dashboard.",
+    "email": "Email",
+    "email_placeholder": "you@pharmatch.com",
+    "password": "Password",
+    "password_placeholder": "Your password",
+    "sign_in": "Sign in",
+    "signing_in": "Signing in…",
+    "error_generic": "Login failed. Check your credentials.",
+    "dev_credentials_hint": "Dev mode: admin credentials are pre-filled."
+  },
+  "UserManagement": {
+    "title": "User Management",
+    "description": "Create and manage dashboard accounts and roles.",
+    "add_user": "Add user",
+    "create_user": "Create user",
+    "cancel": "Cancel",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "role": "Role",
+    "role_user": "User",
+    "role_admin": "Admin",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "toggle_role": "Toggle role",
+    "toggle_active": "Toggle active status",
+    "delete_user": "Delete user",
+    "delete_confirm": "Delete user {email}?",
+    "forbidden": "Admin access required.",
+    "load_error": "Failed to load users",
+    "create_error": "Failed to create user",
+    "update_error": "Failed to update user",
+    "delete_error": "Failed to delete user"
   },
   "sidebar": {
     "navigationMenu": "Navigation menu",
     "workspace": "Workspace",
+    "administration": "Administration",
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar"
   },
@@ -49,7 +90,9 @@
   "userMenu": {
     "menu": "App menu",
     "subtitle": "v9.0 Engine",
-    "home": "Home Page"
+    "home": "Home Page",
+    "users": "User management",
+    "logout": "Sign out"
   },
   "sheet": {
     "close": "Close"

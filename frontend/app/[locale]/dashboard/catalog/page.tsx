@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, API_URL } from "@/lib/utils";
+import { authEventSourceUrl } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { useToast } from "@/components/ui/use-toast";
@@ -273,7 +274,7 @@ export default function CatalogSeederPage() {
         eventSourceRef.current.close();
       }
 
-      const es = new EventSource(`${API_URL}/api/catalog/pipeline/jobs/${jobId}/stream`);
+      const es = new EventSource(authEventSourceUrl(`/api/catalog/pipeline/jobs/${jobId}/stream`));
       eventSourceRef.current = es;
 
       es.addEventListener("step_start", (e) => {

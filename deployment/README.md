@@ -101,7 +101,7 @@ source venv/bin/activate
 
 # Install main backend dependencies (pandas, openpyxl, fastapi, uvicorn, etc.)
 # If you don't have a requirements.txt, run:
-pip install fastapi uvicorn pandas openpyxl pydantic meilisearch requests rich
+pip install fastapi uvicorn pandas openpyxl pydantic[email] meilisearch requests rich
 
 # Go to shefaa-crawler and install its dependencies in the same environment
 cd /var/www/drug-mapping/shefaa-crawler

@@ -22,6 +22,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { authEventSourceUrl } from "@/lib/auth";
 import { cn, API_URL } from "@/lib/utils";
 import { FeatureBadge } from "@/components/shared/FeatureBadge";
 import { StatCard } from "@/components/ui/stat-card";
@@ -293,7 +294,7 @@ export default function GalleryPage() {
   useEffect(() => {
     if (!fetching || !fetchJob?.job_id) return;
 
-    const es = new EventSource(`${API_URL}/api/gallery/fetch/stream`);
+    const es = new EventSource(authEventSourceUrl(`/api/gallery/fetch/stream`));
     eventSourceRef.current = es;
 
     const handleProgress = (e: MessageEvent) => {

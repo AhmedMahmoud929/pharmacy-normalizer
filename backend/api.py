@@ -5,7 +5,8 @@ import asyncio
 import io
 from typing import Optional, List, Dict, Set
 from fastapi import FastAPI, UploadFile, File, Query, HTTPException, Form
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
+from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import concurrent.futures
@@ -45,6 +46,9 @@ from tools.catalog_service import load_catalog_index
 from catalog_api import router as catalog_router, register_reload_callback
 from enrichment_api import router as enrichment_router, register_enrichment_deps
 from gallery_api import router as gallery_router, register_gallery_deps
+from auth_api import router as auth_router
+from auth_utils import decode_access_token
+from db import users_repo
 from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
@@ -64,6 +68,7 @@ def reload_catalog_index():
     return {"products": len(products), "loaded": index is not None}
 
 register_reload_callback(reload_catalog_index)
+app.include_router(auth_router)
 app.include_router(catalog_router)
 register_enrichment_deps(lambda: index, reload_catalog_index)
 app.include_router(enrichment_router)
@@ -79,6 +84,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+AUTH_PUBLIC_PATHS = {"/health", "/api/auth/login", "/openapi.json", "/docs", "/redoc"}
+
+
+@app.middleware("http")
+async def require_auth_middleware(request: Request, call_next):
+    path = request.url.path.rstrip("/") or "/"
+    if request.method == "OPTIONS":
+        return await call_next(request)
+    if path in AUTH_PUBLIC_PATHS or path.startswith("/docs"):
+        return await call_next(request)
+
+    token = None
+    auth_header = request.headers.get("Authorization") or ""
+    if auth_header.lower().startswith("bearer "):
+        token = auth_header[7:].strip()
+    if not token:
+        token = request.cookies.get("pharmatch_token")
+    if not token:
+        token = request.query_params.get("token")
+
+    if not token:
+        return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
+
+    try:
+        payload = decode_access_token(token)
+        user = users_repo.get_user_by_id(str(payload.get("sub") or ""))
+        if not user or not user.get("is_active"):
+            return JSONResponse(status_code=401, content={"detail": "User not found or inactive"})
+        request.state.user = user
+    except ValueError:
+        return JSONResponse(status_code=401, content={"detail": "Invalid or expired token"})
+
+    return await call_next(request)
 
 # Global index instance
 index: Optional[ProductIndex] = None
@@ -177,6 +216,11 @@ async def get_media_file(category: str, filename: str):
 
 @app.on_event("startup")
 async def startup_event():
+    users_repo.seed_admin_if_missing(
+        email="ahmedTheOne@pharmatch.com",
+        password="ahmed@1",
+        name="Ahmed",
+    )
     reload_catalog_index()
 
 @app.get("/health")

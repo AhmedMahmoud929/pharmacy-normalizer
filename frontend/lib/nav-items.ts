@@ -7,6 +7,7 @@ import {
   Sprout,
   Barcode,
   Images,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,6 +33,10 @@ export const dashboardNavItems: NavItem[] = [
   { name: "Normalize", key: "normalize", href: "/dashboard/normalize", icon: FileText },
 ];
 
+export const adminNavItems: NavItem[] = [
+  { name: "User Management", key: "user_management", href: "/dashboard/admin/users", icon: Users },
+];
+
 export function isNavItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -40,6 +45,8 @@ const SUB_ROUTE_LABELS: Record<string, string> = {
   new: "New Campaign",
   campaigns: "Campaigns",
   explorer: "Explorer",
+  admin: "Administration",
+  users: "Users",
 };
 
 export interface DashboardBreadcrumb {

@@ -4,7 +4,8 @@ import React, { useState, useCallback, useRef, useMemo, useEffect } from "react"
 import { Loader2, X, ChevronDown, Square, Download, Check, Clock, Plus, Table } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
-import { cn } from "@/lib/utils";
+import { cn, API_URL } from "@/lib/utils";
+import { authEventSourceUrl } from "@/lib/auth";
 import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -360,7 +361,7 @@ export default function DrugMatcher() {
         }
 
         // Subscribe to real-time streaming progress SSE channel
-        const eventSource = new EventSource(`${API_URL}/api/matcher/job/${job.job_id}/stream`);
+        const eventSource = new EventSource(authEventSourceUrl(`/api/matcher/job/${job.job_id}/stream`));
 
         eventSource.addEventListener("info", (e) => {
           const data = JSON.parse(e.data);
@@ -573,7 +574,7 @@ export default function DrugMatcher() {
             });
 
           // Connect to SSE stream to monitor live progress of background job!
-          const eventSource = new EventSource(`${API_URL}/api/matcher/job/${data.job_id}/stream`);
+          const eventSource = new EventSource(authEventSourceUrl(`/api/matcher/job/${data.job_id}/stream`));
 
           eventSource.addEventListener("info", (e) => {
             const infoData = JSON.parse(e.data);

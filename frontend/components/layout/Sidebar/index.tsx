@@ -43,7 +43,7 @@ export function Sidebar() {
         )}
       >
         {(!collapsible || !isCollapsed) && (
-          <Link href="/" onClick={() => setOpen(false)} className="min-w-0">
+          <Link href="/dashboard/matcher" onClick={() => setOpen(false)} className="min-w-0">
             <div className="flex flex-col">
               <span className="font-bold text-lg tracking-tight text-sidebar-foreground">
                 {tNav("title")}

@@ -2,7 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
-import { dashboardNavItems, isNavItemActive, showCrawler } from "@/lib/nav-items";
+import {
+  dashboardNavItems,
+  adminNavItems,
+  isNavItemActive,
+  showCrawler,
+} from "@/lib/nav-items";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export type SidebarNavItem = {
   labelKey: string;
@@ -24,28 +30,32 @@ const ICON_BY_KEY: Record<string, string> = {
   media_gallery: "solar:gallery-linear",
   global_search: "solar:magnifer-linear",
   normalize: "solar:text-linear",
+  user_management: "solar:users-group-two-rounded-linear",
 };
 
 export function useSidebarItems() {
   const t = useTranslations("Navigation");
   const pathname = usePathname();
+  const { isAdmin } = useAuth();
 
-  const items: SidebarNavItem[] = dashboardNavItems.map((item) => ({
+  const allItems = [...dashboardNavItems, ...(isAdmin ? adminNavItems : [])];
+
+  const items: SidebarNavItem[] = allItems.map((item) => ({
     labelKey: item.key,
     icon: ICON_BY_KEY[item.key] ?? "solar:widget-linear",
     path: item.href,
   }));
 
-  // Ensure crawler stays gated even if nav-items array is imported elsewhere.
   const filtered = showCrawler
     ? items
     : items.filter((item) => item.path !== "/dashboard/crawler");
 
+  const workspaceItems = filtered.filter((item) => item.path !== "/dashboard/admin/users");
+  const adminItems = filtered.filter((item) => item.path === "/dashboard/admin/users");
+
   const sidebarItems: SidebarSection[] = [
-    {
-      titleKey: "workspace",
-      items: filtered,
-    },
+    { titleKey: "workspace", items: workspaceItems },
+    ...(adminItems.length ? [{ titleKey: "administration", items: adminItems }] : []),
   ];
 
   const isActiveStartsWith = ({ path }: { path: string }) =>

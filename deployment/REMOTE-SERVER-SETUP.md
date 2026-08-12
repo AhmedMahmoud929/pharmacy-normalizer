@@ -94,7 +94,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install --upgrade pip
-pip install fastapi uvicorn pandas openpyxl pydantic meilisearch requests rich \
+pip install fastapi uvicorn pandas openpyxl pydantic[email] meilisearch requests rich \
             beautifulsoup4 lxml tqdm opencv-python numpy Pillow python-multipart
 ```
 

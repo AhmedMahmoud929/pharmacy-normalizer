@@ -10,6 +10,7 @@
     "media_gallery": "معرض الصور",
     "global_search": "بحث شامل",
     "normalize": "توحيد الأسماء",
+    "user_management": "إدارة المستخدمين",
     "home_page": "الرئيسية",
     "new_campaign": "حملة جديدة",
     "campaigns": "الحملات",
@@ -35,11 +36,51 @@
     "badge_search": "بحث تقريبي",
     "badge_normalize": "مختبر التوحيد",
     "badge_crawler": "جلب الحملات",
-    "badge_gallery": "الوسائط المحلية"
+    "badge_gallery": "الوسائط المحلية",
+    "badge_users": "إدارة المستخدمين"
+  },
+  "Login": {
+    "title": "تسجيل الدخول إلى فارماتش",
+    "subtitle": "أدخل بياناتك للوصول إلى لوحة التحكم.",
+    "email": "البريد الإلكتروني",
+    "email_placeholder": "you@pharmatch.com",
+    "password": "كلمة المرور",
+    "password_placeholder": "كلمة المرور",
+    "sign_in": "دخول",
+    "signing_in": "جارٍ تسجيل الدخول…",
+    "error_generic": "فشل تسجيل الدخول. تحقق من البيانات.",
+    "dev_credentials_hint": "وضع التطوير: بيانات المدير معبّأة مسبقًا."
+  },
+  "UserManagement": {
+    "title": "إدارة المستخدمين",
+    "description": "إنشاء حسابات لوحة التحكم وإدارة الأدوار.",
+    "add_user": "إضافة مستخدم",
+    "create_user": "إنشاء مستخدم",
+    "cancel": "إلغاء",
+    "email": "البريد",
+    "password": "كلمة المرور",
+    "name": "الاسم",
+    "role": "الدور",
+    "role_user": "مستخدم",
+    "role_admin": "مدير",
+    "status": "الحالة",
+    "actions": "إجراءات",
+    "active": "نشط",
+    "inactive": "معطّل",
+    "toggle_role": "تبديل الدور",
+    "toggle_active": "تبديل الحالة",
+    "delete_user": "حذف المستخدم",
+    "delete_confirm": "حذف المستخدم {email}؟",
+    "forbidden": "يتطلب صلاحيات مدير.",
+    "load_error": "تعذّر تحميل المستخدمين",
+    "create_error": "تعذّر إنشاء المستخدم",
+    "update_error": "تعذّر تحديث المستخدم",
+    "delete_error": "تعذّر حذف المستخدم"
   },
   "sidebar": {
     "navigationMenu": "القائمة الجانبية",
     "workspace": "أدوات العمل",
+    "administration": "الإدارة",
     "expand": "توسيع القائمة",
     "collapse": "طي القائمة"
   },
@@ -49,7 +90,9 @@
   "userMenu": {
     "menu": "قائمة الحساب",
     "subtitle": "المحرك v9.0",
-    "home": "العودة للرئيسية"
+    "home": "العودة للرئيسية",
+    "users": "إدارة المستخدمين",
+    "logout": "تسجيل الخروج"
   },
   "sheet": {
     "close": "إغلاق"

@@ -1,0 +1,114 @@
+import { API_URL } from "@/lib/utils";
+
+export const AUTH_TOKEN_KEY = "pharmatch_token";
+export const AUTH_COOKIE = "pharmatch_token";
+const TOKEN_MAX_AGE_SECONDS = 72 * 3600;
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+  role: "admin" | "user";
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+export function setAuthSession(token: string) {
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_MAX_AGE_SECONDS}; SameSite=Lax`;
+}
+
+export function clearAuthSession() {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+export function authHeaders(token?: string | null): HeadersInit {
+  const value = token ?? getStoredToken();
+  return value ? { Authorization: `Bearer ${value}` } : {};
+}
+
+export function authEventSourceUrl(path: string): string {
+  const token = getStoredToken();
+  const base = path.startsWith("http") ? path : `${API_URL}${path}`;
+  if (!token) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}token=${encodeURIComponent(token)}`;
+}
+
+export async function loginRequest(email: string, password: string) {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || "Login failed");
+  }
+  return data as { access_token: string; user: AuthUser };
+}
+
+export async function fetchCurrentUser(token?: string | null): Promise<AuthUser | null> {
+  const authToken = token ?? getStoredToken();
+  if (!authToken) return null;
+
+  const res = await fetch(`${API_URL}/api/auth/me`, {
+    headers: {
+      ...authHeaders(authToken),
+    },
+  });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  return res.json();
+}
+
+export function installAuthFetchPatch() {
+  if (typeof window === "undefined") return () => {};
+
+  const originalFetch = window.fetch.bind(window);
+
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
+
+    if (url.startsWith(API_URL)) {
+      const token = getStoredToken();
+      if (token) {
+        const headers = new Headers(init?.headers);
+        if (!headers.has("Authorization")) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        init = { ...init, headers };
+      }
+    }
+
+    const response = await originalFetch(input, init);
+
+    if (url.startsWith(API_URL) && response.status === 401 && getStoredToken()) {
+      clearAuthSession();
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
+    }
+
+    return response;
+  };
+
+  return () => {
+    window.fetch = originalFetch;
+  };
+}
