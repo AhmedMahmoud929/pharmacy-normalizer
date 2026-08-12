@@ -12,7 +12,7 @@ import time
 from typing import Any, Dict, Optional
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "pharmatch-dev-secret-change-in-production")
-TOKEN_TTL_HOURS = int(os.environ.get("JWT_TTL_HOURS", "72"))
+TOKEN_TTL_HOURS = int(os.environ.get("JWT_TTL_HOURS", "12"))
 
 
 def hash_password(password: str) -> str:

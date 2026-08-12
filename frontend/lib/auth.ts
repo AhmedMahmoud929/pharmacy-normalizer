@@ -2,7 +2,38 @@ import { API_URL } from "@/lib/utils";
 
 export const AUTH_TOKEN_KEY = "pharmatch_token";
 export const AUTH_COOKIE = "pharmatch_token";
-const TOKEN_MAX_AGE_SECONDS = 72 * 3600;
+const TOKEN_TTL_HOURS = Number(process.env.NEXT_PUBLIC_JWT_TTL_HOURS || "12");
+const TOKEN_MAX_AGE_SECONDS = TOKEN_TTL_HOURS * 3600;
+
+let onUnauthorizedCallback: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: () => void) {
+  onUnauthorizedCallback = handler;
+  return () => {
+    onUnauthorizedCallback = null;
+  };
+}
+
+function loginPath(): string {
+  if (typeof window === "undefined") return "/login";
+  return window.location.pathname.startsWith("/ar") ? "/ar/login" : "/login";
+}
+
+export function handleUnauthorized() {
+  if (typeof window === "undefined" || !getStoredToken()) return;
+
+  clearAuthSession();
+  onUnauthorizedCallback?.();
+
+  const target = loginPath();
+  if (!window.location.pathname.includes("/login")) {
+    window.location.href = target;
+  }
+}
+
+function isAuthApiUrl(url: string): boolean {
+  return url.startsWith(API_URL) && !url.includes("/api/auth/login");
+}
 
 export type AuthUser = {
   id: string;
@@ -99,11 +130,8 @@ export function installAuthFetchPatch() {
 
     const response = await originalFetch(input, init);
 
-    if (url.startsWith(API_URL) && response.status === 401 && getStoredToken()) {
-      clearAuthSession();
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
-      }
+    if (isAuthApiUrl(url) && response.status === 401) {
+      handleUnauthorized();
     }
 
     return response;

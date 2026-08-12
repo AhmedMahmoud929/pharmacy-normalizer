@@ -16,6 +16,7 @@ import {
   getStoredToken,
   installAuthFetchPatch,
   loginRequest,
+  registerUnauthorizedHandler,
   setAuthSession,
 } from "@/lib/auth";
 import {
@@ -66,9 +67,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const uninstall = installAuthFetchPatch();
+    const uninstallPatch = installAuthFetchPatch();
+    const unregisterUnauthorized = registerUnauthorizedHandler(() => setUser(null));
     refresh().finally(() => setLoading(false));
-    return uninstall;
+    return () => {
+      uninstallPatch();
+      unregisterUnauthorized();
+    };
   }, [refresh]);
 
   const login = useCallback(

@@ -15,8 +15,8 @@ import {
 const EMPTY_FORM = {
   email: "",
   password: "",
-  name: "",
-  role: "user" as "admin" | "user",
+  firstName: "",
+  lastName: "",
   permissions: [] as Permission[],
 };
 
@@ -57,13 +57,16 @@ export function CreateUserDialog({
     e.preventDefault();
     setSaving(true);
     setError(null);
+    const name = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
     try {
       const res = await fetch(`${API_URL}/api/auth/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
-          ...form,
-          permissions: form.role === "admin" ? ALL_PERMISSIONS : form.permissions,
+          email: form.email,
+          password: form.password,
+          name,
+          permissions: form.permissions,
         }),
       });
       const data = await res.json();
@@ -122,75 +125,73 @@ export function CreateUserDialog({
             <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
               <div className="overflow-y-auto px-6 py-5 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label htmlFor="create-email" className="text-sm font-medium">
-                    {t("email")}
-                  </label>
-                  <input
-                    id="create-email"
-                    required
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                  <div className="space-y-1.5">
+                    <label htmlFor="create-first-name" className="text-sm font-medium">
+                      {t("first_name")}
+                    </label>
+                    <input
+                      id="create-first-name"
+                      type="text"
+                      autoComplete="given-name"
+                      placeholder={t("placeholder_first_name")}
+                      value={form.firstName}
+                      onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="create-last-name" className="text-sm font-medium">
+                      {t("last_name")}
+                    </label>
+                    <input
+                      id="create-last-name"
+                      type="text"
+                      autoComplete="family-name"
+                      placeholder={t("placeholder_last_name")}
+                      value={form.lastName}
+                      onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="create-email" className="text-sm font-medium">
+                      {t("email")}
+                    </label>
+                    <input
+                      id="create-email"
+                      required
+                      type="email"
+                      autoComplete="email"
+                      placeholder={t("placeholder_email")}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="create-password" className="text-sm font-medium">
+                      {t("password")}
+                    </label>
+                    <input
+                      id="create-password"
+                      required
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder={t("placeholder_password")}
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label htmlFor="create-password" className="text-sm font-medium">
-                    {t("password")}
-                  </label>
-                  <input
-                    id="create-password"
-                    required
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="create-name" className="text-sm font-medium">
-                    {t("name")}
-                  </label>
-                  <input
-                    id="create-name"
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="create-role" className="text-sm font-medium">
-                    {t("role")}
-                  </label>
-                  <select
-                    id="create-role"
-                    value={form.role}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        role: e.target.value as "admin" | "user",
-                        permissions:
-                          e.target.value === "admin" ? [...ALL_PERMISSIONS] : form.permissions,
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="user">{t("role_user")}</option>
-                    <option value="admin">{t("role_admin")}</option>
-                  </select>
-                </div>
-              </div>
-
-              {form.role !== "admin" ? (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">{t("permissions")}</p>
                   <div className="flex flex-wrap gap-2">
-                    {ALL_PERMISSIONS.filter((p) => p !== "users").map((perm) => (
+                    {ALL_PERMISSIONS.map((perm) => (
                       <button
                         key={perm}
                         type="button"
@@ -207,15 +208,12 @@ export function CreateUserDialog({
                     ))}
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t("admin_all_permissions")}</p>
-              )}
 
-              {error ? (
-                <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-xl px-3 py-2">
-                  {error}
-                </p>
-              ) : null}
+                {error ? (
+                  <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-xl px-3 py-2">
+                    {error}
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex justify-end gap-2 border-t border-border px-6 py-4">

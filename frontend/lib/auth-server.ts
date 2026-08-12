@@ -57,6 +57,6 @@ export async function verifyAccessToken(token: string): Promise<AuthPayload | nu
 }
 
 export function getTokenMaxAgeSeconds(): number {
-  const hours = Number(process.env.JWT_TTL_HOURS || "72");
+  const hours = Number(process.env.JWT_TTL_HOURS || "12");
   return hours * 3600;
 }
