@@ -6,6 +6,7 @@ import {
   Terminal,
   Sprout,
   Barcode,
+  Images,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ export const dashboardNavItems: NavItem[] = [
     ? [{ name: "Campaign Crawler", key: "campaign_crawler", href: "/dashboard/crawler", icon: Terminal }]
     : []),
   { name: "Browse DB", key: "browse_db", href: "/dashboard/browse", icon: Database },
+  { name: "Media Gallery", key: "media_gallery", href: "/dashboard/gallery", icon: Images },
   { name: "Global Search", key: "global_search", href: "/dashboard/search", icon: Search },
   { name: "Normalize", key: "normalize", href: "/dashboard/normalize", icon: FileText },
 ];

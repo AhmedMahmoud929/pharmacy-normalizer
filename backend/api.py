@@ -44,6 +44,7 @@ from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
 from tools.catalog_service import load_catalog_index
 from catalog_api import router as catalog_router, register_reload_callback
 from enrichment_api import router as enrichment_router, register_enrichment_deps
+from gallery_api import router as gallery_router, register_gallery_deps
 from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
@@ -152,6 +153,14 @@ def enrich_product_image_status(product: dict) -> dict:
             p["local_image_url"] = None
             
     return p
+
+register_gallery_deps(
+    enrich_product_image_status,
+    sanitize_filename,
+    normalize_cdn_url,
+    fix_dotless_url,
+)
+app.include_router(gallery_router)
 
 @app.get("/media/{category}/{filename}")
 async def get_media_file(category: str, filename: str):

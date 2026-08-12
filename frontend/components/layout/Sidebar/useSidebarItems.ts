@@ -21,6 +21,7 @@ const ICON_BY_KEY: Record<string, string> = {
   catalog_seeder: "solar:leaf-linear",
   campaign_crawler: "solar:code-linear",
   browse_db: "solar:database-linear",
+  media_gallery: "solar:gallery-linear",
   global_search: "solar:magnifer-linear",
   normalize: "solar:text-linear",
 };
