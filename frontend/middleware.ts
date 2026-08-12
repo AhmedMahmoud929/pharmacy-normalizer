@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { verifyAccessToken } from "./lib/auth-server";
+import { permissionForDashboardPath } from "./lib/permissions";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -17,6 +18,35 @@ function stripLocale(pathname: string): string {
 
 function localePrefix(pathname: string): string {
   return pathname.startsWith("/ar") ? "/ar" : "";
+}
+
+function sessionHasPermission(
+  session: NonNullable<Awaited<ReturnType<typeof verifyAccessToken>>>,
+  permission: string
+): boolean {
+  if (session.role === "admin") return true;
+  return (session.permissions ?? []).includes(permission);
+}
+
+function defaultRouteForSession(
+  session: NonNullable<Awaited<ReturnType<typeof verifyAccessToken>>>
+): string {
+  const order = [
+    "/dashboard/matcher",
+    "/dashboard/enrichment",
+    "/dashboard/catalog",
+    "/dashboard/crawler",
+    "/dashboard/browse",
+    "/dashboard/gallery",
+    "/dashboard/search",
+    "/dashboard/normalize",
+    "/dashboard/admin/users",
+  ];
+  for (const route of order) {
+    const perm = permissionForDashboardPath(route);
+    if (perm && sessionHasPermission(session, perm)) return route;
+  }
+  return "/login";
 }
 
 export default async function middleware(request: NextRequest) {
@@ -40,20 +70,23 @@ export default async function middleware(request: NextRequest) {
 
   if (isLogin && session) {
     const url = request.nextUrl.clone();
-    url.pathname = `${prefix}/dashboard/matcher`;
+    url.pathname = `${prefix}${defaultRouteForSession(session)}`;
     return NextResponse.redirect(url);
   }
 
   if (isRoot && session) {
     const url = request.nextUrl.clone();
-    url.pathname = `${prefix}/dashboard/matcher`;
+    url.pathname = `${prefix}${defaultRouteForSession(session)}`;
     return NextResponse.redirect(url);
   }
 
-  if (path.startsWith("/dashboard/admin") && session?.role !== "admin") {
-    const url = request.nextUrl.clone();
-    url.pathname = `${prefix}/dashboard/matcher`;
-    return NextResponse.redirect(url);
+  if (isDashboard && session) {
+    const required = permissionForDashboardPath(path);
+    if (required && !sessionHasPermission(session, required)) {
+      const url = request.nextUrl.clone();
+      url.pathname = `${prefix}${defaultRouteForSession(session)}`;
+      return NextResponse.redirect(url);
+    }
   }
 
   return intlMiddleware(request);

@@ -49,6 +49,7 @@ from gallery_api import router as gallery_router, register_gallery_deps
 from auth_api import router as auth_router
 from auth_utils import decode_access_token
 from db import users_repo
+from permissions import can_access_path
 from tools.csv_helper import load_sheet_safely
 
 app = FastAPI(title="Drug Matcher API")
@@ -116,6 +117,9 @@ async def require_auth_middleware(request: Request, call_next):
         request.state.user = user
     except ValueError:
         return JSONResponse(status_code=401, content={"detail": "Invalid or expired token"})
+
+    if not can_access_path(user, path, request.method):
+        return JSONResponse(status_code=403, content={"detail": "Permission denied"})
 
     return await call_next(request)
 

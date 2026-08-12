@@ -2,33 +2,30 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Users, Plus, Loader2, Shield, Trash2, Pencil } from "lucide-react";
-import { motion } from "framer-motion";
+import { Users, Plus, Loader2, Trash2, Pencil, Shield } from "lucide-react";
 import { API_URL, cn } from "@/lib/utils";
 import { FeatureBadge } from "@/components/shared/FeatureBadge";
 import { cardSurfaceClass } from "@/components/ui/stat-card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { authHeaders, AuthUser } from "@/lib/auth";
+import {
+  ALL_PERMISSIONS,
+  PERMISSION_LABELS,
+  type Permission,
+} from "@/lib/permissions";
+import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 
 type UserRow = AuthUser;
 
 export default function UserManagementPage() {
   const t = useTranslations("UserManagement");
   const tDash = useTranslations("Dashboard");
-  const { user: currentUser, isAdmin } = useAuth();
+  const { user: currentUser, hasPermission } = useAuth();
 
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    name: "",
-    role: "user" as "admin" | "user",
-  });
+  const [createOpen, setCreateOpen] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -48,29 +45,31 @@ export default function UserManagementPage() {
   }, [t]);
 
   useEffect(() => {
-    if (isAdmin) loadUsers();
-  }, [isAdmin, loadUsers]);
+    if (hasPermission("users")) loadUsers();
+  }, [hasPermission, loadUsers]);
 
-  const createUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  const updateUserPermissions = async (row: UserRow, permissions: Permission[]) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/users`, {
-        method: "POST",
+      const res = await fetch(`${API_URL}/api/auth/users/${row.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ permissions }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || t("create_error"));
-      setShowCreate(false);
-      setForm({ email: "", password: "", name: "", role: "user" });
+      if (!res.ok) throw new Error(data.detail || t("update_error"));
       await loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("create_error"));
-    } finally {
-      setSaving(false);
+      setError(err instanceof Error ? err.message : t("update_error"));
     }
+  };
+
+  const toggleUserPermission = async (row: UserRow, perm: Permission) => {
+    if (row.role === "admin") return;
+    const next = row.permissions.includes(perm)
+      ? row.permissions.filter((p) => p !== perm)
+      : [...row.permissions, perm];
+    await updateUserPermissions(row, next as Permission[]);
   };
 
   const toggleActive = async (row: UserRow) => {
@@ -96,7 +95,10 @@ export default function UserManagementPage() {
       const res = await fetch(`${API_URL}/api/auth/users/${row.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ role: nextRole }),
+        body: JSON.stringify({
+          role: nextRole,
+          permissions: nextRole === "admin" ? ALL_PERMISSIONS : row.permissions,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || t("update_error"));
@@ -122,7 +124,7 @@ export default function UserManagementPage() {
     }
   };
 
-  if (!isAdmin) {
+  if (!hasPermission("users")) {
     return (
       <div className={cn(cardSurfaceClass, "p-10 text-center text-muted-foreground")}>
         {t("forbidden")}
@@ -139,7 +141,8 @@ export default function UserManagementPage() {
           <p className="text-muted-foreground max-w-2xl">{t("description")}</p>
         </div>
         <button
-          onClick={() => setShowCreate((v) => !v)}
+          type="button"
+          onClick={() => setCreateOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"
         >
           <Plus className="w-4 h-4" />
@@ -153,63 +156,11 @@ export default function UserManagementPage() {
         </p>
       ) : null}
 
-      {showCreate ? (
-        <motion.form
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          onSubmit={createUser}
-          className={cn(cardSurfaceClass, "p-6 grid grid-cols-1 md:grid-cols-2 gap-4")}
-        >
-          <input
-            required
-            type="email"
-            placeholder={t("email")}
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
-          />
-          <input
-            required
-            type="password"
-            placeholder={t("password")}
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
-          />
-          <input
-            type="text"
-            placeholder={t("name")}
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
-          />
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value as "admin" | "user" })}
-            className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm"
-          >
-            <option value="user">{t("role_user")}</option>
-            <option value="admin">{t("role_admin")}</option>
-          </select>
-          <div className="md:col-span-2 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCreate(false)}
-              className="px-4 py-2 rounded-xl border border-border text-sm"
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {t("create_user")}
-            </button>
-          </div>
-        </motion.form>
-      ) : null}
+      <CreateUserDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={loadUsers}
+      />
 
       <div className={cn(cardSurfaceClass, "overflow-hidden")}>
         {loading ? (
@@ -224,6 +175,7 @@ export default function UserManagementPage() {
                   <th className="text-start p-4 font-semibold">{t("name")}</th>
                   <th className="text-start p-4 font-semibold">{t("email")}</th>
                   <th className="text-start p-4 font-semibold">{t("role")}</th>
+                  <th className="text-start p-4 font-semibold">{t("permissions")}</th>
                   <th className="text-start p-4 font-semibold">{t("status")}</th>
                   <th className="text-end p-4 font-semibold">{t("actions")}</th>
                 </tr>
@@ -232,10 +184,34 @@ export default function UserManagementPage() {
                 {users.map((row) => {
                   const isSelf = row.id === currentUser?.id;
                   return (
-                    <tr key={row.id} className="border-t border-border">
+                    <tr key={row.id} className="border-t border-border align-top">
                       <td className="p-4 font-medium">{row.name || "—"}</td>
                       <td className="p-4">{row.email}</td>
                       <td className="p-4 capitalize">{row.role}</td>
+                      <td className="p-4">
+                        {row.role === "admin" ? (
+                          <span className="text-xs text-muted-foreground">{t("all_permissions")}</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1.5 max-w-md">
+                            {ALL_PERMISSIONS.map((perm) => (
+                              <button
+                                key={perm}
+                                type="button"
+                                disabled={isSelf && perm === "users"}
+                                onClick={() => toggleUserPermission(row, perm)}
+                                className={cn(
+                                  "px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors disabled:opacity-40",
+                                  row.permissions.includes(perm)
+                                    ? "bg-primary/15 text-primary border-primary/30"
+                                    : "bg-muted/30 text-muted-foreground border-border"
+                                )}
+                              >
+                                {PERMISSION_LABELS[perm]}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-4">
                         <span
                           className={cn(

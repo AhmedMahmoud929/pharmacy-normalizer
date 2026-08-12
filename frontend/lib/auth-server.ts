@@ -6,8 +6,14 @@ export type AuthPayload = {
   email: string;
   role: string;
   name?: string;
+  permissions?: string[];
   exp: number;
 };
+
+function hasSessionPermission(session: AuthPayload, permission: string): boolean {
+  if (session.role === "admin") return true;
+  return (session.permissions ?? []).includes(permission);
+}
 
 function decodeBase64Url(data: string): string {
   const padded = data + "=".repeat((4 - (data.length % 4)) % 4);

@@ -9,11 +9,13 @@ import {
   showCrawler,
 } from "@/lib/nav-items";
 import { useAuth } from "@/components/providers/AuthProvider";
+import type { Permission } from "@/lib/permissions";
 
 export type SidebarNavItem = {
   labelKey: string;
   icon: string;
   path: string;
+  permission: Permission;
 };
 
 export type SidebarSection = {
@@ -36,22 +38,25 @@ const ICON_BY_KEY: Record<string, string> = {
 export function useSidebarItems() {
   const t = useTranslations("Navigation");
   const pathname = usePathname();
-  const { isAdmin } = useAuth();
+  const { hasPermission } = useAuth();
 
-  const allItems = [...dashboardNavItems, ...(isAdmin ? adminNavItems : [])];
+  const allItems = [...dashboardNavItems, ...adminNavItems].filter(
+    (item) => hasPermission(item.permission)
+  );
 
   const items: SidebarNavItem[] = allItems.map((item) => ({
     labelKey: item.key,
     icon: ICON_BY_KEY[item.key] ?? "solar:widget-linear",
     path: item.href,
+    permission: item.permission,
   }));
 
   const filtered = showCrawler
     ? items
     : items.filter((item) => item.path !== "/dashboard/crawler");
 
-  const workspaceItems = filtered.filter((item) => item.path !== "/dashboard/admin/users");
-  const adminItems = filtered.filter((item) => item.path === "/dashboard/admin/users");
+  const workspaceItems = filtered.filter((item) => item.permission !== "users");
+  const adminItems = filtered.filter((item) => item.permission === "users");
 
   const sidebarItems: SidebarSection[] = [
     { titleKey: "workspace", items: workspaceItems },

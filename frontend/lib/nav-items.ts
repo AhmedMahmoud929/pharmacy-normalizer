@@ -18,23 +18,24 @@ export interface NavItem {
   key: string;
   href: string;
   icon: LucideIcon;
+  permission: import("@/lib/permissions").Permission;
 }
 
 export const dashboardNavItems: NavItem[] = [
-  { name: "Match Sheet", key: "match_sheet", href: "/dashboard/matcher", icon: Table },
-  { name: "Barcode Enrichment", key: "barcode_enrichment", href: "/dashboard/enrichment", icon: Barcode },
-  { name: "Catalog Seeder", key: "catalog_seeder", href: "/dashboard/catalog", icon: Sprout },
+  { name: "Match Sheet", key: "match_sheet", href: "/dashboard/matcher", icon: Table, permission: "matcher" },
+  { name: "Barcode Enrichment", key: "barcode_enrichment", href: "/dashboard/enrichment", icon: Barcode, permission: "enrichment" },
+  { name: "Catalog Seeder", key: "catalog_seeder", href: "/dashboard/catalog", icon: Sprout, permission: "catalog" },
   ...(showCrawler
-    ? [{ name: "Campaign Crawler", key: "campaign_crawler", href: "/dashboard/crawler", icon: Terminal }]
+    ? [{ name: "Campaign Crawler", key: "campaign_crawler", href: "/dashboard/crawler", icon: Terminal, permission: "crawler" as const }]
     : []),
-  { name: "Browse DB", key: "browse_db", href: "/dashboard/browse", icon: Database },
-  { name: "Media Gallery", key: "media_gallery", href: "/dashboard/gallery", icon: Images },
-  { name: "Global Search", key: "global_search", href: "/dashboard/search", icon: Search },
-  { name: "Normalize", key: "normalize", href: "/dashboard/normalize", icon: FileText },
+  { name: "Browse DB", key: "browse_db", href: "/dashboard/browse", icon: Database, permission: "browse" },
+  { name: "Media Gallery", key: "media_gallery", href: "/dashboard/gallery", icon: Images, permission: "gallery" },
+  { name: "Global Search", key: "global_search", href: "/dashboard/search", icon: Search, permission: "search" },
+  { name: "Normalize", key: "normalize", href: "/dashboard/normalize", icon: FileText, permission: "normalize" },
 ];
 
 export const adminNavItems: NavItem[] = [
-  { name: "User Management", key: "user_management", href: "/dashboard/admin/users", icon: Users },
+  { name: "User Management", key: "user_management", href: "/dashboard/admin/users", icon: Users, permission: "users" },
 ];
 
 export function isNavItemActive(pathname: string, href: string): boolean {

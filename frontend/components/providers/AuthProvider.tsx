@@ -18,11 +18,19 @@ import {
   loginRequest,
   setAuthSession,
 } from "@/lib/auth";
+import {
+  defaultDashboardRoute,
+  effectivePermissions,
+  hasPermission as checkPermission,
+  type Permission,
+} from "@/lib/permissions";
 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
+  permissions: Permission[];
   isAdmin: boolean;
+  hasPermission: (permission: Permission) => boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
@@ -34,6 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const permissions = useMemo(() => effectivePermissions(user), [user]);
+
+  const hasPermission = useCallback(
+    (permission: Permission) => checkPermission(user, permission),
+    [user]
+  );
 
   const refresh = useCallback(async () => {
     const token = getStoredToken();
@@ -61,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await loginRequest(email, password);
       setAuthSession(data.access_token);
       setUser(data.user);
-      router.replace("/dashboard/matcher");
+      router.replace(defaultDashboardRoute(data.user));
     },
     [router]
   );
@@ -76,12 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       loading,
+      permissions,
       isAdmin: user?.role === "admin",
+      hasPermission,
       login,
       logout,
       refresh,
     }),
-    [user, loading, login, logout, refresh]
+    [user, loading, permissions, hasPermission, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

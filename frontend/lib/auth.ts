@@ -9,6 +9,7 @@ export type AuthUser = {
   email: string;
   name: string;
   role: "admin" | "user";
+  permissions: string[];
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

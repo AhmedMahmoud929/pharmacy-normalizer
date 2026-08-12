@@ -46,12 +46,14 @@ def create_access_token(
     email: str,
     role: str,
     name: Optional[str] = None,
+    permissions: Optional[list[str]] = None,
 ) -> str:
     payload = {
         "sub": user_id,
         "email": email,
         "role": role,
         "name": name or "",
+        "permissions": permissions or [],
         "exp": int(time.time()) + TOKEN_TTL_HOURS * 3600,
     }
     data = base64.urlsafe_b64encode(json.dumps(payload, separators=(",", ":")).encode()).decode().rstrip("=")

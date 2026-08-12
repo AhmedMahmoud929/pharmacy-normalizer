@@ -54,7 +54,7 @@ function initials(name: string, email: string): string {
 
 export function UserMenu() {
   const t = useTranslations("userMenu");
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
 
   const displayName = user?.name?.trim() || user?.email || "User";
   const avatar = initials(user?.name || "", user?.email || "U");
@@ -97,7 +97,7 @@ export function UserMenu() {
         </div>
 
         <div className="flex flex-col gap-0.5 p-2">
-          {isAdmin ? (
+          {hasPermission("users") ? (
             <MenuItem
               href="/dashboard/admin/users"
               icon="solar:users-group-two-rounded-linear"
