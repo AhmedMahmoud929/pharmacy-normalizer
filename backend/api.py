@@ -45,6 +45,8 @@ from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
 from tools.catalog_service import load_catalog_index
 from catalog_api import router as catalog_router, register_reload_callback
 from enrichment_api import router as enrichment_router, register_enrichment_deps
+from discovery_api import router as discovery_router, register_discovery_deps
+from source_profiles_api import router as source_profiles_router
 from gallery_api import router as gallery_router, register_gallery_deps
 from auth_api import router as auth_router
 from auth_utils import decode_access_token
@@ -73,6 +75,9 @@ app.include_router(auth_router)
 app.include_router(catalog_router)
 register_enrichment_deps(lambda: index, reload_catalog_index)
 app.include_router(enrichment_router)
+register_discovery_deps(reload_catalog_index)
+app.include_router(discovery_router)
+app.include_router(source_profiles_router)
 
 from catalog_api import set_workspace_root
 set_workspace_root(workspace_root)

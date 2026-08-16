@@ -2,7 +2,7 @@
 
 from db.connection import get_connection
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def init_schema() -> None:
@@ -136,9 +136,62 @@ def init_schema() -> None:
                 finished_at TEXT,
                 duration INTEGER
             );
+
+            -- User-configured product discovery sources (one row per domain)
+            CREATE TABLE IF NOT EXISTS source_profiles (
+                domain TEXT PRIMARY KEY,
+                display_name TEXT NOT NULL,
+                platform TEXT NOT NULL DEFAULT 'custom',
+                enabled INTEGER DEFAULT 1,
+                priority INTEGER DEFAULT 100,
+                search_config_json TEXT,
+                extract_config_json TEXT,
+                sample_url TEXT,
+                created_by TEXT,
+                last_tested_at TEXT,
+                last_test_status TEXT,
+                raw_json TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_source_profiles_priority
+                ON source_profiles(priority);
             """
         )
         conn.execute(
             "INSERT OR REPLACE INTO schema_meta (key, value) VALUES (?, ?)",
             ("schema_version", str(SCHEMA_VERSION)),
         )
+        _seed_chefaa_source_profile(conn)
+
+
+def _seed_chefaa_source_profile(conn) -> None:
+    """Ensure built-in Chefaa Meilisearch source exists."""
+    import json
+
+    row = conn.execute(
+        "SELECT domain FROM source_profiles WHERE domain = ?",
+        ("chefaa.com",),
+    ).fetchone()
+    if row:
+        return
+    conn.execute(
+        """
+        INSERT INTO source_profiles (
+            domain, display_name, platform, enabled, priority,
+            search_config_json, extract_config_json, sample_url, created_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "chefaa.com",
+            "Chefaa",
+            "chefaa",
+            1,
+            0,
+            json.dumps({"type": "meilisearch", "country": "eg"}),
+            json.dumps({}),
+            "https://chefaa.com",
+            "system",
+        ),
+    )

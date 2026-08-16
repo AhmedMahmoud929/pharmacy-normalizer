@@ -26,6 +26,7 @@ export type SidebarSection = {
 const ICON_BY_KEY: Record<string, string> = {
   match_sheet: "solar:document-text-linear",
   barcode_enrichment: "solar:qr-code-linear",
+  product_discovery: "solar:radar-linear",
   catalog_seeder: "solar:leaf-linear",
   campaign_crawler: "solar:code-linear",
   browse_db: "solar:database-linear",

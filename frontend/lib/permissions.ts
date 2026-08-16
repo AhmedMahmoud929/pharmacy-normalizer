@@ -9,6 +9,7 @@ export const ALL_PERMISSIONS = [
   "gallery",
   "search",
   "normalize",
+  "discovery",
   "users",
 ] as const;
 
@@ -28,6 +29,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   gallery: "Media Gallery",
   search: "Global Search",
   normalize: "Normalize",
+  discovery: "Product Discovery",
   users: "User Management",
 };
 
@@ -50,6 +52,7 @@ export const ROUTE_PERMISSION: Record<string, Permission> = {
   "/dashboard/admin": "users",
   "/dashboard/matcher": "matcher",
   "/dashboard/enrichment": "enrichment",
+  "/dashboard/discovery": "discovery",
   "/dashboard/catalog": "catalog",
   "/dashboard/crawler": "crawler",
   "/dashboard/browse": "browse",

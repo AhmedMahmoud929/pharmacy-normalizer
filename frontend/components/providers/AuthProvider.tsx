@@ -44,6 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  if (typeof window !== "undefined") {
+    installAuthFetchPatch();
+  }
+
   const permissions = useMemo(() => effectivePermissions(user), [user]);
 
   const hasPermission = useCallback(
@@ -67,11 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const uninstallPatch = installAuthFetchPatch();
+    installAuthFetchPatch();
     const unregisterUnauthorized = registerUnauthorizedHandler(() => setUser(null));
     refresh().finally(() => setLoading(false));
     return () => {
-      uninstallPatch();
       unregisterUnauthorized();
     };
   }, [refresh]);

@@ -5,3 +5,5 @@ openpyxl
 pydantic[email]
 python-multipart
 email-validator
+beautifulsoup4
+lxml

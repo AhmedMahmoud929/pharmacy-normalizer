@@ -108,6 +108,9 @@ export function installAuthFetchPatch() {
   if (typeof window === "undefined") return () => {};
 
   const originalFetch = window.fetch.bind(window);
+  if ((window.fetch as FetchWithPatchFlag).__authPatched) {
+    return () => {};
+  }
 
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url =
@@ -117,12 +120,16 @@ export function installAuthFetchPatch() {
           ? input.toString()
           : input.url;
 
+    let sentAuth = false;
     if (url.startsWith(API_URL)) {
       const token = getStoredToken();
       if (token) {
         const headers = new Headers(init?.headers);
         if (!headers.has("Authorization")) {
           headers.set("Authorization", `Bearer ${token}`);
+          sentAuth = true;
+        } else {
+          sentAuth = true;
         }
         init = { ...init, headers };
       }
@@ -130,14 +137,19 @@ export function installAuthFetchPatch() {
 
     const response = await originalFetch(input, init);
 
-    if (isAuthApiUrl(url) && response.status === 401) {
+    if (isAuthApiUrl(url) && response.status === 401 && sentAuth) {
       handleUnauthorized();
     }
 
     return response;
   };
 
+  (window.fetch as FetchWithPatchFlag).__authPatched = true;
+
   return () => {
     window.fetch = originalFetch;
+    delete (window.fetch as FetchWithPatchFlag).__authPatched;
   };
 }
+
+type FetchWithPatchFlag = typeof fetch & { __authPatched?: boolean };

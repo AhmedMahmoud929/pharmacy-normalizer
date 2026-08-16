@@ -15,6 +15,7 @@ ALL_PERMISSIONS: List[str] = [
     "gallery",
     "search",
     "normalize",
+    "discovery",
     "users",
 ]
 
@@ -27,6 +28,7 @@ PERMISSION_LABELS: Dict[str, str] = {
     "gallery": "Media Gallery",
     "search": "Global Search",
     "normalize": "Normalize",
+    "discovery": "Product Discovery",
     "users": "User Management",
 }
 
@@ -89,6 +91,8 @@ def permission_for_path(path: str, method: str) -> PermissionRule:
         return "crawler"
     if p.startswith("/api/gallery"):
         return "gallery"
+    if p.startswith("/api/discovery") or p.startswith("/api/sources"):
+        return "discovery"
     if p.startswith("/normalize"):
         return "normalize"
     if p.startswith("/db/"):
@@ -126,4 +130,6 @@ def permission_for_dashboard_path(path: str) -> Optional[str]:
         return "search"
     if path.startswith("/dashboard/normalize"):
         return "normalize"
+    if path.startswith("/dashboard/discovery"):
+        return "discovery"
     return None

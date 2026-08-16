@@ -7,13 +7,13 @@ import {
   Clock, Plus, FileSpreadsheet, Download, Loader2,
   CheckCircle, AlertCircle, Search, ArrowRight, TrendingUp, Trash2
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, API_URL } from "@/lib/utils";
+import { authHeaders } from "@/lib/auth";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { StatCard, StatCardGrid, cardSurfaceClass, tableHeaderClass, tableRowClass } from "@/components/ui/stat-card";
 import { ExportDialog } from "@/components/matcher/ExportDialog";
 import { DeleteCampaignModal } from "@/components/matcher/DeleteCampaignModal";
 import { FeatureBadge } from "@/components/shared/FeatureBadge";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface MatchJob {
   job_id: string;
@@ -32,6 +32,7 @@ interface MatchJob {
 }
 
 export default function MatcherDashboard() {
+  const { loading: authLoading } = useAuth();
   const [jobs, setJobs] = useState<MatchJob[]>([]);
   const t = useTranslations("Matcher");
   const tDash = useTranslations("Dashboard");
@@ -50,8 +51,11 @@ export default function MatcherDashboard() {
   };
 
   const fetchJobs = useCallback(async () => {
+    if (authLoading) return;
     try {
-      const res = await fetch(`${API_URL}/api/matcher/jobs?limit=100`);
+      const res = await fetch(`${API_URL}/api/matcher/jobs?limit=100`, {
+        headers: authHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setJobs(data.jobs || []);
@@ -61,11 +65,13 @@ export default function MatcherDashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authLoading]);
 
   useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+    if (!authLoading) {
+      fetchJobs();
+    }
+  }, [fetchJobs, authLoading]);
 
   const hasActiveJobs = useMemo(
     () => jobs.some(j => j.status === "running" || j.status === "pending"),
