@@ -35,6 +35,7 @@ const ICON_BY_KEY: Record<string, string> = {
   normalize: "solar:text-linear",
   user_management: "solar:users-group-two-rounded-linear",
   database_settings: "solar:database-linear",
+  dev_help: "solar:book-bookmark-linear",
 };
 
 export function useSidebarItems() {
@@ -63,6 +64,17 @@ export function useSidebarItems() {
   const sidebarItems: SidebarSection[] = [
     { titleKey: "workspace", items: workspaceItems },
     ...(adminItems.length ? [{ titleKey: "administration", items: adminItems }] : []),
+    {
+      titleKey: "resources",
+      items: [
+        {
+          labelKey: "dev_help",
+          icon: ICON_BY_KEY.dev_help,
+          path: "/dashboard/dev-help",
+          permission: "matcher",
+        },
+      ],
+    },
   ];
 
   const isActiveStartsWith = ({ path }: { path: string }) =>

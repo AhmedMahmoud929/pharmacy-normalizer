@@ -92,6 +92,10 @@ export function canAccessDashboardPath(
 
   if (normalized === "/dashboard") return true;
 
+  if (normalized === "/dashboard/dev-help" || normalized.startsWith("/dashboard/dev-help/")) {
+    return true;
+  }
+
   if (normalized.startsWith("/dashboard/crawler") && !showCrawler) {
     return false;
   }

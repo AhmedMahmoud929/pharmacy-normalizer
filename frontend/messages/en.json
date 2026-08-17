@@ -16,7 +16,15 @@
     "home_page": "Home Page",
     "new_campaign": "New Campaign",
     "campaigns": "Campaigns",
-    "explorer": "Explorer"
+    "explorer": "Explorer",
+    "dev_help": "Developer Help"
+  },
+  "DevHelp": {
+    "badge": "Documentation",
+    "title": "Developer Help",
+    "description": "Internal reference for how every dashboard module works — routes, workflows, data storage, APIs, permissions, and how the modules connect.",
+    "toc": "On this page",
+    "footer": "For backup, restore, and table cleanup details, see"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -94,6 +102,7 @@
     "navigationMenu": "Navigation menu",
     "workspace": "Workspace",
     "administration": "Administration",
+    "resources": "Resources",
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar"
   },
@@ -498,6 +507,15 @@
     "import_file_selected": "Selected: {filename} ({size})",
     "import_instruction": "Select a valid SQLite database backup (.db) file to restore database state. WARNING: This replaces the current database entirely.",
     "select_file": "Select Backup File",
-    "forbidden": "You do not have permission to access database administration."
+    "forbidden": "You do not have permission to access database administration.",
+    "export_description": "Choose which tables to include in the backup. Large job result tables are excluded by default.",
+    "export_summary": "Exporting {count} tables — estimated size {size}",
+    "export_started": "Backup download started ({count} tables, ~{size}).",
+    "export_confirm": "Download Backup",
+    "select_all": "Select All",
+    "deselect_all": "Deselect All",
+    "always_included": "Always included",
+    "large_table": "Large",
+    "loading_tables": "Loading tables..."
   }
 }

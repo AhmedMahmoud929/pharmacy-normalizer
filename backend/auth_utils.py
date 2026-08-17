@@ -61,12 +61,20 @@ def create_access_token(
     return f"{data}.{sig}"
 
 
-def create_purpose_token(*, user_id: str, purpose: str, ttl_seconds: int = 120) -> str:
-    payload = {
+def create_purpose_token(
+    *,
+    user_id: str,
+    purpose: str,
+    ttl_seconds: int = 120,
+    data: Optional[Dict[str, Any]] = None,
+) -> str:
+    payload: Dict[str, Any] = {
         "sub": user_id,
         "purpose": purpose,
         "exp": int(time.time()) + ttl_seconds,
     }
+    if data:
+        payload["data"] = data
     data = base64.urlsafe_b64encode(json.dumps(payload, separators=(",", ":")).encode()).decode().rstrip("=")
     sig = hmac.new(JWT_SECRET.encode(), data.encode(), hashlib.sha256).hexdigest()
     return f"{data}.{sig}"

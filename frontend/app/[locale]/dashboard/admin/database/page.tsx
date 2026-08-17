@@ -15,10 +15,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface TableInfo {
   name: string;
   rows: number;
+  size_bytes?: number;
+  category?: string;
+  protected?: boolean;
+  large_optional?: boolean;
+  default_export?: boolean;
   error?: string;
 }
 
-type DialogMode = "clean_manager" | "export" | "import" | null;
+type DialogMode = "clean_manager" | "export_manager" | "import" | null;
 
 interface ImportResult {
   message: string;
@@ -45,6 +50,7 @@ export default function DatabaseManagementPage() {
 
   // Table selection state
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
+  const [exportSelectedTables, setExportSelectedTables] = useState<string[]>([]);
 
   // Dialog / Password validation states
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
@@ -106,12 +112,41 @@ export default function DatabaseManagementPage() {
     }
   };
 
+  const handleSelectExportTable = (tableName: string) => {
+    if (protectedTables.includes(tableName)) return;
+    setExportSelectedTables(prev =>
+      prev.includes(tableName)
+        ? prev.filter(t => t !== tableName)
+        : [...prev, tableName]
+    );
+  };
+
+  const handleSelectAllExport = () => {
+    const selectable = tables
+      .map(t => t.name)
+      .filter(name => !protectedTables.includes(name));
+
+    if (exportSelectedTables.filter(n => !protectedTables.includes(n)).length === selectable.length) {
+      setExportSelectedTables(protectedTables.filter(p => tables.some(t => t.name === p)));
+    } else {
+      setExportSelectedTables([...new Set([...protectedTables, ...selectable])]);
+    }
+  };
+
   const openConfirmation = (mode: DialogMode) => {
     setDialogMode(mode);
     setPassword("");
     setDialogError(null);
     setActionStatus(null);
     setImportResult(null);
+    if (mode === "export_manager") {
+      const defaults = tables
+        .filter(t => t.default_export !== false)
+        .map(t => t.name);
+      setExportSelectedTables([
+        ...new Set([...protectedTables.filter(p => tables.some(t => t.name === p)), ...defaults]),
+      ]);
+    }
   };
 
   const closeConfirmation = () => {
@@ -179,6 +214,57 @@ export default function DatabaseManagementPage() {
     }
   };
 
+  const handleConfirmExport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) {
+      setDialogError("Password is required.");
+      return;
+    }
+    if (exportSelectedTables.length === 0) {
+      setDialogError("Select at least one table to export.");
+      return;
+    }
+
+    setDialogError(null);
+    setActionLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/db-admin/backup/export`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ password, tables: exportSelectedTables }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || t("error_password"));
+      }
+
+      const downloadUrl = `${API_URL}${data.download_url}`;
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = data.filename || `pharmatcher_backup_${Date.now()}.db`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setSuccessMsg(
+        t("export_started", {
+          count: data.table_count ?? exportSelectedTables.length,
+          size: formatFileSize(exportSelectedSize),
+        })
+      );
+      closeConfirmation();
+    } catch (err) {
+      setDialogError(err instanceof Error ? err.message : "Export failed.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleConfirmAction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
@@ -190,33 +276,7 @@ export default function DatabaseManagementPage() {
     setActionLoading(true);
 
     try {
-      if (dialogMode === "export") {
-        const res = await fetch(`${API_URL}/api/db-admin/backup/export`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authHeaders(),
-          },
-          body: JSON.stringify({ password }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data.detail || t("error_password"));
-        }
-
-        const downloadUrl = `${API_URL}${data.download_url}`;
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = data.filename || `pharmatcher_backup_${Date.now()}.db`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        setSuccessMsg("Database backup download started.");
-        closeConfirmation();
-      } 
-      else if (dialogMode === "import") {
+      if (dialogMode === "import") {
         if (!selectedFile) {
           setDialogError("Please select a file to import.");
           setActionLoading(false);
@@ -279,6 +339,12 @@ export default function DatabaseManagementPage() {
     return a.name.localeCompare(b.name);
   });
 
+  const exportSelectedSize = tables
+    .filter(t => exportSelectedTables.includes(t.name))
+    .reduce((sum, t) => sum + (t.size_bytes ?? 0), 0);
+
+  const exportableTables = tables.filter(t => !protectedTables.includes(t.name));
+
   return (
     <div className="w-full min-w-0 space-y-8 pb-12">
       {/* Header */}
@@ -340,7 +406,7 @@ export default function DatabaseManagementPage() {
             </p>
           </div>
           <button
-            onClick={() => openConfirmation("export")}
+            onClick={() => openConfirmation("export_manager")}
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all cursor-pointer"
           >
             <Download className="w-4 h-4 text-primary" />
@@ -524,6 +590,140 @@ export default function DatabaseManagementPage() {
                 </div>
               </div>
             </div>
+          ) : dialogMode === "export_manager" ? (
+            <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 p-6 space-y-6 flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <span className="p-2 bg-primary/10 rounded-xl">
+                    <Download className="w-5 h-5 text-primary" />
+                  </span>
+                  <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                    {t("export_db")}
+                  </h2>
+                </div>
+                {exportableTables.length > 0 && (
+                  <button
+                    onClick={handleSelectAllExport}
+                    className="text-xs font-bold text-primary hover:underline uppercase tracking-wider"
+                  >
+                    {exportSelectedTables.filter(n => !protectedTables.includes(n)).length === exportableTables.length
+                      ? t("deselect_all")
+                      : t("select_all")}
+                  </button>
+                )}
+              </div>
+
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {t("export_description")}
+              </p>
+
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-4">
+                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                  <p className="text-sm text-zinc-400 font-medium">{t("loading_tables")}</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border overflow-y-auto pr-2 scrollbar-thin max-h-[300px]">
+                  {sortedTables.map((table) => {
+                    const isProtected = protectedTables.includes(table.name);
+                    const isChecked = exportSelectedTables.includes(table.name);
+
+                    return (
+                      <div
+                        key={table.name}
+                        onClick={isProtected ? undefined : () => handleSelectExportTable(table.name)}
+                        className={cn(
+                          "flex items-center justify-between py-3.5 px-3 transition-all rounded-xl gap-3",
+                          isProtected
+                            ? "cursor-default bg-zinc-50/50 dark:bg-black/10"
+                            : "cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        )}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {isProtected ? (
+                            <Shield className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                          ) : (
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={() => handleSelectExportTable(table.name)}
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-zinc-800 dark:text-zinc-100 flex items-center gap-2 flex-wrap">
+                              {table.name}
+                              {isProtected && (
+                                <span className="text-[9px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-border">
+                                  {t("always_included")}
+                                </span>
+                              )}
+                              {table.large_optional && (
+                                <span className="text-[9px] font-black uppercase bg-warning/10 text-warning px-1.5 py-0.5 rounded border border-warning/20">
+                                  {t("large_table")}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                            {formatFileSize(table.size_bytes ?? 0)}
+                          </p>
+                          <p className="text-[10px] text-zinc-400">
+                            {table.rows.toLocaleString()} {t("rows_count")}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="p-3.5 bg-primary/5 border border-primary/20 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                {t("export_summary", {
+                  count: exportSelectedTables.length,
+                  size: formatFileSize(exportSelectedSize),
+                })}
+              </div>
+
+              <form onSubmit={handleConfirmExport} className="space-y-4 pt-2 border-t border-border">
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t("password_placeholder")}
+                  className="w-full px-4 py-3 bg-zinc-50 dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium"
+                />
+
+                {dialogError && (
+                  <div className="p-3.5 bg-error/10 border border-error/20 rounded-xl text-error text-xs font-semibold">
+                    {dialogError}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={closeConfirmation}
+                    disabled={actionLoading}
+                    className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-xs font-bold text-zinc-650 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer outline-none"
+                  >
+                    {t("cancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={actionLoading || exportSelectedTables.length === 0}
+                    className="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-primary-foreground rounded-xl text-xs font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {actionLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      t("export_confirm")
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           ) : importResult && dialogMode === "import" ? (
             <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 p-6 space-y-6">
               <div className="flex items-center gap-2 text-success">
@@ -580,8 +780,8 @@ export default function DatabaseManagementPage() {
                 </div>
               </div>
             </div>
-          ) : (
-            /* Backup Actions Confirmation Modal (Export/Import) */
+          ) : dialogMode === "import" ? (
+            /* Import Confirmation Modal */
             <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 p-6 space-y-6">
               <div className="flex items-center gap-2 text-warning">
                 <span className="p-2 bg-warning/10 rounded-xl">
@@ -593,17 +793,12 @@ export default function DatabaseManagementPage() {
               </div>
 
               <div className="space-y-3">
-                {dialogMode === "import" && selectedFile && (
+                {selectedFile && (
                   <div className="p-3.5 bg-warning/5 border border-warning/20 rounded-xl">
                     <p className="text-xs text-warning font-bold">
                       This will replace your current DB file with the uploaded copy ({selectedFile.name}).
                     </p>
                   </div>
-                )}
-                {dialogMode === "export" && (
-                  <p className="text-xs text-zinc-400">
-                    You are downloading a complete SQLite copy of the application database.
-                  </p>
                 )}
 
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
@@ -651,7 +846,7 @@ export default function DatabaseManagementPage() {
                 </div>
               </form>
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

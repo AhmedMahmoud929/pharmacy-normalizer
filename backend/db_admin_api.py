@@ -9,18 +9,25 @@ import tempfile
 import time
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth_api import get_current_user
 from auth_utils import create_purpose_token, decode_purpose_token, verify_password
+from db.backup_utils import (
+    LARGE_OPTIONAL_TABLES,
+    PROTECTED_TABLES,
+    default_export_tables,
+    list_all_tables,
+    normalize_export_tables,
+    resolve_backup_file,
+)
 from db.config import DEFAULT_DB_PATH
 from db.connection import get_connection
 
 router = APIRouter(prefix="/api/db-admin", tags=["db-admin"])
 
-# Injected from api.py to reload the catalog index in memory after changes
 _reload_catalog_index = None
 
 
@@ -37,27 +44,71 @@ class CleanRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     password: str
+    tables: List[str] = Field(default_factory=list)
+
+
+def _table_size_bytes(conn: sqlite3.Connection, table: str) -> int:
+    try:
+        row = conn.execute("SELECT SUM(pgsize) FROM dbstat WHERE name = ?", (table,)).fetchone()
+        if row and row[0]:
+            return int(row[0])
+    except sqlite3.Error:
+        pass
+    return 0
+
+
+def _table_category(name: str) -> str:
+    if name in PROTECTED_TABLES:
+        return "system"
+    if name.endswith("_job_results"):
+        return "job_results"
+    if name.endswith("_jobs") or name == "catalog_pipeline_jobs":
+        return "jobs"
+    if name.startswith("catalog_"):
+        return "catalog"
+    if name in {"brands", "tokens", "stop_words"}:
+        return "normalizer"
+    if name == "source_profiles":
+        return "discovery"
+    return "other"
 
 
 @router.get("/tables")
 async def get_tables(current_user: Dict[str, Any] = Depends(get_current_user)):
-    """Retrieve all database tables and their row counts (Admin only)."""
+    """Retrieve all database tables with row counts and on-disk size estimates."""
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only administrators can manage the database.")
 
     tables_info = []
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-        tables = [row["name"] for row in cursor.fetchall()]
+        tables = list_all_tables(conn)
 
         for table in tables:
             try:
                 cursor.execute(f"SELECT COUNT(*) as count FROM {table};")
                 count = cursor.fetchone()["count"]
-                tables_info.append({"name": table, "rows": count})
+                size_bytes = _table_size_bytes(conn, table)
+                tables_info.append({
+                    "name": table,
+                    "rows": count,
+                    "size_bytes": size_bytes,
+                    "category": _table_category(table),
+                    "protected": table in PROTECTED_TABLES,
+                    "large_optional": table in LARGE_OPTIONAL_TABLES,
+                    "default_export": table not in LARGE_OPTIONAL_TABLES,
+                })
             except Exception as e:
-                tables_info.append({"name": table, "rows": 0, "error": str(e)})
+                tables_info.append({
+                    "name": table,
+                    "rows": 0,
+                    "size_bytes": 0,
+                    "category": _table_category(table),
+                    "protected": table in PROTECTED_TABLES,
+                    "large_optional": table in LARGE_OPTIONAL_TABLES,
+                    "default_export": table not in LARGE_OPTIONAL_TABLES,
+                    "error": str(e),
+                })
 
     return {"tables": tables_info}
 
@@ -77,29 +128,33 @@ async def clean_database(
     tables_to_clean = []
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-        all_tables = [row["name"] for row in cursor.fetchall()]
+        all_tables = list_all_tables(conn)
 
         if body.clean_all:
-            # Exclude critical schema metadata and user database from automatic purge
-            tables_to_clean = [t for t in all_tables if t not in ["users", "schema_meta"]]
+            tables_to_clean = [t for t in all_tables if t not in PROTECTED_TABLES]
         else:
             for table in body.tables:
                 if table not in all_tables:
                     raise HTTPException(status_code=400, detail=f"Table '{table}' does not exist.")
-                if table in ["users", "schema_meta"]:
+                if table in PROTECTED_TABLES:
                     raise HTTPException(
                         status_code=400,
                         detail=f"Table '{table}' is protected and cannot be deleted for system stability."
                     )
             tables_to_clean = body.tables
 
-        # Run deletions using context manager connection
         cursor.execute("PRAGMA foreign_keys = OFF;")
         for table in tables_to_clean:
             cursor.execute(f"DELETE FROM {table};")
         cursor.execute("PRAGMA foreign_keys = ON;")
-        cursor.execute("VACUUM;")
+
+    if tables_to_clean:
+        vacuum_conn = sqlite3.connect(DEFAULT_DB_PATH)
+        try:
+            vacuum_conn.isolation_level = None
+            vacuum_conn.execute("VACUUM")
+        finally:
+            vacuum_conn.close()
 
     if _reload_catalog_index:
         _reload_catalog_index()
@@ -116,7 +171,7 @@ async def export_db(
     body: ExportRequest,
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
-    """Authorize a database backup download (Admin only)."""
+    """Authorize a database backup download with optional table selection (Admin only)."""
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only administrators can manage the database.")
 
@@ -126,31 +181,57 @@ async def export_db(
     if not os.path.exists(DEFAULT_DB_PATH):
         raise HTTPException(status_code=404, detail="Database file not found.")
 
+    with get_connection() as conn:
+        all_tables = list_all_tables(conn)
+
+    if body.tables:
+        export_tables = normalize_export_tables(body.tables, set(all_tables))
+    else:
+        export_tables = default_export_tables(all_tables)
+
+    if not export_tables:
+        raise HTTPException(status_code=400, detail="No tables selected for export.")
+
     download_token = create_purpose_token(
         user_id=str(current_user["id"]),
         purpose="db_backup_download",
+        data={"tables": export_tables},
     )
     filename = f"pharmatcher_backup_{int(time.time())}.db"
 
     return {
         "download_url": f"/api/db-admin/backup/download?token={download_token}",
         "filename": filename,
+        "tables": export_tables,
+        "table_count": len(export_tables),
     }
 
 
 @router.get("/backup/download")
-async def download_db_backup(token: str = Query(...)):
+async def download_db_backup(
+    background_tasks: BackgroundTasks,
+    token: str = Query(...),
+):
     """Stream database backup file using a short-lived download token."""
     try:
-        decode_purpose_token(token, purpose="db_backup_download")
+        payload = decode_purpose_token(token, purpose="db_backup_download")
     except ValueError:
         raise HTTPException(status_code=403, detail="Invalid or expired download token.")
 
     if not os.path.exists(DEFAULT_DB_PATH):
         raise HTTPException(status_code=404, detail="Database file not found.")
 
+    tables = (payload.get("data") or {}).get("tables") or []
+    try:
+        backup_path, is_temp = resolve_backup_file(tables)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if is_temp:
+        background_tasks.add_task(os.remove, backup_path)
+
     return FileResponse(
-        path=DEFAULT_DB_PATH,
+        path=backup_path,
         filename=f"pharmatcher_backup_{int(time.time())}.db",
         media_type="application/x-sqlite3",
     )
@@ -174,7 +255,6 @@ async def import_db(
         with os.fdopen(temp_fd, "wb") as tmp:
             shutil.copyfileobj(file.file, tmp)
 
-        # Validate that the backup file is a valid SQLite DB with the required schema
         try:
             temp_conn = sqlite3.connect(temp_path)
             temp_cursor = temp_conn.cursor()
@@ -191,7 +271,6 @@ async def import_db(
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid database file format: {str(e)}")
 
-        # Perform online copy from uploaded temp DB to the live DB
         src_conn = sqlite3.connect(temp_path)
         dest_conn = sqlite3.connect(DEFAULT_DB_PATH)
         try:
@@ -212,8 +291,7 @@ async def import_db(
     total_rows = 0
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-        table_names = [row["name"] for row in cursor.fetchall()]
+        table_names = list_all_tables(conn)
         for table in table_names:
             try:
                 cursor.execute(f"SELECT COUNT(*) as count FROM {table};")

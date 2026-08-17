@@ -1,8 +1,9 @@
 """SQLite schema initialization for PharmMatcher unified database."""
 
 from db.connection import get_connection
+from db.migrate_legacy_job_dbs import migrate_legacy_job_databases
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 def init_schema() -> None:
@@ -157,6 +158,117 @@ def init_schema() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_source_profiles_priority
                 ON source_profiles(priority);
+
+            -- Match Sheet job history
+            CREATE TABLE IF NOT EXISTS matcher_jobs (
+                job_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                pid INTEGER,
+                filename TEXT NOT NULL,
+                total_rows INTEGER DEFAULT 0,
+                processed_rows INTEGER DEFAULT 0,
+                matched_count INTEGER DEFAULT 0,
+                review_count INTEGER DEFAULT 0,
+                no_match_count INTEGER DEFAULT 0,
+                column_used TEXT,
+                match_threshold REAL,
+                review_threshold REAL,
+                output_path TEXT,
+                results_path TEXT,
+                error_msg TEXT,
+                created_at TEXT NOT NULL,
+                started_at TEXT,
+                finished_at TEXT,
+                duration INTEGER,
+                use_uploaded_price INTEGER DEFAULT 0,
+                price_column TEXT,
+                use_uploaded_stock INTEGER DEFAULT 0,
+                stock_column TEXT,
+                default_stock INTEGER DEFAULT 10,
+                use_uploaded_code INTEGER DEFAULT 0,
+                code_column TEXT,
+                use_uploaded_international_barcode INTEGER DEFAULT 0,
+                international_barcode_column TEXT,
+                match_with_international_barcode INTEGER DEFAULT 0,
+                match_international_barcode_column TEXT,
+                match_with_code INTEGER DEFAULT 0,
+                match_pos_code_column TEXT,
+                skip_normalizer INTEGER DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS matcher_job_results (
+                job_id TEXT PRIMARY KEY,
+                results_json TEXT NOT NULL DEFAULT '[]',
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (job_id) REFERENCES matcher_jobs(job_id) ON DELETE CASCADE
+            );
+
+            -- Product Discovery job history
+            CREATE TABLE IF NOT EXISTS discovery_jobs (
+                job_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                pid INTEGER,
+                filename TEXT NOT NULL,
+                input_type TEXT NOT NULL,
+                matcher_job_id TEXT,
+                name_column TEXT,
+                source_domains_json TEXT,
+                total_rows INTEGER DEFAULT 0,
+                processed_rows INTEGER DEFAULT 0,
+                found_count INTEGER DEFAULT 0,
+                review_count INTEGER DEFAULT 0,
+                not_found_count INTEGER DEFAULT 0,
+                imported_count INTEGER DEFAULT 0,
+                match_threshold REAL,
+                review_threshold REAL,
+                results_path TEXT,
+                error_msg TEXT,
+                created_at TEXT NOT NULL,
+                started_at TEXT,
+                finished_at TEXT,
+                duration INTEGER
+            );
+
+            CREATE TABLE IF NOT EXISTS discovery_job_results (
+                job_id TEXT PRIMARY KEY,
+                results_json TEXT NOT NULL DEFAULT '[]',
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (job_id) REFERENCES discovery_jobs(job_id) ON DELETE CASCADE
+            );
+
+            -- Barcode Enrichment job history
+            CREATE TABLE IF NOT EXISTS enrichment_jobs (
+                job_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                pid INTEGER,
+                filename TEXT NOT NULL,
+                total_rows INTEGER DEFAULT 0,
+                processed_rows INTEGER DEFAULT 0,
+                matched_count INTEGER DEFAULT 0,
+                review_count INTEGER DEFAULT 0,
+                no_match_count INTEGER DEFAULT 0,
+                already_synced_count INTEGER DEFAULT 0,
+                applied_count INTEGER DEFAULT 0,
+                pending_apply_count INTEGER DEFAULT 0,
+                name_column TEXT,
+                barcode_column TEXT,
+                code_column TEXT,
+                match_threshold REAL,
+                review_threshold REAL,
+                results_path TEXT,
+                error_msg TEXT,
+                created_at TEXT NOT NULL,
+                started_at TEXT,
+                finished_at TEXT,
+                duration INTEGER
+            );
+
+            CREATE TABLE IF NOT EXISTS enrichment_job_results (
+                job_id TEXT PRIMARY KEY,
+                results_json TEXT NOT NULL DEFAULT '[]',
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (job_id) REFERENCES enrichment_jobs(job_id) ON DELETE CASCADE
+            );
             """
         )
         conn.execute(
@@ -164,6 +276,8 @@ def init_schema() -> None:
             ("schema_version", str(SCHEMA_VERSION)),
         )
         _seed_chefaa_source_profile(conn)
+
+    migrate_legacy_job_databases()
 
 
 def _seed_chefaa_source_profile(conn) -> None:
