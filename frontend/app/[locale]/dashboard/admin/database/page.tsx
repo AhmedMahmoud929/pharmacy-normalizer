@@ -23,6 +23,15 @@ interface TableInfo {
   error?: string;
 }
 
+interface LocalFileTarget {
+  id: string;
+  label: string;
+  description: string;
+  category: string;
+  file_count: number;
+  size_bytes: number;
+}
+
 type DialogMode = "clean_manager" | "export_manager" | "import" | null;
 
 interface ImportResult {
@@ -44,12 +53,14 @@ export default function DatabaseManagementPage() {
   const { hasPermission } = useAuth();
 
   const [tables, setTables] = useState<TableInfo[]>([]);
+  const [localFileTargets, setLocalFileTargets] = useState<LocalFileTarget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Table selection state
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
+  const [selectedLocalTargets, setSelectedLocalTargets] = useState<string[]>([]);
   const [exportSelectedTables, setExportSelectedTables] = useState<string[]>([]);
 
   // Dialog / Password validation states
@@ -69,15 +80,24 @@ export default function DatabaseManagementPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/db-admin/tables`, {
-        headers: authHeaders(),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
+      const [tablesRes, filesRes] = await Promise.all([
+        fetch(`${API_URL}/api/db-admin/tables`, { headers: authHeaders() }),
+        fetch(`${API_URL}/api/db-admin/local-files`, { headers: authHeaders() }),
+      ]);
+
+      if (!tablesRes.ok) {
+        const data = await tablesRes.json().catch(() => ({}));
         throw new Error(data.detail || "Failed to load database tables.");
       }
-      const data = await res.json();
-      setTables(data.tables || []);
+      if (!filesRes.ok) {
+        const data = await filesRes.json().catch(() => ({}));
+        throw new Error(data.detail || "Failed to load local file targets.");
+      }
+
+      const tablesData = await tablesRes.json();
+      const filesData = await filesRes.json();
+      setTables(tablesData.tables || []);
+      setLocalFileTargets(filesData.targets || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load database tables.");
     } finally {
@@ -109,6 +129,23 @@ export default function DatabaseManagementPage() {
       setSelectedTables([]);
     } else {
       setSelectedTables(clearable);
+    }
+  };
+
+  const handleSelectLocalTarget = (targetId: string) => {
+    setSelectedLocalTargets(prev =>
+      prev.includes(targetId)
+        ? prev.filter(id => id !== targetId)
+        : [...prev, targetId]
+    );
+  };
+
+  const handleSelectAllLocal = () => {
+    const allIds = localFileTargets.map(t => t.id);
+    if (selectedLocalTargets.length === allIds.length) {
+      setSelectedLocalTargets([]);
+    } else {
+      setSelectedLocalTargets(allIds);
     }
   };
 
@@ -178,8 +215,8 @@ export default function DatabaseManagementPage() {
       return;
     }
 
-    if (selectedTables.length === 0) {
-      setDialogError("Select at least one table to clean.");
+    if (selectedTables.length === 0 && selectedLocalTargets.length === 0) {
+      setDialogError(t("error_nothing_selected"));
       return;
     }
 
@@ -197,14 +234,20 @@ export default function DatabaseManagementPage() {
           password,
           tables: selectedTables,
           clean_all: false,
+          local_targets: selectedLocalTargets,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || t("error_password"));
 
-      setSuccessMsg(t("success_clean"));
+      const cleanedTables = Array.isArray(data.cleaned_tables) ? data.cleaned_tables.length : 0;
+      const cleanedLocal = Array.isArray(data.cleaned_local) ? data.cleaned_local.length : 0;
+      setSuccessMsg(
+        t("success_clean_detail", { tables: cleanedTables, folders: cleanedLocal })
+      );
       setSelectedTables([]);
+      setSelectedLocalTargets([]);
       await loadTables();
       closeConfirmation();
     } catch (err) {
@@ -372,22 +415,22 @@ export default function DatabaseManagementPage() {
       )}
 
       {/* 3 Columns Grid of Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
         
         {/* Card 1: Clean Database */}
-        <div className={cn(cardSurfaceClass, "p-6 space-y-4 flex flex-col justify-between h-[280px]")}>
-          <div className="space-y-3">
+        <div className={cn(cardSurfaceClass, "p-6 flex flex-col h-full gap-4")}>
+          <div className="space-y-3 flex-1">
             <div className="flex items-center gap-3 border-b border-border pb-3">
               <Trash2 className="w-5 h-5 text-error" />
               <h3 className="font-bold text-lg text-zinc-800 dark:text-zinc-200">{t("clean_db")}</h3>
             </div>
             <p className="text-xs font-medium text-zinc-400 leading-relaxed">
-              Choose specific database tables to wipe, or perform a system-wide clean (excluding user accounts and meta properties).
+              Choose database tables to wipe and optionally delete local job uploads, exports, and cached media from disk.
             </p>
           </div>
           <button
             onClick={() => openConfirmation("clean_manager")}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-error/10 hover:bg-error hover:text-white border border-error/20 hover:border-transparent text-error font-bold text-sm transition-all cursor-pointer"
+            className="mt-auto w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-error/10 hover:bg-error hover:text-white border border-error/20 hover:border-transparent text-error font-bold text-sm transition-all cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             Open Clean Manager
@@ -395,8 +438,8 @@ export default function DatabaseManagementPage() {
         </div>
 
         {/* Card 2: Export Backup */}
-        <div className={cn(cardSurfaceClass, "p-6 space-y-4 flex flex-col justify-between h-[280px]")}>
-          <div className="space-y-3">
+        <div className={cn(cardSurfaceClass, "p-6 flex flex-col h-full gap-4")}>
+          <div className="space-y-3 flex-1">
             <div className="flex items-center gap-3 border-b border-border pb-3">
               <Download className="w-5 h-5 text-primary" />
               <h3 className="font-bold text-lg text-zinc-800 dark:text-zinc-200">{t("export_db")}</h3>
@@ -407,7 +450,7 @@ export default function DatabaseManagementPage() {
           </div>
           <button
             onClick={() => openConfirmation("export_manager")}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all cursor-pointer"
+            className="mt-auto w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all cursor-pointer"
           >
             <Download className="w-4 h-4 text-primary" />
             Download Database Backup
@@ -415,8 +458,8 @@ export default function DatabaseManagementPage() {
         </div>
 
         {/* Card 3: Import Backup */}
-        <div className={cn(cardSurfaceClass, "p-6 space-y-4 flex flex-col justify-between min-h-[280px]")}>
-          <div className="space-y-3">
+        <div className={cn(cardSurfaceClass, "p-6 flex flex-col h-full gap-4")}>
+          <div className="space-y-3 flex-1">
             <div className="flex items-center gap-3 border-b border-border pb-3">
               <Upload className="w-5 h-5 text-warning" />
               <h3 className="font-bold text-lg text-zinc-800 dark:text-zinc-200">{t("import_db")}</h3>
@@ -448,14 +491,15 @@ export default function DatabaseManagementPage() {
               )}
             </div>
           </div>
-          <button
-            onClick={() => openConfirmation("import")}
-            disabled={!selectedFile}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-bold text-sm transition-all hover:bg-primary-dark shadow-md shadow-primary/15 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-          >
-            <Upload className="w-4 h-4" />
-            Upload & Restore DB
-          </button>
+          {selectedFile && (
+            <button
+              onClick={() => openConfirmation("import")}
+              className="mt-auto w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-bold text-sm transition-all hover:bg-primary-dark shadow-md shadow-primary/15 cursor-pointer"
+            >
+              <Upload className="w-4 h-4" />
+              Upload & Restore DB
+            </button>
+          )}
         </div>
 
       </div>
@@ -473,8 +517,8 @@ export default function DatabaseManagementPage() {
 
           {dialogMode === "clean_manager" ? (
             /* Clean Manager Dialog */
-            <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 p-6 space-y-6 flex flex-col max-h-[90vh]">
-              <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 p-6 space-y-5 flex flex-col max-h-[90vh]">
+              <div className="flex items-center border-b border-border pb-4">
                 <div className="flex items-center gap-2 text-error">
                   <span className="p-2 bg-error/10 rounded-xl">
                     <Trash2 className="w-5 h-5 text-error" />
@@ -483,68 +527,141 @@ export default function DatabaseManagementPage() {
                     Clean Database Manager
                   </h2>
                 </div>
-                {clearableTables.length > 0 && (
-                  <button
-                    onClick={handleSelectAll}
-                    className="text-xs font-bold text-primary hover:underline uppercase tracking-wider"
-                  >
-                    {selectedTables.length === clearableTables.length ? "Deselect All" : "Select All"}
-                  </button>
-                )}
               </div>
 
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                  <p className="text-sm text-zinc-400 font-medium">Fetching tables status...</p>
+                  <p className="text-sm text-zinc-400 font-medium">{t("loading_tables")}</p>
                 </div>
-              ) : tables.length === 0 ? (
-                <p className="text-sm text-zinc-500 py-10 text-center">No tables discovered in SQLite database.</p>
               ) : (
-                <div className="divide-y divide-border overflow-y-auto pr-2 scrollbar-thin max-h-[300px]">
-                  {sortedTables.map((table) => {
-                    const isProtected = protectedTables.includes(table.name);
-                    const isChecked = selectedTables.includes(table.name);
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-0 flex-1 items-stretch">
+                  {/* Tables column */}
+                  <div className="flex flex-col gap-3 min-h-0 md:pr-3 md:border-r md:border-border">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                        {t("select_tables_to_clean")}
+                      </p>
+                      {clearableTables.length > 0 && (
+                        <button
+                          onClick={handleSelectAll}
+                          className="text-xs font-bold text-primary hover:underline uppercase tracking-wider shrink-0"
+                        >
+                          {selectedTables.length === clearableTables.length ? t("deselect_all") : t("select_all")}
+                        </button>
+                      )}
+                    </div>
 
-                    return (
-                      <div 
-                        key={table.name} 
-                        onClick={isProtected ? undefined : () => handleSelectTable(table.name)}
-                        className={cn(
-                          "flex items-center justify-between py-3.5 px-3 transition-all rounded-xl",
-                          isProtected 
-                            ? "cursor-default opacity-50 bg-zinc-50/50 dark:bg-black/10" 
-                            : "cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          {isProtected ? (
-                            <Shield className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                          ) : (
-                            <Checkbox
-                              checked={isChecked}
-                              onCheckedChange={() => handleSelectTable(table.name)}
-                            />
-                          )}
-                          <div>
-                            <p className="font-medium text-sm text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-                              {table.name}
-                              {isProtected && (
-                                <span className="text-[9px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-border">
-                                  PROTECTED
-                                </span>
+                    {tables.length === 0 ? (
+                      <p className="text-sm text-zinc-500 py-6 text-center">No tables discovered in SQLite database.</p>
+                    ) : (
+                      <div className="divide-y divide-border overflow-y-auto pr-2 scrollbar-thin flex-1 min-h-[240px] max-h-[42vh]">
+                        {sortedTables.map((table) => {
+                          const isProtected = protectedTables.includes(table.name);
+                          const isChecked = selectedTables.includes(table.name);
+
+                          return (
+                            <div
+                              key={table.name}
+                              onClick={isProtected ? undefined : () => handleSelectTable(table.name)}
+                              className={cn(
+                                "flex items-center justify-between py-3.5 px-3 transition-all rounded-xl",
+                                isProtected
+                                  ? "cursor-default opacity-50 bg-zinc-50/50 dark:bg-black/10"
+                                  : "cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                            {table.rows.toLocaleString()} {t("rows_count")}
-                          </span>
-                        </div>
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                {isProtected ? (
+                                  <Shield className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                                ) : (
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={() => handleSelectTable(table.name)}
+                                  />
+                                )}
+                                <div className="min-w-0">
+                                  <p className="font-medium text-sm text-zinc-800 dark:text-zinc-100 flex items-center gap-2 truncate">
+                                    {table.name}
+                                    {isProtected && (
+                                      <span className="text-[9px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-border shrink-0">
+                                        PROTECTED
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0 ml-3">
+                                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                                  {table.rows.toLocaleString()} {t("rows_count")}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
+
+                  {/* Local files column */}
+                  <div className="flex flex-col gap-3 min-h-0 md:pl-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                          {t("local_files_section")}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-1">{t("local_files_description")}</p>
+                      </div>
+                      {localFileTargets.length > 0 && (
+                        <button
+                          onClick={handleSelectAllLocal}
+                          className="text-xs font-bold text-primary hover:underline uppercase tracking-wider shrink-0"
+                        >
+                          {selectedLocalTargets.length === localFileTargets.length
+                            ? t("deselect_all")
+                            : t("select_all")}
+                        </button>
+                      )}
+                    </div>
+
+                    {localFileTargets.length === 0 ? (
+                      <p className="text-sm text-zinc-500 py-6 text-center">No local file targets found.</p>
+                    ) : (
+                      <div className="divide-y divide-border overflow-y-auto pr-2 scrollbar-thin flex-1 min-h-[240px] max-h-[42vh]">
+                        {localFileTargets.map((target) => {
+                          const isChecked = selectedLocalTargets.includes(target.id);
+                          return (
+                            <div
+                              key={target.id}
+                              onClick={() => handleSelectLocalTarget(target.id)}
+                              className="flex items-center justify-between py-3 px-3 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all rounded-xl"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <Checkbox
+                                  checked={isChecked}
+                                  onCheckedChange={() => handleSelectLocalTarget(target.id)}
+                                />
+                                <div className="min-w-0">
+                                  <p className="font-medium text-sm text-zinc-800 dark:text-zinc-100 truncate">
+                                    {target.label}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-500 truncate">{target.description}</p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0 ml-3">
+                                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 block">
+                                  {target.file_count.toLocaleString()} {t("files_count")}
+                                </span>
+                                <span className="text-[10px] text-zinc-400">
+                                  {formatFileSize(target.size_bytes)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -581,11 +698,21 @@ export default function DatabaseManagementPage() {
                   </button>
                   <button
                     type="button"
-                    disabled={selectedTables.length === 0 || actionLoading}
+                    disabled={
+                      (selectedTables.length === 0 && selectedLocalTargets.length === 0) ||
+                      actionLoading
+                    }
                     onClick={handleConfirmClean}
                     className="flex-1 px-4 py-3 bg-error hover:bg-error/95 text-white rounded-xl text-xs font-bold shadow-lg shadow-error/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
-                    {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `Clean Selected (${selectedTables.length})`}
+                    {actionLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      t("clean_selected_summary", {
+                        tables: selectedTables.length,
+                        folders: selectedLocalTargets.length,
+                      })
+                    )}
                   </button>
                 </div>
               </div>

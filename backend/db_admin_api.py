@@ -25,6 +25,7 @@ from db.backup_utils import (
 )
 from db.config import DEFAULT_DB_PATH
 from db.connection import get_connection
+from db.local_files_utils import clean_local_targets, list_local_file_targets
 
 router = APIRouter(prefix="/api/db-admin", tags=["db-admin"])
 
@@ -38,8 +39,9 @@ def register_db_admin_deps(reload_catalog_index_fn) -> None:
 
 class CleanRequest(BaseModel):
     password: str
-    tables: List[str]
-    clean_all: bool
+    tables: List[str] = Field(default_factory=list)
+    clean_all: bool = False
+    local_targets: List[str] = Field(default_factory=list)
 
 
 class ExportRequest(BaseModel):
@@ -113,6 +115,15 @@ async def get_tables(current_user: Dict[str, Any] = Depends(get_current_user)):
     return {"tables": tables_info}
 
 
+@router.get("/local-files")
+async def get_local_files(current_user: Dict[str, Any] = Depends(get_current_user)):
+    """List on-disk data folders that can be cleaned (job uploads, exports, media)."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only administrators can manage the database.")
+
+    return {"targets": list_local_file_targets()}
+
+
 @router.post("/clean")
 async def clean_database(
     body: CleanRequest,
@@ -125,44 +136,67 @@ async def clean_database(
     if not verify_password(body.password, current_user["password_hash"]):
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
-    tables_to_clean = []
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        all_tables = list_all_tables(conn)
+    if not body.clean_all and not body.tables and not body.local_targets:
+        raise HTTPException(
+            status_code=400,
+            detail="Select at least one table or local file target to clean.",
+        )
 
-        if body.clean_all:
-            tables_to_clean = [t for t in all_tables if t not in PROTECTED_TABLES]
-        else:
-            for table in body.tables:
-                if table not in all_tables:
-                    raise HTTPException(status_code=400, detail=f"Table '{table}' does not exist.")
-                if table in PROTECTED_TABLES:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Table '{table}' is protected and cannot be deleted for system stability."
-                    )
-            tables_to_clean = body.tables
+    tables_to_clean: List[str] = []
+    if body.clean_all or body.tables:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            all_tables = list_all_tables(conn)
 
-        cursor.execute("PRAGMA foreign_keys = OFF;")
-        for table in tables_to_clean:
-            cursor.execute(f"DELETE FROM {table};")
-        cursor.execute("PRAGMA foreign_keys = ON;")
+            if body.clean_all:
+                tables_to_clean = [t for t in all_tables if t not in PROTECTED_TABLES]
+            else:
+                for table in body.tables:
+                    if table not in all_tables:
+                        raise HTTPException(status_code=400, detail=f"Table '{table}' does not exist.")
+                    if table in PROTECTED_TABLES:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Table '{table}' is protected and cannot be deleted for system stability."
+                        )
+                tables_to_clean = body.tables
 
-    if tables_to_clean:
-        vacuum_conn = sqlite3.connect(DEFAULT_DB_PATH)
+            if tables_to_clean:
+                cursor.execute("PRAGMA foreign_keys = OFF;")
+                for table in tables_to_clean:
+                    cursor.execute(f"DELETE FROM {table};")
+                cursor.execute("PRAGMA foreign_keys = ON;")
+
+        if tables_to_clean:
+            vacuum_conn = sqlite3.connect(DEFAULT_DB_PATH)
+            try:
+                vacuum_conn.isolation_level = None
+                vacuum_conn.execute("VACUUM")
+            finally:
+                vacuum_conn.close()
+
+    cleaned_local: List[Dict[str, Any]] = []
+    if body.local_targets:
         try:
-            vacuum_conn.isolation_level = None
-            vacuum_conn.execute("VACUUM")
-        finally:
-            vacuum_conn.close()
+            cleaned_local = clean_local_targets(body.local_targets)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    if _reload_catalog_index:
+    if _reload_catalog_index and tables_to_clean:
         _reload_catalog_index()
+
+    parts: List[str] = []
+    if tables_to_clean:
+        parts.append(f"{len(tables_to_clean)} table(s)")
+    if cleaned_local:
+        total_files = sum(item["deleted_files"] for item in cleaned_local)
+        parts.append(f"{total_files} local file(s) from {len(cleaned_local)} folder group(s)")
 
     return {
         "status": "success",
         "cleaned_tables": tables_to_clean,
-        "message": f"Successfully cleaned data from {len(tables_to_clean)} tables."
+        "cleaned_local": cleaned_local,
+        "message": f"Successfully cleaned {' and '.join(parts) or 'nothing'}."
     }
 
 
