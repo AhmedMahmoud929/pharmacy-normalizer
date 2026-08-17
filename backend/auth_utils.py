@@ -61,6 +61,36 @@ def create_access_token(
     return f"{data}.{sig}"
 
 
+def create_purpose_token(*, user_id: str, purpose: str, ttl_seconds: int = 120) -> str:
+    payload = {
+        "sub": user_id,
+        "purpose": purpose,
+        "exp": int(time.time()) + ttl_seconds,
+    }
+    data = base64.urlsafe_b64encode(json.dumps(payload, separators=(",", ":")).encode()).decode().rstrip("=")
+    sig = hmac.new(JWT_SECRET.encode(), data.encode(), hashlib.sha256).hexdigest()
+    return f"{data}.{sig}"
+
+
+def decode_purpose_token(token: str, *, purpose: str) -> Dict[str, Any]:
+    try:
+        data, sig = token.rsplit(".", 1)
+    except ValueError as exc:
+        raise ValueError("Invalid token format") from exc
+
+    expected = hmac.new(JWT_SECRET.encode(), data.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(sig, expected):
+        raise ValueError("Invalid token signature")
+
+    padded = data + "=" * (-len(data) % 4)
+    payload = json.loads(base64.urlsafe_b64decode(padded.encode()))
+    if payload.get("purpose") != purpose:
+        raise ValueError("Invalid token purpose")
+    if int(payload.get("exp", 0)) < int(time.time()):
+        raise ValueError("Token expired")
+    return payload
+
+
 def decode_access_token(token: str) -> Dict[str, Any]:
     try:
         data, sig = token.rsplit(".", 1)

@@ -38,6 +38,7 @@ export const dashboardNavItems: NavItem[] = [
 
 export const adminNavItems: NavItem[] = [
   { name: "User Management", key: "user_management", href: "/dashboard/admin/users", icon: Users, permission: "users" },
+  { name: "Database Settings", key: "database_settings", href: "/dashboard/admin/database", icon: Database, permission: "users" },
 ];
 
 export function isNavItemActive(pathname: string, href: string): boolean {

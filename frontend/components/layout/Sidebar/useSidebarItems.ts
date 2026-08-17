@@ -34,6 +34,7 @@ const ICON_BY_KEY: Record<string, string> = {
   global_search: "solar:magnifer-linear",
   normalize: "solar:text-linear",
   user_management: "solar:users-group-two-rounded-linear",
+  database_settings: "solar:database-linear",
 };
 
 export function useSidebarItems() {

@@ -35,6 +35,35 @@ function isAuthApiUrl(url: string): boolean {
   return url.startsWith(API_URL) && !url.includes("/api/auth/login");
 }
 
+/** Endpoints that return 401 for wrong password, not expired session. */
+const PASSWORD_VERIFICATION_401_PATHS = [
+  "/api/db-admin/clean",
+  "/api/db-admin/backup/export",
+  "/api/db-admin/backup/import",
+];
+
+function isPasswordVerification401(url: string, method: string): boolean {
+  if (PASSWORD_VERIFICATION_401_PATHS.some((path) => url.includes(path))) {
+    return true;
+  }
+
+  return (
+    method === "DELETE" &&
+    /\/api\/matcher\/job\/[^/?#]+$/.test(url.replace(API_URL, ""))
+  );
+}
+
+function resolveFetchMethod(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): string {
+  if (init?.method) return init.method.toUpperCase();
+  if (typeof input !== "string" && !(input instanceof URL) && "method" in input) {
+    return input.method.toUpperCase();
+  }
+  return "GET";
+}
+
 export type AuthUser = {
   id: string;
   email: string;
@@ -136,8 +165,14 @@ export function installAuthFetchPatch() {
     }
 
     const response = await originalFetch(input, init);
+    const method = resolveFetchMethod(input, init);
 
-    if (isAuthApiUrl(url) && response.status === 401 && sentAuth) {
+    if (
+      isAuthApiUrl(url) &&
+      response.status === 401 &&
+      sentAuth &&
+      !isPasswordVerification401(url, method)
+    ) {
       handleUnauthorized();
     }
 

@@ -71,7 +71,7 @@ def permission_for_path(path: str, method: str) -> PermissionRule:
         return None
     if p.startswith("/api/auth/permissions"):
         return None
-    if p.startswith("/api/auth/users"):
+    if p.startswith("/api/auth/users") or p.startswith("/api/db-admin"):
         return "users"
     if p.startswith("/media/"):
         return None

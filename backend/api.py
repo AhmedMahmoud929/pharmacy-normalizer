@@ -49,6 +49,7 @@ from discovery_api import router as discovery_router, register_discovery_deps
 from source_profiles_api import router as source_profiles_router
 from gallery_api import router as gallery_router, register_gallery_deps
 from auth_api import router as auth_router
+from db_admin_api import router as db_admin_router, register_db_admin_deps
 from auth_utils import decode_access_token
 from db import users_repo
 from permissions import can_access_path
@@ -78,6 +79,8 @@ app.include_router(enrichment_router)
 register_discovery_deps(reload_catalog_index)
 app.include_router(discovery_router)
 app.include_router(source_profiles_router)
+register_db_admin_deps(reload_catalog_index)
+app.include_router(db_admin_router)
 
 from catalog_api import set_workspace_root
 set_workspace_root(workspace_root)
