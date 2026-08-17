@@ -16,11 +16,11 @@ export const MatcherSkeleton: React.FC = () => {
         <div className="p-4 border-b border-border bg-muted/30 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-zinc-300 dark:bg-zinc-750 rounded" />
-              <div className="w-32 h-4 bg-zinc-300 dark:bg-zinc-750 rounded" />
+              <div className="w-4 h-4 bg-zinc-300 dark:bg-zinc-700 rounded" />
+              <div className="w-32 h-4 bg-zinc-300 dark:bg-zinc-700 rounded" />
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-24 h-4 bg-zinc-300 dark:bg-zinc-750 rounded" />
+              <div className="w-24 h-4 bg-zinc-300 dark:bg-zinc-700 rounded" />
             </div>
           </div>
           <div className="w-full h-10 bg-white dark:bg-zinc-900/80 border border-primary/10 rounded-xl" />
@@ -43,12 +43,12 @@ export const MatcherSkeleton: React.FC = () => {
             </thead>
             <tbody>
               {Array.from({ length: 8 }).map((_, idx) => (
-                <tr key={idx} className="border-b border-zinc-150/10 dark:border-zinc-800/20">
+                <tr key={idx} className="border-b border-zinc-200/10 dark:border-zinc-800/20">
                   <td className="p-4">
                     <div className="h-3 bg-zinc-300 dark:bg-zinc-800 rounded w-8" />
                   </td>
                   <td className="p-4">
-                    <div className="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-900 border border-zinc-250 dark:border-zinc-850" />
+                    <div className="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800" />
                   </td>
                   <td className="p-4">
                     <div className="space-y-2">

@@ -2348,7 +2348,7 @@ async def get_matcher_job_results(
     sort_by: Optional[str] = Query(None),
     sort_dir: str = Query("asc")
 ):
-    from tools.matcher_db import get_job
+    from tools.matcher_db import get_job, load_results
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -2367,23 +2367,10 @@ async def get_matcher_job_results(
         "duration": job.get("duration")
     }
 
-    results_path = job["results_path"]
-    if not results_path or not os.path.exists(results_path):
-        if job["status"] in ["pending", "running"]:
-            return {
-                "job_id": job_id,
-                "total": 0,
-                "total_unfiltered": 0,
-                "limit": limit,
-                "offset": offset,
-                "results": [],
-                "stats": job_stats
-            }
-        raise HTTPException(status_code=404, detail="Job results file not found")
-
     try:
-        with open(results_path, "r", encoding="utf-8") as f:
-            all_results = json.load(f)
+        all_results = load_results(job_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Job not found")
     except Exception as e:
         if job["status"] in ["pending", "running"]:
             return {
@@ -2396,6 +2383,9 @@ async def get_matcher_job_results(
                 "stats": job_stats
             }
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    if not all_results and job["status"] not in ["pending", "running"]:
+        raise HTTPException(status_code=404, detail="Job results not found")
 
     total_unfiltered = len(all_results)
 
@@ -2446,20 +2436,20 @@ async def get_matcher_job_results(
 
 @app.post("/api/matcher/job/{job_id}/override")
 async def override_matcher_match(job_id: str, req: OverrideRequest):
-    from tools.matcher_db import get_job, update_job_totals
+    from tools.matcher_db import get_job, update_job_totals, load_results, save_results, export_path_for_job
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-        
-    results_path = job["results_path"]
-    if not results_path or not os.path.exists(results_path):
-        raise HTTPException(status_code=404, detail="Job results file not found")
-        
+
     try:
-        with open(results_path, "r", encoding="utf-8") as f:
-            all_results = json.load(f)
+        all_results = load_results(job_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Job not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    if not all_results:
+        raise HTTPException(status_code=404, detail="Job results not found")
         
     # Find matching row index
     target_item = None
@@ -2513,12 +2503,9 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
     target_item["matches"] = [new_candidate] + [m for m in target_item["matches"] if m.get("sku") != req.matched_sku]
     
     try:
-        temp_path = results_path + ".tmp"
-        with open(temp_path, "w", encoding="utf-8") as f:
-            json.dump(all_results, f, indent=2, ensure_ascii=False)
-        os.replace(temp_path, results_path)
+        save_results(job_id, all_results)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to write results file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save results: {str(e)}")
         
     matched_count = 0
     review_count = 0
@@ -2600,7 +2587,7 @@ async def override_matcher_match(job_id: str, req: OverrideRequest):
                     
             excel_records.append(record)
             
-        excel_out_path = os.path.join(os.path.dirname(results_path), "matched.xlsx")
+        excel_out_path = export_path_for_job(job_id)
         df_out = pd.DataFrame(excel_records)
         df_out = clean_df_for_excel(df_out)
         with pd.ExcelWriter(excel_out_path, engine='openpyxl') as writer:
@@ -2845,7 +2832,7 @@ async def export_matcher_job_file(
     columns: Optional[str] = Query(None), # comma-separated list of column keys
     search: Optional[str] = Query(None)
 ):
-    from tools.matcher_db import get_job
+    from tools.matcher_db import get_job, load_results
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -2861,16 +2848,15 @@ async def export_matcher_job_file(
             filename=f"matched_{job['filename']}"
         )
 
-    # Load results
-    results_path = job["results_path"]
-    if not results_path or not os.path.exists(results_path):
-        raise HTTPException(status_code=404, detail="Job results file not found")
-        
     try:
-        with open(results_path, "r", encoding="utf-8") as f:
-            all_results = json.load(f)
+        all_results = load_results(job_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Job not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    if not all_results:
+        raise HTTPException(status_code=404, detail="Job results not found")
 
     # Filter by Search & Statuses
     filtered_results = []
@@ -2977,20 +2963,20 @@ async def export_matcher_job_media(
     search: Optional[str] = Query(None),
     media_types: str = Query("products")  # Comma-separated list of media types, e.g. "products,brands"
 ):
-    from tools.matcher_db import get_job
+    from tools.matcher_db import get_job, load_results
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    results_path = job["results_path"]
-    if not results_path or not os.path.exists(results_path):
-        raise HTTPException(status_code=404, detail="Job results file not found")
-        
     try:
-        with open(results_path, "r", encoding="utf-8") as f:
-            all_results = json.load(f)
+        all_results = load_results(job_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Job not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read results: {str(e)}")
+
+    if not all_results:
+        raise HTTPException(status_code=404, detail="Job results not found")
 
     # Filter by Search & Statuses
     filtered_results = []

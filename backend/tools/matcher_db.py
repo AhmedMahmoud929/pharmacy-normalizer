@@ -8,12 +8,13 @@ from typing import Dict, Any, List, Optional
 backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_DIR = os.path.join(backend_root, "data", "extracted")
 DB_PATH = os.path.join(DB_DIR, "matcher_jobs.db")
-JOBS_DIR = os.path.join(backend_root, "data", "matcher", "jobs")
+LEGACY_JOBS_DIR = os.path.join(backend_root, "data", "matcher", "jobs")
+EXPORT_DIR = os.path.join(DB_DIR, "matcher_exports")
 
 def init_db():
     """Initialize the SQLite database and create tables if they do not exist."""
     os.makedirs(DB_DIR, exist_ok=True)
-    os.makedirs(JOBS_DIR, exist_ok=True)
+    os.makedirs(EXPORT_DIR, exist_ok=True)
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -41,6 +42,16 @@ def init_db():
             duration INTEGER
         )
     """)
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS matcher_job_results (
+            job_id TEXT PRIMARY KEY,
+            results_json TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (job_id) REFERENCES matcher_jobs(job_id) ON DELETE CASCADE
+        )
+        """
+    )
     conn.commit()
     
     # Ensure columns exist (handling legacy schema upgrades cleanly)
@@ -97,7 +108,6 @@ def create_job(
     cursor = conn.cursor()
     
     now = datetime.now().isoformat()
-    results_path = os.path.join(JOBS_DIR, job_id, "results.json")
     
     cursor.execute(
         """
@@ -119,7 +129,7 @@ def create_job(
             match_threshold,
             review_threshold,
             None,
-            results_path,
+            None,
             None,
             now,
             None,
@@ -141,9 +151,13 @@ def create_job(
             1 if skip_normalizer else 0,
         )
     )
-    
-    # Pre-create workspace directory for job results
-    os.makedirs(os.path.join(JOBS_DIR, job_id), exist_ok=True)
+    cursor.execute(
+        """
+        INSERT INTO matcher_job_results (job_id, results_json, updated_at)
+        VALUES (?, '[]', ?)
+        """,
+        (job_id, now),
+    )
     
     conn.commit()
     conn.close()
@@ -301,7 +315,6 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
         "match_threshold": row[10],
         "review_threshold": row[11],
         "output_path": row[12],
-        "results_path": row[13],
         "error_msg": row[14],
         "created_at": row[15],
         "started_at": row[16],
@@ -374,7 +387,6 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
             "match_threshold": row[10],
             "review_threshold": row[11],
             "output_path": row[12],
-            "results_path": row[13],
             "error_msg": row[14],
             "created_at": row[15],
             "started_at": row[16],
@@ -404,28 +416,120 @@ def get_jobs(limit: int = 20, offset: int = 0, status: Optional[str] = None) -> 
     }
 
 def delete_job(job_id: str):
-    """Delete a mapping job session from SQLite and remove its workspace files from disk."""
+    """Delete a mapping job session and its stored results from SQLite."""
     init_db()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
-    # Query results_path and output_path to clean up files
-    cursor.execute("SELECT results_path, output_path FROM matcher_jobs WHERE job_id = ?", (job_id,))
+
+    cursor.execute("SELECT output_path FROM matcher_jobs WHERE job_id = ?", (job_id,))
     row = cursor.fetchone()
-    
-    if row:
-        results_path, output_path = row
-        # Clean up files inside the job's directory
-        path_to_clean = results_path or output_path
-        if path_to_clean:
-            job_dir = os.path.dirname(path_to_clean)
-            if os.path.exists(job_dir):
-                import shutil
-                try:
-                    shutil.rmtree(job_dir)
-                except Exception as e:
-                    print(f"Failed to remove job folder {job_dir}: {e}")
-                    
+    if row and row[0] and os.path.exists(row[0]):
+        try:
+            os.remove(row[0])
+        except OSError:
+            pass
+
+    cursor.execute("DELETE FROM matcher_job_results WHERE job_id = ?", (job_id,))
     cursor.execute("DELETE FROM matcher_jobs WHERE job_id = ?", (job_id,))
     conn.commit()
     conn.close()
+
+
+def export_path_for_job(job_id: str) -> str:
+    return os.path.join(EXPORT_DIR, f"{job_id}.xlsx")
+
+
+def _legacy_results_path(job_id: str, job: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    if job and job.get("results_path"):
+        path = job["results_path"]
+        if path and os.path.exists(path):
+            return path
+    default = os.path.join(LEGACY_JOBS_DIR, job_id, "results.json")
+    if os.path.exists(default):
+        return default
+    return None
+
+
+def _cleanup_legacy_file(path: str) -> None:
+    try:
+        os.remove(path)
+        parent = os.path.dirname(path)
+        if os.path.isdir(parent) and not os.listdir(parent):
+            os.rmdir(parent)
+    except OSError:
+        pass
+
+
+def save_results(job_id: str, results: List[Dict[str, Any]]) -> None:
+    init_db()
+    job = get_job(job_id)
+    if not job:
+        raise FileNotFoundError(f"Job {job_id} not found")
+
+    payload = json.dumps(results, ensure_ascii=False)
+    now = datetime.now().isoformat()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO matcher_job_results (job_id, results_json, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(job_id) DO UPDATE SET
+            results_json = excluded.results_json,
+            updated_at = excluded.updated_at
+        """,
+        (job_id, payload, now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _migrate_legacy_results(job_id: str, job: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    path = _legacy_results_path(job_id, job)
+    if not path:
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            return []
+        save_results(job_id, data)
+        _cleanup_legacy_file(path)
+        return data
+    except Exception:
+        return []
+
+
+def load_results(job_id: str) -> List[Dict[str, Any]]:
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT results_path FROM matcher_jobs WHERE job_id = ?", (job_id,))
+    legacy_row = cursor.fetchone()
+    legacy_path = legacy_row[0] if legacy_row else None
+    job = get_job(job_id)
+    if not job:
+        conn.close()
+        raise FileNotFoundError(f"Job {job_id} not found")
+
+    cursor.execute(
+        "SELECT results_json FROM matcher_job_results WHERE job_id = ?",
+        (job_id,),
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    if row and row[0]:
+        try:
+            data = json.loads(row[0])
+            if isinstance(data, list):
+                legacy = _legacy_results_path(job_id, {"results_path": legacy_path})
+                if legacy:
+                    _cleanup_legacy_file(legacy)
+                return data
+        except json.JSONDecodeError:
+            pass
+
+    migrated = _migrate_legacy_results(job_id, {"results_path": legacy_path})
+    return migrated

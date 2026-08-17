@@ -29,6 +29,7 @@ from tools.discovery_runner import (
     discovery_product_to_catalog,
     job_listeners,
     run_discovery_background,
+    stream_discovery_try,
 )
 from tools.matcher import NAME_COLUMN_CANDIDATES
 from tools.matcher_db import get_jobs as get_matcher_jobs
@@ -48,6 +49,13 @@ class ResolveRequest(BaseModel):
     row_index: int
     action: str  # accept | reject | pick
     candidate_index: Optional[int] = None
+
+
+class TryRequest(BaseModel):
+    product_name: str
+    source_domains: Optional[List[str]] = None
+    match_threshold: float = 0.60
+    review_threshold: float = 0.40
 
 
 def _require_job(job_id: str) -> Dict[str, Any]:
@@ -147,11 +155,13 @@ async def run_discovery_job(
     else:
         if not matcher_job_id:
             raise HTTPException(status_code=400, detail="matcher_job_id is required")
-        from tools.discovery_runner import load_matcher_no_match_rows
+        from tools.matcher_db import get_job as get_matcher_job
 
-        rows = load_matcher_no_match_rows(matcher_job_id)
-        total_rows = len(rows)
-        filename = f"matcher-{matcher_job_id[:8]}-no-match"
+        matcher_job = get_matcher_job(matcher_job_id)
+        if not matcher_job:
+            raise HTTPException(status_code=404, detail="Matcher job not found")
+        total_rows = int(matcher_job.get("no_match_count") or 0)
+        filename = matcher_job.get("filename") or f"matcher-{matcher_job_id[:8]}-no-match"
 
     job_id = str(uuid.uuid4())
     job_info = create_job(
@@ -377,6 +387,25 @@ async def import_discovery_results(job_id: str):
 @router.get("/sources")
 async def list_available_sources():
     return {"profiles": list_profiles(enabled_only=True)}
+
+
+@router.post("/try")
+async def try_discovery_product(req: TryRequest):
+    """Run discovery for one product with live step-by-step SSE feedback."""
+    name = (req.product_name or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="product_name is required")
+
+    return StreamingResponse(
+        stream_discovery_try(
+            name,
+            source_domains=req.source_domains or None,
+            match_threshold=req.match_threshold,
+            review_threshold=req.review_threshold,
+        ),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/job/{job_id}/stream")

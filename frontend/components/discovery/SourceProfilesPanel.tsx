@@ -17,6 +17,7 @@ import { cn, API_URL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { cardSurfaceClass, tableHeaderClass, tableRowClass } from "@/components/ui/stat-card";
 import { useToast } from "@/components/ui/use-toast";
+import { ExtractedProductCard, ExtractedProductJson, PreviewTabBar, type ExtractedProductData } from "@/components/discovery/ExtractedProductPreview";
 
 interface SourceProfile {
   domain: string;
@@ -39,7 +40,7 @@ interface PreviewResult {
   extracted_preview?: Record<string, unknown>;
 }
 
-const FIELDS = ["name", "price", "image", "barcode"] as const;
+const FIELDS = ["name", "name_ar", "price", "image", "brand", "barcode"] as const;
 
 export function SourceProfilesPanel() {
   const t = useTranslations("Discovery");
@@ -48,9 +49,11 @@ export function SourceProfilesPanel() {
   const [loading, setLoading] = useState(true);
   const [sampleUrl, setSampleUrl] = useState("");
   const [preview, setPreview] = useState<PreviewResult | null>(null);
+  const [extractedPreview, setExtractedPreview] = useState<ExtractedProductData | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"selectors" | "card" | "json">("selectors");
   const [form, setForm] = useState({
     domain: "",
     display_name: "",
@@ -58,8 +61,10 @@ export function SourceProfilesPanel() {
     priority: 100,
     enabled: true,
     name: "h1",
+    name_ar: "h2",
     price: ".price",
-    image: "img",
+    image: "meta[property='og:image']",
+    brand: "",
     barcode: "",
     price_divisor: 100,
   });
@@ -93,6 +98,8 @@ export function SourceProfilesPanel() {
       if (!res.ok) throw new Error(await res.text());
       const data: PreviewResult = await res.json();
       setPreview(data);
+      setExtractedPreview((data.extracted_preview as ExtractedProductData) || null);
+      setPreviewTab("card");
       const ext = data.suggested_extract_config || {};
       setForm((f) => ({
         ...f,
@@ -100,8 +107,10 @@ export function SourceProfilesPanel() {
         display_name: data.domain,
         platform: data.platform,
         name: String(ext.name || f.name),
+        name_ar: String(ext.name_ar || f.name_ar),
         price: String(ext.price || f.price),
         image: String(ext.image || f.image),
+        brand: ext.brand ? String(ext.brand) : "",
         barcode: ext.barcode ? String(ext.barcode) : "",
         price_divisor: Number(ext.price_divisor || f.price_divisor),
       }));
@@ -129,8 +138,10 @@ export function SourceProfilesPanel() {
           search_config: preview?.suggested_search_config || {},
           extract_config: {
             name: form.name,
+            name_ar: form.name_ar,
             price: form.price,
             image: form.image,
+            brand: form.brand || null,
             barcode: form.barcode || null,
             price_divisor: form.price_divisor,
           },
@@ -139,6 +150,7 @@ export function SourceProfilesPanel() {
       if (!res.ok) throw new Error(await res.text());
       toast({ title: t("profile_saved") });
       setPreview(null);
+      setExtractedPreview(null);
       setSampleUrl("");
       fetchProfiles();
     } catch (e) {
@@ -165,8 +177,10 @@ export function SourceProfilesPanel() {
           search_config: preview?.suggested_search_config || {},
           extract_config: {
             name: form.name,
+            name_ar: form.name_ar,
             price: form.price,
             image: form.image,
+            brand: form.brand || null,
             barcode: form.barcode || null,
             price_divisor: form.price_divisor,
           },
@@ -179,7 +193,11 @@ export function SourceProfilesPanel() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Test failed");
-      toast({ title: t("test_ok"), description: JSON.stringify(data.result?.title_en || data.result) });
+      if (data.result) {
+        setExtractedPreview(data.result as ExtractedProductData);
+        setPreviewTab("card");
+      }
+      toast({ title: t("test_ok") });
     } catch (e) {
       toast({ title: t("test_failed"), description: String(e), variant: "destructive" });
     } finally {
@@ -219,55 +237,74 @@ export function SourceProfilesPanel() {
         </div>
 
         {preview && (
-          <div className="grid gap-4 md:grid-cols-2 border-t border-border pt-4">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground">
-                {t("detected")}: <span className="text-foreground">{preview.platform}</span> · {preview.domain}
-              </p>
-              {FIELDS.map((field) => (
-                <label key={field} className="block text-xs space-y-1">
-                  <span className="font-medium uppercase">{field} selector</span>
+          <div className="space-y-4 border-t border-border pt-4">
+            <p className="text-xs font-semibold text-muted-foreground">
+              {t("detected")}: <span className="text-foreground">{preview.platform}</span> · {preview.domain}
+            </p>
+
+            <PreviewTabBar
+              tabs={[
+                { id: "selectors", label: t("preview_tab_selectors") },
+                { id: "card", label: t("preview_tab_card") },
+                { id: "json", label: t("preview_tab_json") },
+              ]}
+              active={previewTab}
+              onChange={setPreviewTab}
+            />
+
+            {previewTab === "selectors" && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {FIELDS.map((field) => (
+                  <label key={field} className="block text-xs space-y-1">
+                    <span className="font-medium uppercase">
+                      {field === "barcode" ? t("international_barcode_selector") : `${field} selector`}
+                    </span>
+                    <input
+                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm font-mono"
+                      value={String(form[field as keyof typeof form] ?? "")}
+                      onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
+                      placeholder={field === "barcode" ? "meta[itemprop='gtin13'], ..." : undefined}
+                    />
+                  </label>
+                ))}
+                <label className="block text-xs space-y-1">
+                  <span className="font-medium">{t("price_divisor")}</span>
                   <input
-                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm font-mono"
-                    value={String(form[field as keyof typeof form] ?? "")}
-                    onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
+                    type="number"
+                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+                    value={form.price_divisor}
+                    onChange={(e) => setForm((f) => ({ ...f, price_divisor: Number(e.target.value) }))}
                   />
                 </label>
-              ))}
-              <label className="block text-xs space-y-1">
-                <span className="font-medium">{t("price_divisor")}</span>
-                <input
-                  type="number"
-                  className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-                  value={form.price_divisor}
-                  onChange={(e) => setForm((f) => ({ ...f, price_divisor: Number(e.target.value) }))}
-                />
-              </label>
-              <label className="block text-xs space-y-1">
-                <span className="font-medium">{t("priority")}</span>
-                <input
-                  type="number"
-                  className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-                  value={form.priority}
-                  onChange={(e) => setForm((f) => ({ ...f, priority: Number(e.target.value) }))}
-                />
-              </label>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground">{t("extracted_preview")}</p>
-              <pre className="text-xs bg-muted/50 rounded-lg p-3 overflow-auto max-h-64">
-                {JSON.stringify(preview.extracted_preview, null, 2)}
-              </pre>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={testProfile} disabled={testing}>
-                  {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-                  {t("test")}
-                </Button>
-                <Button onClick={saveProfile} disabled={saving}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  {t("save_profile")}
-                </Button>
+                <label className="block text-xs space-y-1">
+                  <span className="font-medium">{t("priority")}</span>
+                  <input
+                    type="number"
+                    className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+                    value={form.priority}
+                    onChange={(e) => setForm((f) => ({ ...f, priority: Number(e.target.value) }))}
+                  />
+                </label>
               </div>
+            )}
+
+            {previewTab === "card" && extractedPreview && (
+              <ExtractedProductCard data={extractedPreview} />
+            )}
+
+            {previewTab === "json" && extractedPreview && (
+              <ExtractedProductJson data={extractedPreview} />
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={testProfile} disabled={testing}>
+                {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                {t("test")}
+              </Button>
+              <Button onClick={saveProfile} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                {t("save_profile")}
+              </Button>
             </div>
           </div>
         )}

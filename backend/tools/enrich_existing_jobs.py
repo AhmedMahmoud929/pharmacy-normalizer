@@ -3,9 +3,13 @@ import json
 
 tools_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(tools_dir)
+import sys
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from tools.matcher_db import get_jobs, load_results, save_results
 
 DB_PATH = os.path.join(project_root, "data", "normalized", "chefaa_products_eg_normalized.json")
-JOBS_DIR = os.path.join(project_root, "data", "matcher", "jobs")
 
 def main():
     if not os.path.exists(DB_PATH):
@@ -24,30 +28,18 @@ def main():
         pid = str(p.get("id"))
         prod_lookup[pid] = p
 
-    if not os.path.exists(JOBS_DIR):
-        print(f"Jobs directory does not exist: {JOBS_DIR}")
-        return
-        
-    jobs = [d for d in os.listdir(JOBS_DIR) if os.path.isdir(os.path.join(JOBS_DIR, d))]
+    jobs = get_jobs(limit=1000, offset=0).get("jobs", [])
     print(f"Found {len(jobs)} jobs to process.")
     
-    for job_id in jobs:
-        results_path = os.path.join(JOBS_DIR, job_id, "results.json")
-        if not os.path.exists(results_path):
-            continue
-            
+    for job in jobs:
+        job_id = job["job_id"]
         print(f"\nProcessing Job: {job_id}")
         try:
-            with open(results_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            results = load_results(job_id)
         except Exception as e:
-            print(f"  Failed to load JSON: {e}")
+            print(f"  Failed to load results: {e}")
             continue
             
-        # The JSON could be a list of results or a dict with "results" key
-        is_dict_wrapper = isinstance(data, dict)
-        results = data.get("results", []) if is_dict_wrapper else data
-        
         modified_count = 0
         for res in results:
             matches = res.get("matches") or []
@@ -99,15 +91,11 @@ def main():
                     modified_count += 1
                     
         if modified_count > 0:
-            print(f"  Enriched {modified_count} matched product entries in results.json.")
+            print(f"  Enriched {modified_count} matched product entries in DB.")
             try:
-                # Write back safely
-                tmp_path = results_path + ".tmp"
-                with open(tmp_path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False, indent=2)
-                os.replace(tmp_path, results_path)
+                save_results(job_id, results)
             except Exception as e:
-                print(f"  Failed to save JSON: {e}")
+                print(f"  Failed to save results: {e}")
         else:
             print("  No entries enriched.")
 

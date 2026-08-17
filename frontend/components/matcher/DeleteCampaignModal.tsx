@@ -78,7 +78,7 @@ export const DeleteCampaignModal: React.FC<DeleteCampaignModalProps> = ({
             className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-zinc-150 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-2 text-error">
                 <span className="p-2 bg-error/10 rounded-xl">
                   <AlertTriangle className="w-5 h-5 text-error animate-pulse" />
@@ -98,7 +98,7 @@ export const DeleteCampaignModal: React.FC<DeleteCampaignModalProps> = ({
             {/* Form */}
             <form onSubmit={handleDelete} className="p-6 space-y-6">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-zinc-655 dark:text-zinc-300">
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
                   Are you sure you want to delete the mapping campaign:
                 </p>
                 <div className="p-3.5 bg-zinc-50 dark:bg-black/35 rounded-xl border border-zinc-200/60 dark:border-zinc-800/80">
@@ -141,7 +141,7 @@ export const DeleteCampaignModal: React.FC<DeleteCampaignModalProps> = ({
                   type="button"
                   onClick={onClose}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-850 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>

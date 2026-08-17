@@ -11,6 +11,10 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
+from tools.discovery.barcode_utils import (
+    ld_json_barcode_candidates,
+    pick_international_barcode,
+)
 from tools.discovery.extractors.base import SearchCandidate, UnifiedProduct
 from tools.discovery.html_fetcher import fetch_html
 from tools.discovery.platform_detect import domain_from_url
@@ -264,7 +268,10 @@ def extract_from_url(url: str, profile: Dict[str, Any]) -> UnifiedProduct:
             variant.get("price") or product_json.get("price"),
             divisor=divisor,
         )
-        barcode = str(variant.get("barcode") or variant.get("sku") or "")
+        barcode = pick_international_barcode(
+            variant.get("barcode"),
+            *(ld_json_barcode_candidates(ld_product) if ld_product else ()),
+        )
         images = _collect_images(product_json, origin)
 
     if ld_product:
@@ -282,6 +289,8 @@ def extract_from_url(url: str, profile: Dict[str, Any]) -> UnifiedProduct:
                 ld_image = ld_image.get("url") or ld_image.get("image")
             if ld_image:
                 images = _collect_images({"images": [ld_image]}, origin)
+        if not barcode:
+            barcode = pick_international_barcode(*ld_json_barcode_candidates(ld_product))
 
     if not title_en:
         title_en = _title_from_html(html)
@@ -306,7 +315,7 @@ def extract_from_url(url: str, profile: Dict[str, Any]) -> UnifiedProduct:
             price=fallback.price if fallback.price is not None else price,
             image_url=fallback.image_url or (images[0] if images else ""),
             images=fallback.images or images,
-            barcode=fallback.barcode or barcode,
+            barcode=pick_international_barcode(fallback.barcode, barcode),
             source_url=url,
             source_domain=domain,
             brand=fallback.brand or brand,

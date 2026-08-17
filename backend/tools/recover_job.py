@@ -14,20 +14,23 @@ if project_root not in sys.path:
 from tools.matcher_export import build_custom_columns, build_original_row_dict, load_original_sheet
 from tools.matcher_runner import clean_df_for_excel
 
+from tools.matcher_db import load_results, export_path_for_job
+
 def recover(job_id: str):
     backend_root = os.path.join(project_root)
     db_path = os.path.join(backend_root, "data", "extracted", "matcher_jobs.db")
-    jobs_dir = os.path.join(backend_root, "data", "matcher", "jobs", job_id)
-    results_path = os.path.join(jobs_dir, "results.json")
-    excel_out_path = os.path.join(jobs_dir, "matched.xlsx")
+    excel_out_path = export_path_for_job(job_id)
 
-    if not os.path.exists(results_path):
-        print(f"Error: {results_path} not found.")
+    try:
+        results_list = load_results(job_id)
+    except FileNotFoundError:
+        print(f"Error: job {job_id} not found.")
+        return
+    if not results_list:
+        print(f"Error: no results stored for job {job_id}.")
         return
 
-    print("Loading results.json...")
-    with open(results_path, "r", encoding="utf-8") as f:
-        results_list = json.load(f)
+    print(f"Loading results from DB ({len(results_list)} rows)...")
 
     # Sort results_list by original row_index to preserve Excel file ordering
     results_list.sort(key=lambda x: x["row_index"])

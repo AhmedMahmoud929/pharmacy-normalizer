@@ -22,7 +22,7 @@ if tools_dir not in sys.path:
 from tools.matcher_export import build_custom_columns, build_original_row_dict
 
 from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
-from tools.matcher_db import update_job_progress, finalize_job, update_job_pid
+from tools.matcher_db import update_job_progress, finalize_job, update_job_pid, save_results, export_path_for_job
 from tools.csv_helper import load_sheet_safely
 
 def _extract_cell_string(val) -> Optional[str]:
@@ -481,15 +481,11 @@ async def run_matcher_background(
                             review_count=review_count, 
                             no_match_count=no_match_count
                         )
-                        # Save incremental results.json so API users can view ongoing match chunks
+                        # Persist incremental results to DB so API users can view ongoing chunks
                         try:
-                            results_json_path = os.path.join(jobs_dir, "results.json")
-                            temp_json_path = results_json_path + ".tmp"
-                            with open(temp_json_path, "w", encoding="utf-8") as f:
-                                json.dump(results_list, f, indent=2, ensure_ascii=False)
-                            os.replace(temp_json_path, results_json_path)
+                            save_results(job_id, results_list)
                         except Exception as write_err:
-                            print(f"Failed to write incremental results for job {job_id}: {write_err}")
+                            print(f"Failed to save incremental results for job {job_id}: {write_err}")
                         
                     # Broadcast to SSE listeners
                     if job_id in job_listeners:
@@ -558,15 +554,11 @@ async def run_matcher_background(
                         review_count=review_count, 
                         no_match_count=no_match_count
                     )
-                    # Save incremental results.json so API users can view ongoing match chunks
+                    # Persist incremental results to DB so API users can view ongoing chunks
                     try:
-                        results_json_path = os.path.join(jobs_dir, "results.json")
-                        temp_json_path = results_json_path + ".tmp"
-                        with open(temp_json_path, "w", encoding="utf-8") as f:
-                            json.dump(results_list, f, indent=2, ensure_ascii=False)
-                        os.replace(temp_json_path, results_json_path)
+                        save_results(job_id, results_list)
                     except Exception as write_err:
-                        print(f"Failed to write incremental results for job {job_id}: {write_err}")
+                        print(f"Failed to save incremental results for job {job_id}: {write_err}")
                     
                 # Broadcast progress & row results
                 if job_id in job_listeners:
@@ -588,12 +580,8 @@ async def run_matcher_background(
         # 6. Sort results_list by original row_index to preserve Excel file ordering
         results_list.sort(key=lambda x: x["row_index"])
 
-        # 7. Write raw results.json file
-        results_json_path = os.path.join(jobs_dir, "results.json")
-        temp_json_path = results_json_path + ".tmp"
-        with open(temp_json_path, "w", encoding="utf-8") as f:
-            json.dump(results_list, f, indent=2, ensure_ascii=False)
-        os.replace(temp_json_path, results_json_path)
+        # 7. Persist final results to DB
+        save_results(job_id, results_list)
 
         # 8. Compile finalized xlsx sheet output
         excel_records = []
@@ -660,7 +648,7 @@ async def run_matcher_background(
                     
             excel_records.append(record)
 
-        excel_out_path = os.path.join(jobs_dir, "matched.xlsx")
+        excel_out_path = export_path_for_job(job_id)
         df_out = pd.DataFrame(excel_records)
         df_out = clean_df_for_excel(df_out)
         with pd.ExcelWriter(excel_out_path, engine='openpyxl') as writer:

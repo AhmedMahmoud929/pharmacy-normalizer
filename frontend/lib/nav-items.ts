@@ -25,7 +25,7 @@ export interface NavItem {
 export const dashboardNavItems: NavItem[] = [
   { name: "Match Sheet", key: "match_sheet", href: "/dashboard/matcher", icon: Table, permission: "matcher" },
   { name: "Barcode Enrichment", key: "barcode_enrichment", href: "/dashboard/enrichment", icon: Barcode, permission: "enrichment" },
-  { name: "Product Discovery", key: "product_discovery", href: "/dashboard/discovery", icon: Radar, permission: "discovery" },
+  { name: "Product Discovery", key: "product_discovery", href: "/dashboard/discovery/jobs", icon: Radar, permission: "discovery" },
   { name: "Catalog Seeder", key: "catalog_seeder", href: "/dashboard/catalog", icon: Sprout, permission: "catalog" },
   ...(showCrawler
     ? [{ name: "Campaign Crawler", key: "campaign_crawler", href: "/dashboard/crawler", icon: Terminal, permission: "crawler" as const }]

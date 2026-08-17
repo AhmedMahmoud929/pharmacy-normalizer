@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -13,6 +12,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Square,
   Upload,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -28,8 +28,8 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { UploadZone } from "@/components/matcher/UploadZone";
 
-type ViewMode = "list" | "new" | "job";
 type DiscoveryStatus = "found" | "review" | "not_found";
+type PanelMode = "list" | "new" | "job";
 
 interface DiscoveryJob {
   job_id: string;
@@ -92,23 +92,25 @@ function StatusBadge({ status }: { status: DiscoveryStatus }) {
   );
 }
 
-export function DiscoveryJobsPanel() {
+export function DiscoveryJobsPanel({
+  mode,
+  jobId,
+}: {
+  mode: PanelMode;
+  jobId?: string;
+}) {
   const t = useTranslations("Discovery");
   const { toast } = useToast();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const jobFromUrl = searchParams.get("job");
 
-  const [view, setView] = useState<ViewMode>(jobFromUrl ? "job" : "list");
   const [history, setHistory] = useState<DiscoveryJob[]>([]);
-  const [activeJobId, setActiveJobId] = useState<string | null>(jobFromUrl);
   const [jobMeta, setJobMeta] = useState<DiscoveryJob | null>(null);
   const [rows, setRows] = useState<DiscoveryRow[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [importing, setImporting] = useState(false);
 
   const [inputType, setInputType] = useState<"matcher" | "upload">("matcher");
@@ -130,56 +132,68 @@ export function DiscoveryJobsPanel() {
     }
   }, [t, toast]);
 
-  const fetchJobResults = useCallback(async (jobId: string, filter: string) => {
+  const fetchJobResults = useCallback(async (activeId: string, filter: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "200", offset: "0" });
       if (filter !== "all") params.set("status", filter);
-      const res = await fetch(`${API_URL}/api/discovery/job/${jobId}/results?${params}`);
+      const res = await fetch(`${API_URL}/api/discovery/job/${activeId}/results?${params}`);
       const data = await res.json();
       setRows(data.results || []);
       setStats(data.stats || {});
-      const metaRes = await fetch(`${API_URL}/api/discovery/job/${jobId}`);
-      setJobMeta(await metaRes.json());
+      const metaRes = await fetch(`${API_URL}/api/discovery/job/${activeId}`);
+      const meta = await metaRes.json();
+      setJobMeta(meta);
+      return meta as DiscoveryJob;
     } catch {
       toast({ title: t("error_load_results"), variant: "destructive" });
+      return null;
     } finally {
       setLoading(false);
     }
   }, [t, toast]);
 
   useEffect(() => {
-    fetchHistory();
-    fetch(`${API_URL}/api/discovery/matcher-jobs`).then((r) => r.json()).then((d) => setMatcherJobs(d.jobs || []));
-    fetch(`${API_URL}/api/discovery/sources`).then((r) => r.json()).then((d) => {
-      const profiles = d.profiles || [];
-      setSources(profiles);
-      setSelectedSources(profiles.map((p: SourceOption) => p.domain));
-    });
-  }, [fetchHistory]);
+    if (mode === "list") {
+      fetchHistory();
+    }
+  }, [mode, fetchHistory]);
 
   useEffect(() => {
-    if (activeJobId && view === "job") {
-      fetchJobResults(activeJobId, statusFilter);
-      const interval = setInterval(() => {
-        if (jobMeta?.status === "running") fetchJobResults(activeJobId, statusFilter);
-      }, 4000);
-      return () => clearInterval(interval);
+    if (mode === "new" || mode === "job") {
+      fetch(`${API_URL}/api/discovery/matcher-jobs`).then((r) => r.json()).then((d) => setMatcherJobs(d.jobs || []));
+      fetch(`${API_URL}/api/discovery/sources`).then((r) => r.json()).then((d) => {
+        const profiles = d.profiles || [];
+        setSources(profiles);
+        setSelectedSources(profiles.map((p: SourceOption) => p.domain));
+      });
     }
-  }, [activeJobId, view, statusFilter, fetchJobResults, jobMeta?.status]);
+  }, [mode]);
 
-  const openJob = (jobId: string) => {
-    setActiveJobId(jobId);
-    setView("job");
-    router.replace(`${pathname}?job=${jobId}`);
-  };
+  useEffect(() => {
+    if (mode !== "job" || !jobId) return;
 
-  const startNew = () => {
-    setView("new");
-    setUploadFile(null);
-    setActiveJobId(null);
-    router.replace(pathname);
-  };
+    let cancelled = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const poll = async () => {
+      const meta = await fetchJobResults(jobId, statusFilter);
+      if (cancelled || !meta) return;
+      const terminal = ["completed", "stopped", "failed"].includes(meta.status);
+      if (terminal && timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    };
+
+    poll();
+    timer = setInterval(poll, 4000);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearInterval(timer);
+    };
+  }, [mode, jobId, statusFilter, fetchJobResults]);
 
   const detectColumns = async (file: File) => {
     const fd = new FormData();
@@ -210,37 +224,56 @@ export function DiscoveryJobsPanel() {
       const res = await fetch(`${API_URL}/api/discovery/run`, { method: "POST", body: fd });
       if (!res.ok) throw new Error(await res.text());
       const job = await res.json();
+      const id = job?.job_id as string | undefined;
+      if (!id) throw new Error("Missing job id");
       toast({ title: t("job_started") });
-      setView("job");
-      setActiveJobId(job.job_id);
-      router.replace(`${pathname}?job=${job.job_id}`);
-      fetchHistory();
-    } catch (e) {
-      toast({ title: t("error_run"), description: String(e), variant: "destructive" });
-    } finally {
       setRunning(false);
+      router.push(`/dashboard/discovery/jobs/${id}`);
+    } catch (e) {
+      setRunning(false);
+      toast({ title: t("error_run"), description: String(e), variant: "destructive" });
     }
   };
 
+  const stopJob = async () => {
+    if (!jobId) return;
+    setStopping(true);
+    try {
+      const res = await fetch(`${API_URL}/api/discovery/job/${jobId}/stop`, { method: "POST" });
+      if (!res.ok) throw new Error(await res.text());
+      toast({ title: t("job_stopped") });
+      await fetchJobResults(jobId, statusFilter);
+    } catch (e) {
+      toast({ title: t("error_stop"), description: String(e), variant: "destructive" });
+    } finally {
+      setStopping(false);
+    }
+  };
+
+  const isJobActive =
+    jobMeta?.status === "running" || jobMeta?.status === "pending";
+  const processedCount = jobMeta?.processed_rows ?? 0;
+  const totalCount = jobMeta?.total_rows ?? stats.total ?? 0;
+
   const resolveRow = async (rowIndex: number, action: string, candidateIndex?: number) => {
-    if (!activeJobId) return;
-    const res = await fetch(`${API_URL}/api/discovery/job/${activeJobId}/resolve`, {
+    if (!jobId) return;
+    const res = await fetch(`${API_URL}/api/discovery/job/${jobId}/resolve`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ row_index: rowIndex, action, candidate_index: candidateIndex }),
     });
-    if (res.ok) fetchJobResults(activeJobId, statusFilter);
+    if (res.ok) fetchJobResults(jobId, statusFilter);
   };
 
   const importFound = async () => {
-    if (!activeJobId) return;
+    if (!jobId) return;
     setImporting(true);
     try {
-      const res = await fetch(`${API_URL}/api/discovery/job/${activeJobId}/import`, { method: "POST" });
+      const res = await fetch(`${API_URL}/api/discovery/job/${jobId}/import`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Import failed");
       toast({ title: t("imported_count", { count: data.imported }) });
-      fetchJobResults(activeJobId, statusFilter);
+      fetchJobResults(jobId, statusFilter);
     } catch (e) {
       toast({ title: t("error_import"), description: String(e), variant: "destructive" });
     } finally {
@@ -248,10 +281,10 @@ export function DiscoveryJobsPanel() {
     }
   };
 
-  if (view === "new") {
+  if (mode === "new") {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => setView("list")} className="gap-2">
+        <Button variant="ghost" onClick={() => router.push("/dashboard/discovery/jobs")} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> {t("back")}
         </Button>
         <div className={cn(cardSurfaceClass, "p-6 space-y-6")}>
@@ -332,23 +365,47 @@ export function DiscoveryJobsPanel() {
     );
   }
 
-  if (view === "job" && activeJobId) {
+  if (mode === "job" && jobId) {
     return (
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button variant="ghost" onClick={() => { setView("list"); router.replace(pathname); }} className="gap-2">
+          <Button variant="ghost" onClick={() => router.push("/dashboard/discovery/jobs")} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> {t("back")}
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => fetchJobResults(activeJobId, statusFilter)}>
+            {isJobActive && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={stopJob}
+                disabled={stopping}
+                className="gap-2 text-error border-error/30 hover:bg-error/10"
+              >
+                {stopping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4 fill-current" />}
+                {t("stop_job")}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => fetchJobResults(jobId, statusFilter)}>
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <Button size="sm" onClick={importFound} disabled={importing || jobMeta?.status === "running"}>
+            <Button size="sm" onClick={importFound} disabled={importing || isJobActive}>
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
               {t("import_found")}
             </Button>
           </div>
         </div>
+
+        {isJobActive && (
+          <div className={cn(cardSurfaceClass, "p-4 flex flex-wrap items-center gap-3")}>
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <div className="text-sm">
+              <span className="font-medium">{t("job_running")}</span>
+              <span className="text-muted-foreground ml-2">
+                {processedCount} / {totalCount} {t("stat_processed")}
+              </span>
+            </div>
+          </div>
+        )}
 
         <StatCardGrid>
           <StatCard label={t("stat_total")} value={stats.total ?? jobMeta?.total_rows ?? 0} icon={Search} />
@@ -422,7 +479,7 @@ export function DiscoveryJobsPanel() {
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <Button onClick={startNew} className="gap-2">
+        <Button onClick={() => router.push("/dashboard/discovery/jobs/new")} className="gap-2">
           <Plus className="h-4 w-4" /> {t("new_job")}
         </Button>
       </div>
@@ -443,7 +500,13 @@ export function DiscoveryJobsPanel() {
                 <td className="p-3">{job.found_count ?? 0} / {job.total_rows}</td>
                 <td className="p-3 text-xs text-muted-foreground">{job.created_at?.slice(0, 16)}</td>
                 <td className="p-3 text-right">
-                  <Button size="sm" variant="outline" onClick={() => openJob(job.job_id)}>{t("open")}</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push(`/dashboard/discovery/jobs/${job.job_id}`)}
+                  >
+                    {t("open")}
+                  </Button>
                 </td>
               </tr>
             ))}

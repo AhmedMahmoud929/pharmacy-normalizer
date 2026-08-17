@@ -14,6 +14,7 @@ from tools.discovery.platform_detect import (
     default_search_config,
     detect_platform,
     domain_from_url,
+    infer_search_config,
     suggest_dom_elements,
 )
 from tools.discovery.html_fetcher import fetch_html
@@ -81,7 +82,7 @@ async def preview_profile(req: PreviewRequest):
     domain = domain_from_url(url)
     html = fetch_html(url if url.startswith("http") else f"https://{url}")
     platform = detect_platform(html, url)
-    search_config = default_search_config(platform, domain)
+    search_config = infer_search_config(html, url, domain, platform)
     extract_config = default_extract_config(platform)
     available_elements = suggest_dom_elements(html)
 

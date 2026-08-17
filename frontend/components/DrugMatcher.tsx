@@ -24,7 +24,6 @@ import { ManualMatchModal } from "./ManualMatchModal";
 import { ExportDialog } from "./matcher/ExportDialog";
 import { MatcherSkeleton } from "./matcher/MatcherSkeleton";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // --- Types ---
 interface MatchCandidate {
@@ -910,7 +909,7 @@ export default function DrugMatcher() {
               setShowHistory(true);
               fetchHistory();
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 border-zinc-800 dark:hover:bg-zinc-850 cursor-pointer text-zinc-600 dark:text-zinc-300 font-bold text-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 dark:hover:bg-zinc-800 cursor-pointer text-zinc-600 dark:text-zinc-300 font-bold text-sm transition-all"
             title="View History Logs"
           >
             <Clock className="w-4 h-4 text-primary" />
@@ -1188,14 +1187,14 @@ export default function DrugMatcher() {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed right-0 top-0 bottom-0 z-[10000] w-full max-w-md bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 overflow-y-auto"
             >
-              <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-800 pb-4 mb-6">
+              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4 mb-6">
                 <div>
                   <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Match Job History</h2>
                   <p className="text-xs text-zinc-400 mt-1">Review past and ongoing sheets matches</p>
                 </div>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="p-2 rounded-full hover:bg-zinc-150 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1228,7 +1227,7 @@ export default function DrugMatcher() {
                             isRunning && "bg-primary/10 text-primary border border-primary/20",
                             isSuccess && "bg-success/10 text-success border border-success/20",
                             isFailed && "bg-error/10 text-error border border-error/20",
-                            job.status === "stopped" && "bg-zinc-150 dark:bg-zinc-800 text-zinc-650 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                            job.status === "stopped" && "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
                           )}>
                             {job.status}
                           </span>
@@ -1268,7 +1267,7 @@ export default function DrugMatcher() {
                     <Link
                       href="/dashboard/matcher"
                       onClick={() => setShowHistory(false)}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm transition-all"
                     >
                       Show All Campaigns
                     </Link>

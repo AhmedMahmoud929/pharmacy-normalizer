@@ -11,12 +11,12 @@ from typing import Any, Dict, List, Optional
 backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_DIR = os.path.join(backend_root, "data", "extracted")
 DB_PATH = os.path.join(DB_DIR, "discovery_jobs.db")
-JOBS_DIR = os.path.join(backend_root, "data", "discovery", "jobs")
+# Legacy on-disk path — migrated into DB on read, no longer written.
+LEGACY_JOBS_DIR = os.path.join(backend_root, "data", "discovery", "jobs")
 
 
 def init_db() -> None:
     os.makedirs(DB_DIR, exist_ok=True)
-    os.makedirs(JOBS_DIR, exist_ok=True)
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -48,6 +48,16 @@ def init_db() -> None:
         )
         """
     )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS discovery_job_results (
+            job_id TEXT PRIMARY KEY,
+            results_json TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (job_id) REFERENCES discovery_jobs(job_id) ON DELETE CASCADE
+        )
+        """
+    )
     conn.commit()
     conn.close()
 
@@ -68,8 +78,6 @@ def create_job(
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     now = datetime.now().isoformat()
-    results_path = os.path.join(JOBS_DIR, job_id, "results.json")
-    os.makedirs(os.path.join(JOBS_DIR, job_id), exist_ok=True)
 
     cursor.execute(
         """
@@ -98,13 +106,20 @@ def create_job(
             0,
             match_threshold,
             review_threshold,
-            results_path,
+            None,
             None,
             now,
             None,
             None,
             None,
         ),
+    )
+    cursor.execute(
+        """
+        INSERT INTO discovery_job_results (job_id, results_json, updated_at)
+        VALUES (?, '[]', ?)
+        """,
+        (job_id, now),
     )
     conn.commit()
     conn.close()
@@ -121,7 +136,6 @@ def create_job(
         "match_threshold": match_threshold,
         "review_threshold": review_threshold,
         "created_at": now,
-        "results_path": results_path,
     }
 
 
@@ -136,6 +150,7 @@ def _row_to_dict(cursor: sqlite3.Cursor, row: tuple) -> Dict[str, Any]:
             data["source_domains"] = []
     else:
         data["source_domains"] = []
+    data.pop("results_path", None)
     return data
 
 
@@ -278,31 +293,97 @@ def finalize_job(
     conn.close()
 
 
+def _legacy_results_path(job_id: str, job: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    if job and job.get("results_path"):
+        path = job["results_path"]
+        if path and os.path.exists(path):
+            return path
+    default = os.path.join(LEGACY_JOBS_DIR, job_id, "results.json")
+    if os.path.exists(default):
+        return default
+    return None
+
+
+def _cleanup_legacy_file(path: str) -> None:
+    try:
+        os.remove(path)
+        parent = os.path.dirname(path)
+        if os.path.isdir(parent) and not os.listdir(parent):
+            os.rmdir(parent)
+    except OSError:
+        pass
+
+
+def _migrate_legacy_results(job_id: str, job: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    path = _legacy_results_path(job_id, job)
+    if not path:
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            return []
+        save_results(job_id, data)
+        _cleanup_legacy_file(path)
+        return data
+    except Exception:
+        return []
+
+
 def load_results(job_id: str) -> List[Dict[str, Any]]:
+    init_db()
     job = get_job(job_id)
     if not job:
         raise FileNotFoundError(f"Job {job_id} not found")
-    results_path = job.get("results_path")
-    if not results_path or not os.path.exists(results_path):
-        return []
-    with open(results_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if not isinstance(data, list):
-        return []
-    return data
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT results_json FROM discovery_job_results WHERE job_id = ?",
+        (job_id,),
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    if row and row[0]:
+        try:
+            data = json.loads(row[0])
+            if isinstance(data, list):
+                legacy_path = _legacy_results_path(job_id, job)
+                if legacy_path:
+                    _cleanup_legacy_file(legacy_path)
+                return data
+        except json.JSONDecodeError:
+            pass
+
+    migrated = _migrate_legacy_results(job_id, job)
+    if migrated:
+        return migrated
+    return []
 
 
-def save_results(job_id: str, results: List[Dict[str, Any]]) -> str:
+def save_results(job_id: str, results: List[Dict[str, Any]]) -> None:
+    init_db()
     job = get_job(job_id)
     if not job:
         raise FileNotFoundError(f"Job {job_id} not found")
-    results_path = job["results_path"]
-    os.makedirs(os.path.dirname(results_path), exist_ok=True)
-    temp_path = results_path + ".tmp"
-    with open(temp_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
-    os.replace(temp_path, results_path)
-    return results_path
+
+    payload = json.dumps(results, ensure_ascii=False)
+    now = datetime.now().isoformat()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO discovery_job_results (job_id, results_json, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(job_id) DO UPDATE SET
+            results_json = excluded.results_json,
+            updated_at = excluded.updated_at
+        """,
+        (job_id, payload, now),
+    )
+    conn.commit()
+    conn.close()
 
 
 def recount_stats(results: List[Dict[str, Any]]) -> Dict[str, int]:

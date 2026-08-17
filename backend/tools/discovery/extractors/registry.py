@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from tools.discovery.extractors import chefaa, custom, shopify
 from tools.discovery.extractors.base import SearchCandidate, UnifiedProduct
+from tools.discovery.web_search import fallback_enabled, web_search_site
 
 
 def _module_for_platform(platform: str):
@@ -19,7 +20,12 @@ def _module_for_platform(platform: str):
 def search_products(query: str, profile: Dict[str, Any]) -> List[SearchCandidate]:
     platform = profile.get("platform") or "custom"
     mod = _module_for_platform(platform)
-    return mod.search(query, profile)
+    candidates = mod.search(query, profile)
+
+    if not candidates and platform != "chefaa" and fallback_enabled(profile):
+        candidates = web_search_site(query, profile)
+
+    return candidates
 
 
 def extract_product(url: str, profile: Dict[str, Any]) -> UnifiedProduct:

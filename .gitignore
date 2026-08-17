@@ -31,6 +31,8 @@ backend/data/extracted/
 backend/data/extracted_data/
 backend/data/media/
 backend/data/matcher/
+backend/data/discovery/
+backend/data/enrichment/
 backend/data/tmp/
 backend/data/input/
 backend/data/normalized/

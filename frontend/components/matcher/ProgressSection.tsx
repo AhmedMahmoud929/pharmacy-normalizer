@@ -20,7 +20,7 @@ export const ProgressSection: React.FC<ProgressSectionProps> = ({ progress, isPr
       <div className="p-8 rounded-2xl bg-primary/5 border border-primary/20 backdrop-blur-md flex flex-col items-center justify-center text-center space-y-4">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
         <div className="space-y-1">
-          <p className="text-base font-bold text-zinc-800 dark:text-zinc-150">Initializing Mapping Process</p>
+          <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">Initializing Mapping Process</p>
           <p className="text-xs text-zinc-400 font-medium max-w-sm">
             Uploading your pharmacy sheet, processing column headers, and mapping against our live master product catalog index...
           </p>

@@ -54,7 +54,12 @@ def _hit_to_product(hit: Dict[str, Any], domain: str = "chefaa.com") -> UnifiedP
         price=float(price) if price is not None else None,
         image_url=image,
         images=[image] if image else [],
-        barcode=str(hit.get("international_barcode") or hit.get("barcode") or ""),
+        barcode=str(
+            pick_international_barcode(
+                hit.get("international_barcode"),
+                hit.get("barcode"),
+            )
+        ),
         source_url=share,
         source_domain=domain,
         brand=brand,

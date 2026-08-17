@@ -219,7 +219,7 @@ export default function MatcherDashboard() {
         ) : filteredJobs.length === 0 ? (
           <div className="text-center py-20 space-y-4">
             <FileSpreadsheet className="w-16 h-16 text-zinc-300 dark:text-zinc-700 mx-auto" />
-            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-250">{t("empty_title")}</h3>
+            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{t("empty_title")}</h3>
             <p className="text-sm text-zinc-500 max-w-sm mx-auto">
               {t("empty_desc")}
             </p>
@@ -257,12 +257,12 @@ export default function MatcherDashboard() {
                             isSuccess && "bg-success/10 text-success border-success/20",
                             isRunning && "bg-primary/10 text-primary border-primary/20",
                             isFailed && "bg-error/10 text-error border-error/20",
-                            isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-550 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
+                            isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
                           )}>
                             <FileSpreadsheet className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="font-bold text-zinc-800 dark:text-zinc-150 truncate max-w-[200px]" title={job.filename}>
+                            <p className="font-bold text-zinc-800 dark:text-zinc-100 truncate max-w-[200px]" title={job.filename}>
                               {job.filename}
                             </p>
                             <p className="text-[10px] text-zinc-400 font-medium">ID: {job.job_id.substring(0, 8)}</p>
@@ -271,7 +271,7 @@ export default function MatcherDashboard() {
                       </td>
 
                       {/* Mapped Column */}
-                      <td className="p-4 font-semibold text-zinc-600 dark:text-zinc-350">
+                      <td className="p-4 font-semibold text-zinc-600 dark:text-zinc-300">
                         {job.column_used || "Auto-detect"}
                       </td>
 
@@ -308,7 +308,7 @@ export default function MatcherDashboard() {
                           isRunning && "bg-primary/10 text-primary border border-primary/20 animate-pulse",
                           isSuccess && "bg-success/10 text-success border border-success/20",
                           isFailed && "bg-error/10 text-error border border-error/20",
-                          isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-550 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                          isStopped && "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
                         )}>
                           {isRunning && <Loader2 className="w-3 h-3 animate-spin" />}
                           {isSuccess && <CheckCircle className="w-3 h-3 text-success" />}
@@ -329,7 +329,7 @@ export default function MatcherDashboard() {
                           {/* Inspect Results */}
                           <Link
                             href={`/dashboard/matcher/new?job_id=${job.job_id}`}
-                            className="p-2 cursor-pointer rounded-lg bg-zinc-850 hover:bg-primary hover:text-primary-foreground text-zinc-600 dark:text-zinc-300 transition-all"
+                            className="p-2 cursor-pointer rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-primary hover:text-primary-foreground text-zinc-600 dark:text-zinc-300 transition-all"
                             title={t("tip_inspect")}
                           >
                             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -339,7 +339,7 @@ export default function MatcherDashboard() {
                           {isSuccess && (
                             <button
                               onClick={() => handleExportClick(job.job_id)}
-                              className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
+                              className="p-2 rounded-lg cursor-pointer bg-zinc-100 dark:bg-zinc-800 hover:bg-success hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
                               title={t("tip_export")}
                             >
                               <Download className="w-4 h-4" />
@@ -352,7 +352,7 @@ export default function MatcherDashboard() {
                               setJobToDelete({ id: job.job_id, filename: job.filename });
                               setIsDeleteOpen(true);
                             }}
-                            className="p-2 rounded-lg cursor-pointer bg-zinc-850 hover:bg-error hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
+                            className="p-2 rounded-lg cursor-pointer bg-zinc-100 dark:bg-zinc-800 hover:bg-error hover:text-white text-zinc-600 dark:text-zinc-300 transition-all inline-flex items-center justify-center"
                             title={t("tip_delete")}
                           >
                             <Trash2 className="w-4 h-4" />
