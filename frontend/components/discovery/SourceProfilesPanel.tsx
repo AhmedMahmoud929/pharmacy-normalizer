@@ -76,7 +76,7 @@ export function SourceProfilesPanel() {
       const data = await res.json();
       setProfiles(data.profiles || []);
     } catch {
-      toast({ title: t("error_load_profiles"), variant: "destructive" });
+      toast({ title: t("error_load_profiles"), type: "error" });
     } finally {
       setLoading(false);
     }
@@ -115,7 +115,7 @@ export function SourceProfilesPanel() {
         price_divisor: Number(ext.price_divisor || f.price_divisor),
       }));
     } catch (e) {
-      toast({ title: t("error_preview"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_preview"), description: String(e), type: "error" });
     } finally {
       setPreviewLoading(false);
     }
@@ -154,7 +154,7 @@ export function SourceProfilesPanel() {
       setSampleUrl("");
       fetchProfiles();
     } catch (e) {
-      toast({ title: t("error_save"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_save"), description: String(e), type: "error" });
     } finally {
       setSaving(false);
     }
@@ -199,7 +199,7 @@ export function SourceProfilesPanel() {
       }
       toast({ title: t("test_ok") });
     } catch (e) {
-      toast({ title: t("test_failed"), description: String(e), variant: "destructive" });
+      toast({ title: t("test_failed"), description: String(e), type: "error" });
     } finally {
       setTesting(false);
     }
@@ -214,7 +214,7 @@ export function SourceProfilesPanel() {
       if (!res.ok) throw new Error(await res.text());
       fetchProfiles();
     } catch (e) {
-      toast({ title: t("error_delete"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_delete"), description: String(e), type: "error" });
     }
   };
 

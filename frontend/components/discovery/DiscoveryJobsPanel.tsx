@@ -128,7 +128,7 @@ export function DiscoveryJobsPanel({
       const data = await res.json();
       setHistory(Array.isArray(data) ? data : []);
     } catch {
-      toast({ title: t("error_load_jobs"), variant: "destructive" });
+      toast({ title: t("error_load_jobs"), type: "error" });
     }
   }, [t, toast]);
 
@@ -146,7 +146,7 @@ export function DiscoveryJobsPanel({
       setJobMeta(meta);
       return meta as DiscoveryJob;
     } catch {
-      toast({ title: t("error_load_results"), variant: "destructive" });
+      toast({ title: t("error_load_results"), type: "error" });
       return null;
     } finally {
       setLoading(false);
@@ -231,7 +231,7 @@ export function DiscoveryJobsPanel({
       router.push(`/dashboard/discovery/jobs/${id}`);
     } catch (e) {
       setRunning(false);
-      toast({ title: t("error_run"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_run"), description: String(e), type: "error" });
     }
   };
 
@@ -244,7 +244,7 @@ export function DiscoveryJobsPanel({
       toast({ title: t("job_stopped") });
       await fetchJobResults(jobId, statusFilter);
     } catch (e) {
-      toast({ title: t("error_stop"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_stop"), description: String(e), type: "error" });
     } finally {
       setStopping(false);
     }
@@ -275,7 +275,7 @@ export function DiscoveryJobsPanel({
       toast({ title: t("imported_count", { count: data.imported }) });
       fetchJobResults(jobId, statusFilter);
     } catch (e) {
-      toast({ title: t("error_import"), description: String(e), variant: "destructive" });
+      toast({ title: t("error_import"), description: String(e), type: "error" });
     } finally {
       setImporting(false);
     }

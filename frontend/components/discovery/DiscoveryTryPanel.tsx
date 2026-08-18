@@ -126,7 +126,7 @@ export function DiscoveryTryPanel() {
         setSources(profiles);
         setSelectedSources(profiles.map((p: SourceOption) => p.domain));
       })
-      .catch(() => toast({ title: t("error_load_profiles"), variant: "destructive" }));
+      .catch(() => toast({ title: t("error_load_profiles"), type: "error" }));
   }, [t, toast]);
 
   useEffect(() => {
@@ -223,11 +223,11 @@ export function DiscoveryTryPanel() {
   const runTry = async () => {
     const name = productName.trim();
     if (!name) {
-      toast({ title: t("try_name_required"), variant: "destructive" });
+      toast({ title: t("try_name_required"), type: "error" });
       return;
     }
     if (selectedSources.length === 0) {
-      toast({ title: t("try_sources_required"), variant: "destructive" });
+      toast({ title: t("try_sources_required"), type: "error" });
       return;
     }
 
@@ -266,7 +266,7 @@ export function DiscoveryTryPanel() {
       });
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
-      toast({ title: t("try_error"), description: String(e), variant: "destructive" });
+      toast({ title: t("try_error"), description: String(e), type: "error" });
       setSteps((prev) => [
         ...prev,
         {

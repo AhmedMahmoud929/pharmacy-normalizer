@@ -468,14 +468,14 @@ export default function EnrichmentDashboard() {
             loadHistory();
           } catch (err: any) {
             if (!pollAbortRef.current && !stopRequestedRef.current) {
-              toast({ title: "Job error", description: err.message, variant: "destructive" });
+              toast({ title: "Job error", description: err.message, type: "error" });
             }
           } finally {
             setIsRunning(false);
           }
         }
       } catch (err: any) {
-        toast({ title: "Load failed", description: err.message, variant: "destructive" });
+        toast({ title: "Load failed", description: err.message, type: "error" });
         setIsLoadingJob(false);
         setIsRunning(false);
         openedJobRef.current = null;
@@ -551,7 +551,7 @@ export default function EnrichmentDashboard() {
       setBarcodeColumn(data.suggested?.barcode_column || "");
       setCodeColumn(data.suggested?.code_column || "");
     } catch (err: any) {
-      toast({ title: "Upload error", description: err.message, variant: "destructive" });
+      toast({ title: "Upload error", description: err.message, type: "error" });
     } finally {
       setIsDetecting(false);
     }
@@ -563,7 +563,7 @@ export default function EnrichmentDashboard() {
       toast({
         title: "Columns required",
         description: "Select name and barcode columns",
-        variant: "destructive",
+        type: "error",
       });
       return;
     }
@@ -603,7 +603,7 @@ export default function EnrichmentDashboard() {
       toast({ title: "Matching complete", description: "Review results, then apply matched rows" });
       loadHistory();
     } catch (err: any) {
-      toast({ title: "Run failed", description: err.message, variant: "destructive" });
+      toast({ title: "Run failed", description: err.message, type: "error" });
     } finally {
       setIsRunning(false);
     }
@@ -637,7 +637,7 @@ export default function EnrichmentDashboard() {
       });
       loadHistory();
     } catch (err: any) {
-      toast({ title: "Apply failed", description: err.message, variant: "destructive" });
+      toast({ title: "Apply failed", description: err.message, type: "error" });
     } finally {
       setIsApplying(false);
     }
@@ -656,7 +656,7 @@ export default function EnrichmentDashboard() {
       toast({ title: "Job stopped", description: "Partial results are available to review." });
       loadHistory();
     } catch (err: any) {
-      toast({ title: "Stop failed", description: err.message, variant: "destructive" });
+      toast({ title: "Stop failed", description: err.message, type: "error" });
     } finally {
       setIsStopping(false);
     }
@@ -688,7 +688,7 @@ export default function EnrichmentDashboard() {
       });
       loadHistory();
     } catch (err: any) {
-      toast({ title: "Action failed", description: err.message, variant: "destructive" });
+      toast({ title: "Action failed", description: err.message, type: "error" });
     } finally {
       setResolvingRow(null);
     }
