@@ -157,9 +157,14 @@ git pull
 ./redeploy.sh
 ```
 
-`redeploy.sh` reads `deploy.env` automatically when present.
+`redeploy.sh` reads `deploy.env` automatically when present. It writes `frontend/.env.production` from that file before building, then starts PM2 via `deployment/new-matcher/ecosystem.config.cjs` so `JWT_SECRET` is available at runtime.
 
-If login succeeds but the browser loops between `/login` and `/dashboard`, the frontend PM2 process is almost certainly missing `JWT_SECRET` (it must match `deploy.env`). Re-run `./redeploy.sh` after pulling the latest deployment scripts.
+If login succeeds but the browser loops between `/login` and `/dashboard`:
+
+1. Confirm `deploy.env` has the same `JWT_SECRET` used by the backend (`systemctl show fastapi-new-matcher --property=Environment`).
+2. Re-run `./redeploy.sh` (not just `pm2 restart`).
+3. Clear site cookies or use a private window.
+4. Default admin password on first seed is `ahmed@1` (not `ahmed@123`) unless changed on the server.
 
 ---
 

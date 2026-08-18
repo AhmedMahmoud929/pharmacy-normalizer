@@ -78,18 +78,14 @@ if ! command -v pm2 >/dev/null 2>&1; then
 fi
 cd "$PROJECT_ROOT/frontend"
 pnpm install
-# JWT_SECRET must match backend (deploy.env) so proxy.ts can verify login cookies.
-JWT_SECRET="${JWT_SECRET}" NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run build
+bash "$PROJECT_ROOT/deployment/new-matcher/write-frontend-env.sh"
+pnpm run build
 
 echo -e "${YELLOW}Step 6: PM2${NC}"
 FRONTEND_PORT="${FRONTEND_PORT:-3005}"
+export PROJECT_ROOT FRONTEND_PORT PM2_APP_NAME JWT_SECRET
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-JWT_SECRET="${JWT_SECRET}" pm2 start "$PROJECT_ROOT/frontend/node_modules/next/dist/bin/next" \
-  --name "$PM2_APP_NAME" \
-  --cwd "$PROJECT_ROOT/frontend" \
-  --interpreter node \
-  --update-env \
-  -- start -p "$FRONTEND_PORT"
+pm2 start "$PROJECT_ROOT/deployment/new-matcher/ecosystem.config.cjs" --update-env
 pm2 save
 
 echo -e "${YELLOW}Step 7: Nginx${NC}"

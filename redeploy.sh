@@ -115,19 +115,17 @@ if [ -z "${JWT_SECRET:-}" ]; then
     exit 1
 fi
 
+bash "$PROJECT_ROOT/deployment/new-matcher/write-frontend-env.sh"
+
 echo -e "${CYAN}Building with API URL: ${NEXT_PUBLIC_API_URL}${NC}"
-JWT_SECRET="${JWT_SECRET}" NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run build
+pnpm run build
 echo -e "${GREEN}✔ Next.js build completed successfully!${NC}"
 
 echo -e "${CYAN}Restarting Next.js server in PM2...${NC}"
 FRONTEND_PORT="${FRONTEND_PORT:-3005}"
+export PROJECT_ROOT FRONTEND_PORT PM2_APP_NAME JWT_SECRET
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-JWT_SECRET="${JWT_SECRET}" pm2 start "$PROJECT_ROOT/frontend/node_modules/next/dist/bin/next" \
-  --name "$PM2_APP_NAME" \
-  --cwd "$PROJECT_ROOT/frontend" \
-  --interpreter node \
-  --update-env \
-  -- start -p "$FRONTEND_PORT"
+pm2 start "$PROJECT_ROOT/deployment/new-matcher/ecosystem.config.cjs" --update-env
 pm2 save
 echo -e "${GREEN}✔ PM2 process list restarted and saved!${NC}"
 

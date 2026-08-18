@@ -1,5 +1,7 @@
-const JWT_SECRET =
-  process.env.JWT_SECRET || "pharmatch-dev-secret-change-in-production";
+function jwtSecret(): string {
+  // Bracket access keeps Next.js from inlining this at build time.
+  return process.env["JWT_SECRET"] ?? "pharmatch-dev-secret-change-in-production";
+}
 
 export type AuthPayload = {
   sub: string;
@@ -41,7 +43,7 @@ export async function verifyAccessToken(token: string): Promise<AuthPayload | nu
     const [data, sig] = token.split(".");
     if (!data || !sig) return null;
 
-    const expected = await hmacSha256Hex(JWT_SECRET, data);
+    const expected = await hmacSha256Hex(jwtSecret(), data);
     if (sig !== expected) return null;
 
     const payload = JSON.parse(decodeBase64Url(data)) as AuthPayload;

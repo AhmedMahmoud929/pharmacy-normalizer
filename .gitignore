@@ -9,6 +9,7 @@ frontend/out/
 frontend/build/
 frontend/.pnpm-debug.log
 frontend/.env*.local
+frontend/.env.production
 
 # --- Python / Backend (FastAPI & Crawler) ---
 backend/venv/

@@ -6,6 +6,7 @@ import { Loader2, LockKeyhole, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { defaultDashboardRoute } from "@/lib/permissions";
 
 const isDev = process.env.NODE_ENV === "development";
 const DEV_LOGIN_EMAIL =
@@ -23,7 +24,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      window.location.href = "/dashboard/matcher";
+      const destination = defaultDashboardRoute(user);
+      if (destination !== "/login") {
+        window.location.href = destination;
+      }
     }
   }, [loading, user]);
 

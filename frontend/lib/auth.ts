@@ -82,7 +82,11 @@ export function getStoredToken(): string | null {
 
 export function setAuthSession(token: string) {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
-  document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_MAX_AGE_SECONDS}; SameSite=Lax`;
+  const secure =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? "; Secure"
+      : "";
+  document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
 }
 
 export function clearAuthSession() {
