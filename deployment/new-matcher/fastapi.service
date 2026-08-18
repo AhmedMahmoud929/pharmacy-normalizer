@@ -1,0 +1,18 @@
+[Unit]
+Description=FastAPI Pharmatch AI (new-matcher)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/new-matcher.bya3online.com/backend
+Environment="PATH=/var/www/new-matcher.bya3online.com/backend/venv/bin"
+EnvironmentFile=-/var/www/new-matcher.bya3online.com/deploy.env
+ExecStart=/var/www/new-matcher.bya3online.com/backend/venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000 --workers 4
+
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -24,14 +24,29 @@ echo -e "${CYAN}     🚀 PHARMATCH AI PRODUCTION REDEPLOYMENT WIZARD    ${NC}"
 echo -e "${CYAN}=======================================================${NC}"
 
 # 1. Verify working directory
-PROJECT_ROOT="/var/www/drug-mapping"
-if [ -d "$PROJECT_ROOT" ]; then
-    echo -e "${GREEN}✔ Validated production root directory at: ${PROJECT_ROOT}${NC}"
-    cd "$PROJECT_ROOT"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -d "/var/www/new-matcher.bya3online.com" ]; then
+    PROJECT_ROOT="/var/www/new-matcher.bya3online.com"
+elif [ -d "/var/www/drug-mapping" ]; then
+    PROJECT_ROOT="/var/www/drug-mapping"
+elif [ -d "$SCRIPT_DIR" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
 else
-    echo -e "${YELLOW}⚠ Warning: /var/www/drug-mapping not found. Using current directory: $(pwd)${NC}"
     PROJECT_ROOT=$(pwd)
 fi
+
+cd "$PROJECT_ROOT"
+echo -e "${GREEN}✔ Production root: ${PROJECT_ROOT}${NC}"
+
+# Optional server-specific config (see deployment/new-matcher/deploy.env.example)
+if [ -f "$PROJECT_ROOT/deploy.env" ]; then
+    # shellcheck disable=SC1091
+    source "$PROJECT_ROOT/deploy.env"
+    echo -e "${GREEN}✔ Loaded deploy.env${NC}"
+fi
+
+PM2_APP_NAME="${PM2_APP_NAME:-pharmatch-frontend}"
+SYSTEMD_SERVICE="${SYSTEMD_SERVICE:-fastapi}"
 
 # 2. Pull latest codebase
 echo -e "\n${YELLOW}Step 1: Pulling latest changes from Git...${NC}"
@@ -57,8 +72,8 @@ else
     exit 1
 fi
 
-echo -e "${CYAN}Restarting FastAPI systemd service...${NC}"
-sudo systemctl restart fastapi
+echo -e "${CYAN}Restarting FastAPI systemd service (${SYSTEMD_SERVICE})...${NC}"
+sudo systemctl restart "$SYSTEMD_SERVICE"
 echo -e "${GREEN}✔ FastAPI background service restarted!${NC}"
 
 # 4. Build and Restart Frontend (Next.js)
@@ -84,9 +99,13 @@ if [ -z "$NEXT_PUBLIC_API_URL" ]; then
         NEXT_PUBLIC_API_URL=$(grep -E "^NEXT_PUBLIC_API_URL=" ".env" | cut -d'=' -f2- | tr -d '"'\'' ')
     fi
     
-    # Fallback to the live production api subdomain
+    # Fallback API URL
     if [ -z "$NEXT_PUBLIC_API_URL" ]; then
-        NEXT_PUBLIC_API_URL="https://pharmatcher-api.bya3online.com"
+        if [ "$PROJECT_ROOT" = "/var/www/new-matcher.bya3online.com" ]; then
+            NEXT_PUBLIC_API_URL="https://new-matcher-api.bya3online.com"
+        else
+            NEXT_PUBLIC_API_URL="https://pharmatcher-api.bya3online.com"
+        fi
     fi
 fi
 
@@ -96,7 +115,7 @@ NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL pnpm run build
 echo -e "${GREEN}✔ Next.js build completed successfully!${NC}"
 
 echo -e "${CYAN}Restarting Next.js server in PM2...${NC}"
-pm2 restart pharmatch-frontend || pm2 start "pnpm run start" --name "pharmatch-frontend"
+pm2 restart "$PM2_APP_NAME" || pm2 start "pnpm run start" --name "$PM2_APP_NAME"
 pm2 save
 echo -e "${GREEN}✔ PM2 process list restarted and saved!${NC}"
 

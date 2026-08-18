@@ -41,6 +41,9 @@ shefaa-crawler/data/categories.json
 **/*.xlsx
 **/*.json.bak
 
+# --- Server deploy secrets (copy from deploy.env.example on the server) ---
+deploy.env
+
 # --- Backups & Temp files ---
 redeploy_backup*.sh
 *.bak
