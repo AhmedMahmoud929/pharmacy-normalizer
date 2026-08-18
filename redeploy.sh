@@ -110,16 +110,22 @@ if [ -z "$NEXT_PUBLIC_API_URL" ]; then
 fi
 
 
+if [ -z "${JWT_SECRET:-}" ]; then
+    echo -e "${RED}❌ JWT_SECRET is missing. Set it in deploy.env (must match the backend).${NC}"
+    exit 1
+fi
+
 echo -e "${CYAN}Building with API URL: ${NEXT_PUBLIC_API_URL}${NC}"
-NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL pnpm run build
+JWT_SECRET="${JWT_SECRET}" NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run build
 echo -e "${GREEN}✔ Next.js build completed successfully!${NC}"
 
 echo -e "${CYAN}Restarting Next.js server in PM2...${NC}"
 FRONTEND_PORT="${FRONTEND_PORT:-3005}"
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-pm2 start "$PROJECT_ROOT/frontend/node_modules/.bin/next" \
+JWT_SECRET="${JWT_SECRET}" pm2 start "$PROJECT_ROOT/frontend/node_modules/.bin/next" \
   --name "$PM2_APP_NAME" \
   --cwd "$PROJECT_ROOT/frontend" \
+  --update-env \
   -- start -p "$FRONTEND_PORT"
 pm2 save
 echo -e "${GREEN}✔ PM2 process list restarted and saved!${NC}"

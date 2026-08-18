@@ -159,6 +159,8 @@ git pull
 
 `redeploy.sh` reads `deploy.env` automatically when present.
 
+If login succeeds but the browser loops between `/login` and `/dashboard`, the frontend PM2 process is almost certainly missing `JWT_SECRET` (it must match `deploy.env`). Re-run `./redeploy.sh` after pulling the latest deployment scripts.
+
 ---
 
 ## Service names
