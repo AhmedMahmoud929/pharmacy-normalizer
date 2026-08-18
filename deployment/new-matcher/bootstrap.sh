@@ -30,7 +30,13 @@ if [ "${JWT_SECRET:-}" = "replace-with-long-random-string" ] || [ -z "${JWT_SECR
 fi
 
 echo -e "${YELLOW}Step 1: Python virtual environment${NC}"
+if ! python3 -m venv --help >/dev/null 2>&1; then
+  echo -e "${RED}python3-venv is missing. Install it, then re-run:${NC}"
+  echo -e "  sudo apt install -y python3-venv python3-dev"
+  exit 1
+fi
 cd "$PROJECT_ROOT/backend"
+rm -rf venv
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
@@ -56,16 +62,35 @@ sudo systemctl enable "$SYSTEMD_SERVICE"
 sudo systemctl restart "$SYSTEMD_SERVICE"
 
 echo -e "${YELLOW}Step 5: Frontend build${NC}"
+if ! command -v node >/dev/null 2>&1; then
+  echo -e "${RED}Node.js is missing. Install it, then re-run:${NC}"
+  echo -e "  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+  echo -e "  sudo apt install -y nodejs"
+  exit 1
+fi
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo -e "${YELLOW}Installing pnpm...${NC}"
+  npm install -g pnpm
+fi
+if ! command -v pm2 >/dev/null 2>&1; then
+  echo -e "${YELLOW}Installing pm2...${NC}"
+  npm install -g pm2
+fi
 cd "$PROJECT_ROOT/frontend"
 pnpm install
 NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run build
 
 echo -e "${YELLOW}Step 6: PM2${NC}"
+FRONTEND_PORT="${FRONTEND_PORT:-3005}"
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-pm2 start "pnpm run start" --name "$PM2_APP_NAME"
+pm2 start "pnpm run start" --name "$PM2_APP_NAME" --cwd "$PROJECT_ROOT/frontend"
 pm2 save
 
 echo -e "${YELLOW}Step 7: Nginx${NC}"
+if [ ! -f "$PROJECT_ROOT/deployment/new-matcher/nginx.conf" ]; then
+  echo -e "${RED}Missing deployment/new-matcher/nginx.conf${NC}"
+  exit 1
+fi
 sudo cp "$PROJECT_ROOT/deployment/new-matcher/nginx.conf" /etc/nginx/sites-available/new-matcher.conf
 sudo ln -sf /etc/nginx/sites-available/new-matcher.conf /etc/nginx/sites-enabled/new-matcher.conf
 sudo rm -f /etc/nginx/sites-enabled/default

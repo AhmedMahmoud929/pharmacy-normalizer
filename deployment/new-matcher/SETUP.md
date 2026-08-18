@@ -26,7 +26,7 @@ Create **A records** pointing to the new server IP:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y python3-pip python3-venv python3-dev nginx git curl build-essential
+sudo apt install -y python3-pip python3-venv python3-dev python3.12-venv nginx git curl build-essential
 
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
