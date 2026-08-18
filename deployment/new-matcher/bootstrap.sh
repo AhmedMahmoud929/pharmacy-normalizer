@@ -83,7 +83,10 @@ NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run build
 echo -e "${YELLOW}Step 6: PM2${NC}"
 FRONTEND_PORT="${FRONTEND_PORT:-3005}"
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-pm2 start "pnpm run start" --name "$PM2_APP_NAME" --cwd "$PROJECT_ROOT/frontend"
+pm2 start "$PROJECT_ROOT/frontend/node_modules/.bin/next" \
+  --name "$PM2_APP_NAME" \
+  --cwd "$PROJECT_ROOT/frontend" \
+  -- start -p "$FRONTEND_PORT"
 pm2 save
 
 echo -e "${YELLOW}Step 7: Nginx${NC}"
