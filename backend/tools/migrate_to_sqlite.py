@@ -25,7 +25,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from db import catalog_repo, mappings_repo
-from db.config import DEFAULT_DB_PATH, LEGACY_NORMALIZED_JSON, LEGACY_RAW_JSON
+from db.config import DEFAULT_DB_PATH
 from db.schema import init_schema
 from normalizer import normalize
 
@@ -105,13 +105,11 @@ def main() -> None:
 
     json_path = args.json
     if not json_path:
-        if os.path.exists(LEGACY_NORMALIZED_JSON):
-            json_path = LEGACY_NORMALIZED_JSON
-        elif os.path.exists(LEGACY_RAW_JSON):
-            json_path = LEGACY_RAW_JSON
-        else:
-            print("❌ No catalog JSON found. Pass --json or place data in data/normalized/ or data/extracted/.")
-            sys.exit(1)
+        print("❌ Pass --json with the path to a catalog JSON export to import.")
+        sys.exit(1)
+    if not os.path.exists(json_path):
+        print(f"❌ Catalog JSON not found: {json_path}")
+        sys.exit(1)
 
     import_catalog_json(json_path, promote=not args.no_promote)
 

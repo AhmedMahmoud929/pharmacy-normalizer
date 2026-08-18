@@ -41,7 +41,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from normalizer import normalize
-from tools.matcher import ProductIndex, DEFAULT_DB_PATH, init_worker
+from tools.matcher import ProductIndex
 from tools.catalog_service import load_catalog_index
 from catalog_api import router as catalog_router, register_reload_callback
 from enrichment_api import router as enrichment_router, register_enrichment_deps

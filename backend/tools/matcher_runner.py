@@ -21,7 +21,7 @@ if tools_dir not in sys.path:
 
 from tools.matcher_export import build_custom_columns, build_original_row_dict
 
-from tools.matcher import ProductIndex, DEFAULT_DB_PATH, normalize
+from tools.matcher import ProductIndex, load_products_data, normalize
 from tools.matcher_db import update_job_progress, finalize_job, update_job_pid, save_results, export_path_for_job
 from tools.csv_helper import load_sheet_safely
 
@@ -37,16 +37,13 @@ def _extract_cell_string(val) -> Optional[str]:
 _global_index = None
 
 def get_db_path() -> str:
-    db_to_load = DEFAULT_DB_PATH
-    from tools.matcher import RAW_DB_PATH
-    if not os.path.exists(DEFAULT_DB_PATH) and os.path.exists(RAW_DB_PATH):
-        db_to_load = RAW_DB_PATH
-    return db_to_load
+    from db.config import DEFAULT_DB_PATH
+    return DEFAULT_DB_PATH
 
 def _init_process_worker(db_path: str):
     global _global_index
     from tools.matcher import ProductIndex, load_products_data
-    products_data = load_products_data(db_path)
+    products_data = load_products_data()
     _global_index = ProductIndex(products_data)
 
 # Excel formatting helpers
@@ -129,36 +126,8 @@ def enrich_product_image_status(product: dict) -> dict:
 job_listeners: Dict[str, Set[asyncio.Queue]] = {}
 
 def load_reference_db() -> List[Dict[str, Any]]:
-    """Loads the reference catalog dataset."""
-    db_to_load = DEFAULT_DB_PATH
-    from tools.matcher import RAW_DB_PATH
-    if not os.path.exists(DEFAULT_DB_PATH) and os.path.exists(RAW_DB_PATH):
-        db_to_load = RAW_DB_PATH
-        
-    try:
-        with open(db_to_load, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (MemoryError, Exception):
-        # Fall back to streaming line-by-line
-        products = []
-        current_obj_str = []
-        in_object = False
-        with open(db_to_load, "r", encoding="utf-8") as f:
-            for line in f:
-                stripped = line.strip()
-                if stripped == "{":
-                    in_object = True
-                    current_obj_str = ["{"]
-                elif stripped in ("},", "}"):
-                    current_obj_str.append("}")
-                    in_object = False
-                    try:
-                        products.append(json.loads("".join(current_obj_str)))
-                    except Exception:
-                        pass
-                elif in_object:
-                    current_obj_str.append(line)
-        return products
+    """Load the reference catalog from SQLite."""
+    return load_products_data()
 
 def _build_matches_from_entry(entry: dict, match_threshold: float, review_threshold: float, score: float = 1.0) -> list:
     """Format a catalog index entry as matcher results (exact lookup hit)."""

@@ -4,10 +4,6 @@ BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BACKEND_ROOT, "data")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "pharmatcher.db")
 
-# Legacy JSON paths kept only for one-time migration tooling.
-LEGACY_NORMALIZED_JSON = os.path.join(DATA_DIR, "normalized", "chefaa_products_eg_normalized.json")
-LEGACY_RAW_JSON = os.path.join(DATA_DIR, "extracted", "chefaa_products_eg.json")
-
 
 def resolve_backend_root(workspace_root: str | None = None) -> str:
     """

@@ -71,31 +71,18 @@ def normalize_lookup_key(val) -> str:
 #  Constants & Config
 # ─────────────────────────────────────────────────────────────────────
 
-DEFAULT_DB_PATH = os.path.join(project_root, "data", "normalized", "chefaa_products_eg_normalized.json")
-RAW_DB_PATH = os.path.join(project_root, "data", "extracted", "chefaa_products_eg.json")
-SQLITE_DB_PATH = os.path.join(project_root, "data", "pharmatcher.db")
+from db.config import DEFAULT_DB_PATH as SQLITE_DB_PATH
+
+DEFAULT_DB_PATH = SQLITE_DB_PATH
 
 def load_products_data(db_path: str = None) -> List[Dict[str, Any]]:
-    """Load catalog products — prefers SQLite, falls back to legacy JSON."""
-    try:
-        from tools.catalog_service import load_catalog_index
-        index, products = load_catalog_index()
-        if products:
-            return products
-    except Exception as exc:
-        console.print(f"[yellow]SQLite catalog load failed ({exc}); falling back to JSON.[/yellow]")
-
-    resolved = resolve_db_path(db_path or DEFAULT_DB_PATH)
-    with open(resolved, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """Load catalog products from SQLite (pharmatcher.db)."""
+    from tools.catalog_service import load_catalog_index
+    _, products = load_catalog_index()
+    return products
 
 def resolve_db_path(db_path: str) -> str:
-    if os.path.exists(db_path):
-        return db_path
-    if db_path == DEFAULT_DB_PATH and os.path.exists(RAW_DB_PATH):
-        console.print(f"⚠️ [yellow]Warning: Normalized database not found at {DEFAULT_DB_PATH}. Falling back to raw database at {RAW_DB_PATH}...[/yellow]")
-        return RAW_DB_PATH
-    return db_path
+    return db_path or SQLITE_DB_PATH
 
 NAME_COLUMN_CANDIDATES = [
     "name", "Name", "NAME",
@@ -676,7 +663,7 @@ def main():
     parser.add_argument("--file", "-f", help="Input sheet path")
     parser.add_argument("--column", "-c", help="Name column override")
     parser.add_argument("--output", "-o", help="Output file path")
-    parser.add_argument("--db", default=DEFAULT_DB_PATH, help="Path to reference JSON")
+    parser.add_argument("--db", default=SQLITE_DB_PATH, help="Path to SQLite catalog database (pharmatcher.db)")
     parser.add_argument("--top", type=int, default=5, help="Number of candidates")
     parser.add_argument("--match-threshold", type=float, default=60.0, help="Minimum score for automatic match (default: 60.0)")
     parser.add_argument("--review-threshold", type=float, default=40.0, help="Minimum score for pharmacist review (default: 40.0)")
@@ -704,31 +691,12 @@ def main():
         run_single(args.query, index, args)
     elif args.file: run_sheet(args.file, index, args)
 
-def load_reference(db_path: str) -> ProductIndex:
-    resolved_path = resolve_db_path(db_path)
-    
-    with open(resolved_path, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-        
-    if content.startswith("["):
-        content = content[1:]
-    if content.endswith("]"):
-        content = content[:-1]
-        
-    raw_objects = content.split("\n  },")
-    products = []
-    
-    for obj_str in raw_objects:
-        obj_str = obj_str.strip()
-        if not obj_str:
-            continue
-        if not obj_str.endswith("}"):
-            obj_str += "}"
-        try:
-            products.append(json.loads(obj_str))
-        except:
-            pass
-            
+def load_reference(db_path: str = None) -> ProductIndex:
+    products = load_products_data(db_path)
+    if not products:
+        raise FileNotFoundError(
+            "Catalog is empty. Import products via Catalog Seeder or migrate_to_sqlite.py --json <export.json>."
+        )
     return ProductIndex(products)
 
 if __name__ == "__main__":
