@@ -194,6 +194,28 @@ def _emit(job_id: str, event: str, data: Dict[str, Any]) -> None:
             pass
 
 
+def _update_step_progress(
+    job_id: str,
+    step: str,
+    *,
+    processed: int,
+    total: int,
+    message: Optional[str] = None,
+) -> None:
+    pipeline_repo.update_step_progress(
+        job_id,
+        step,
+        status="running",
+        processed=processed,
+        total=total,
+        message=message,
+    )
+    payload: Dict[str, Any] = {"step": step, "processed": processed, "total": total}
+    if message:
+        payload["message"] = message
+    _emit(job_id, "step_progress", payload)
+
+
 async def run_pipeline(
     *,
     steps: Optional[List[str]] = None,
@@ -232,6 +254,7 @@ async def _execute_pipeline(
     workspace_root: Optional[str],
 ) -> None:
     crawl_output_path: Optional[str] = None
+    crawl_products: Optional[List[Dict[str, Any]]] = None
     try:
         for step in steps:
             _ensure_not_cancelled(job_id)
@@ -243,14 +266,20 @@ async def _execute_pipeline(
                 _emit(job_id, "step_start", {"step": step})
 
             if step == "crawl":
-                crawl_output_path = await _step_crawl(job_id, crawl_options, workspace_root)
+                crawl_output_path, crawl_products = await _step_crawl(
+                    job_id, crawl_options, workspace_root
+                )
             elif step == "sync_staging":
                 count = await asyncio.to_thread(catalog_repo.sync_live_to_staging)
                 _ensure_not_cancelled(job_id)
                 pipeline_repo.update_step_progress(job_id, step, status="completed", processed=count, total=count)
             elif step == "import":
-                source = import_source_path or crawl_output_path
-                count = await _step_import(source)
+                if crawl_products is not None:
+                    count = await _step_import_products(job_id, crawl_products)
+                    crawl_products = None
+                else:
+                    source = import_source_path or crawl_output_path
+                    count = await _step_import_from_file(job_id, source)
                 _ensure_not_cancelled(job_id)
                 pipeline_repo.update_step_progress(job_id, step, status="completed", processed=count, total=count)
             elif step == "normalize":
@@ -258,7 +287,7 @@ async def _execute_pipeline(
                 _ensure_not_cancelled(job_id)
                 pipeline_repo.update_step_progress(job_id, step, status="completed", processed=count, total=count)
             elif step == "seed_mappings":
-                count = await _step_seed_mappings()
+                count = await _step_seed_mappings(job_id)
                 _ensure_not_cancelled(job_id)
                 pipeline_repo.update_step_progress(job_id, step, status="completed", processed=count, total=count)
             elif step == "promote":
@@ -296,7 +325,7 @@ async def _step_crawl(
     job_id: str,
     crawl_options: Dict[str, Any],
     workspace_root: Optional[str],
-) -> str:
+) -> tuple[str, List[Dict[str, Any]]]:
     """Fetch full catalog from Chefaa Meilisearch API — no web scraping."""
     from tools.meili_catalog import fetch_all_products
 
@@ -349,10 +378,14 @@ async def _step_crawl(
     if not products:
         raise RuntimeError("Meilisearch returned zero products.")
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(products, f, ensure_ascii=False, indent=2)
-
     final_count = len(products)
+
+    def _write_results_file() -> None:
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(products, f, ensure_ascii=False, separators=(",", ":"))
+
+    await asyncio.to_thread(_write_results_file)
+
     pipeline_repo.update_step_progress(
         job_id,
         "crawl",
@@ -363,81 +396,145 @@ async def _step_crawl(
         products_found=final_count,
     )
 
-    return output_path
+    return output_path, products
 
 
-async def _step_import(source_path: Optional[str]) -> int:
+def _import_products_with_progress(
+    job_id: str,
+    products: List[Dict[str, Any]],
+) -> int:
+    total = len(products)
+
+    def on_progress(processed: int, batch_total: int) -> None:
+        _update_step_progress(
+            job_id,
+            "import",
+            processed=processed,
+            total=batch_total,
+            message=f"Importing products into staging ({processed:,} / {batch_total:,})",
+        )
+
+    def should_cancel() -> bool:
+        return is_pipeline_cancelled(job_id)
+
+    return catalog_repo.import_products_to_staging_batched(
+        products,
+        batch_size=500,
+        on_progress=on_progress,
+        should_cancel=should_cancel,
+    )
+
+
+async def _step_import_products(job_id: str, products: List[Dict[str, Any]]) -> int:
+    if not isinstance(products, list):
+        raise ValueError("Import source must be a JSON array of products.")
+    _update_step_progress(
+        job_id,
+        "import",
+        processed=0,
+        total=len(products),
+        message=f"Importing {len(products):,} products into staging…",
+    )
+    return await asyncio.to_thread(_import_products_with_progress, job_id, products)
+
+
+async def _step_import_from_file(job_id: str, source_path: Optional[str]) -> int:
     if not source_path or not os.path.exists(source_path):
         raise FileNotFoundError(
             "No import source. Provide import_source_path or run the crawl step first."
         )
-    with open(source_path, "r", encoding="utf-8") as f:
-        products = json.load(f)
-    if not isinstance(products, list):
-        raise ValueError("Import source must be a JSON array of products.")
-    return catalog_repo.import_products_to_staging(products)
+
+    _update_step_progress(
+        job_id,
+        "import",
+        processed=0,
+        total=0,
+        message="Loading catalog JSON file…",
+    )
+
+    def _load_and_import() -> int:
+        with open(source_path, "r", encoding="utf-8") as f:
+            products = json.load(f)
+        if not isinstance(products, list):
+            raise ValueError("Import source must be a JSON array of products.")
+        return _import_products_with_progress(job_id, products)
+
+    return await asyncio.to_thread(_load_and_import)
 
 
 async def _step_normalize(job_id: str) -> int:
-    progress_interval = 50
-    batch_size = 50
+    progress_interval = 200
+    batch_size = 500
 
-    total = await asyncio.to_thread(catalog_repo.count_unnormalized_staging)
-    processed = 0
+    def on_progress(processed: int, total: int) -> None:
+        _update_step_progress(
+            job_id,
+            "normalize",
+            processed=processed,
+            total=total,
+            message=f"Normalizing product names ({processed:,} / {total:,})",
+        )
+
+    def should_cancel() -> bool:
+        return is_pipeline_cancelled(job_id)
+
+    return await asyncio.to_thread(
+        catalog_repo.normalize_staging_batch,
+        normalize,
+        batch_size=batch_size,
+        on_progress=on_progress,
+        should_cancel=should_cancel,
+        progress_interval=progress_interval,
+    )
+
+
+async def _step_seed_mappings(job_id: str) -> int:
+    batch_size = 1000
+    offset = 0
+    seen: set[str] = set()
+    brand_list: List[tuple[str, str, str]] = []
+    total = await asyncio.to_thread(catalog_repo.get_staging_count)
 
     while True:
         _ensure_not_cancelled(job_id)
-        rows = await asyncio.to_thread(catalog_repo.get_unnormalized_staging_batch, batch_size)
+        rows = await asyncio.to_thread(
+            catalog_repo.get_staging_raw_json_batch,
+            offset=offset,
+            limit=batch_size,
+        )
         if not rows:
             break
 
         for row in rows:
-            _ensure_not_cancelled(job_id)
-            title = row.get("title_en") or row.get("title_ar") or ""
-            if title:
-                normalized = await asyncio.to_thread(normalize, title)
-            else:
-                normalized = str(row["id"])
-            await asyncio.to_thread(
-                catalog_repo.update_staging_normalized, row["id"], normalized
-            )
-            processed += 1
-            if processed % progress_interval == 0 or processed == total:
-                pipeline_repo.update_step_progress(
-                    job_id, "normalize", status="running", processed=processed, total=total
-                )
-                _emit(
-                    job_id,
-                    "step_progress",
-                    {"step": "normalize", "processed": processed, "total": total},
-                )
+            if not row.get("raw_json"):
+                continue
+            try:
+                prod = json.loads(row["raw_json"])
+            except json.JSONDecodeError:
+                continue
+            brands = prod.get("brands")
+            if not isinstance(brands, dict):
+                continue
+            arabic = (brands.get("title_ar") or brands.get("name_ar") or "").strip()
+            english = (brands.get("title_en") or brands.get("name_en") or "").strip()
+            if arabic and english and arabic not in seen:
+                seen.add(arabic)
+                brand_list.append((arabic, english, "catalog_pipeline"))
 
-        await asyncio.sleep(0)
+        offset += len(rows)
+        _update_step_progress(
+            job_id,
+            "seed_mappings",
+            processed=min(offset, total),
+            total=total,
+            message=f"Extracting brand mappings ({min(offset, total):,} / {total:,})",
+        )
 
-    return processed
+        if len(rows) < batch_size:
+            break
 
-
-async def _step_seed_mappings() -> int:
-    products = catalog_repo.get_staging_products()
-    brand_list = []
-    seen = set()
-    for row in products:
-        if not row.get("raw_json"):
-            continue
-        try:
-            prod = json.loads(row["raw_json"])
-        except json.JSONDecodeError:
-            continue
-        brands = prod.get("brands")
-        if not isinstance(brands, dict):
-            continue
-        arabic = (brands.get("title_ar") or brands.get("name_ar") or "").strip()
-        english = (brands.get("title_en") or brands.get("name_en") or "").strip()
-        if arabic and english and arabic not in seen:
-            seen.add(arabic)
-            brand_list.append((arabic, english, "catalog_pipeline"))
     if brand_list:
-        mappings_repo.bulk_insert_brands(brand_list)
+        await asyncio.to_thread(mappings_repo.bulk_insert_brands, brand_list)
     return len(brand_list)
 
 

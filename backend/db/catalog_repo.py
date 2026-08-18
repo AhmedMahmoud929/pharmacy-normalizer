@@ -135,15 +135,44 @@ def clear_staging() -> None:
 
 
 def import_products_to_staging(products: List[Dict[str, Any]], *, clear_first: bool = True) -> int:
+    return import_products_to_staging_batched(
+        products,
+        clear_first=clear_first,
+    )
+
+
+def import_products_to_staging_batched(
+    products: List[Dict[str, Any]],
+    *,
+    clear_first: bool = True,
+    batch_size: int = 500,
+    on_progress: Optional[Any] = None,
+    should_cancel: Optional[Any] = None,
+) -> int:
+    """Insert staging products in commits batches so progress is visible and memory stays bounded."""
     if clear_first:
         clear_staging()
     if not products:
         return 0
 
-    rows = [product_record_to_row(p) for p in products if p.get("id") or p.get("slug")]
-    with get_connection() as conn:
-        conn.executemany(_INSERT_STAGING_SQL, rows)
-    return len(rows)
+    total = len(products)
+    imported = 0
+
+    for start in range(0, total, batch_size):
+        if should_cancel and should_cancel():
+            raise PipelineCancelled()
+
+        chunk = products[start : start + batch_size]
+        rows = [product_record_to_row(p) for p in chunk if p.get("id") or p.get("slug")]
+        if rows:
+            with get_connection() as conn:
+                conn.executemany(_INSERT_STAGING_SQL, rows)
+            imported += len(rows)
+
+        if on_progress:
+            on_progress(imported, total)
+
+    return imported
 
 
 def import_products_to_live(products: List[Dict[str, Any]], *, replace: bool = True) -> int:
@@ -171,6 +200,20 @@ def get_staging_products(*, offset: int = 0, limit: Optional[int] = None) -> Lis
         params.extend([limit, offset])
     with get_connection() as conn:
         cur = conn.execute(sql, params)
+        return [dict(r) for r in cur.fetchall()]
+
+
+def get_staging_raw_json_batch(*, offset: int = 0, limit: int = 1000) -> List[Dict[str, Any]]:
+    """Lightweight staging page for brand extraction (id + raw_json only)."""
+    with get_connection() as conn:
+        cur = conn.execute(
+            """
+            SELECT id, raw_json FROM catalog_products_staging
+            ORDER BY id
+            LIMIT ? OFFSET ?
+            """,
+            (limit, offset),
+        )
         return [dict(r) for r in cur.fetchall()]
 
 
