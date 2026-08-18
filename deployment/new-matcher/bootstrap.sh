@@ -84,9 +84,10 @@ JWT_SECRET="${JWT_SECRET}" NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" pnpm run
 echo -e "${YELLOW}Step 6: PM2${NC}"
 FRONTEND_PORT="${FRONTEND_PORT:-3005}"
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-JWT_SECRET="${JWT_SECRET}" pm2 start "$PROJECT_ROOT/frontend/node_modules/.bin/next" \
+JWT_SECRET="${JWT_SECRET}" pm2 start "$PROJECT_ROOT/frontend/node_modules/next/dist/bin/next" \
   --name "$PM2_APP_NAME" \
   --cwd "$PROJECT_ROOT/frontend" \
+  --interpreter node \
   --update-env \
   -- start -p "$FRONTEND_PORT"
 pm2 save
