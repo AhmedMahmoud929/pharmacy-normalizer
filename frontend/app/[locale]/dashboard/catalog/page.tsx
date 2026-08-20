@@ -295,6 +295,7 @@ export default function CatalogSeederPage() {
               status: "running",
               processed: data.processed,
               total: data.total,
+              message: data.message,
               products_found: data.products_found,
               processed_categories: data.processed_categories,
               total_categories: data.total_categories,
@@ -844,6 +845,9 @@ export default function CatalogSeederPage() {
                               </span>
                             ) : null}
                           </div>
+                          {stepData?.message && status === "running" && (
+                            <p className="text-xs text-muted-foreground mt-1">{stepData.message}</p>
+                          )}
                         </div>
                       </div>
 
