@@ -5,7 +5,7 @@ export type DevHelpSection = {
   bullets?: string[];
   subsections?: {
     title: string;
-    content: string;
+    content?: string;
     items?: string[];
   }[];
   table?: {
